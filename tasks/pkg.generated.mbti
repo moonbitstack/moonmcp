@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonmcp/tasks"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub let default_poll_interval_ms : Int32
+
+pub let default_ttl_ms : Int32
+
+pub fn task_mode_from_wire(String) -> TaskMode?
+
+pub let tasks_extension_id : String
+
+// Errors
+
+// Types and methods
+pub(all) struct TaskConfig {
+  mode : TaskMode
+  poll_interval_ms : Int32
+} derive(Eq, @debug.Debug)
+pub fn TaskConfig::from_bool(Bool) -> Self
+pub fn TaskConfig::new(mode? : TaskMode, poll_interval_ms? : Int32) -> Self
+pub fn TaskConfig::supports_tasks(Self) -> Bool
+
+pub(all) struct TaskMeta {
+  ttl : Int32?
+  fn_key : String?
+} derive(Eq, @debug.Debug)
+
+pub(all) enum TaskMode {
+  Forbidden
+  Optional
+  Required
+} derive(Eq, @debug.Debug)
+pub fn TaskMode::to_wire(Self) -> String
+
+// Type aliases
+
+// Traits

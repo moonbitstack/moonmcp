@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonmcp/exceptions"
+
+import {
+  "moonbitlang/core/debug",
+  "moonmcp/types",
+}
+
+// Values
+pub fn insufficient_scope(Array[String]) -> FastMCPError
+
+pub fn to_mcp_error(FastMCPError, default_code? : Int32) -> @types.ErrorData
+
+// Errors
+pub(all) suberror FastMCPError {
+  Mcp(@types.ErrorData)
+  Validation(String)
+  Resource(String)
+  Tool(String)
+  Prompt(String)
+  InvalidSignature(String)
+  Client(String)
+  NotFound(String)
+  Disabled(String)
+  ResourceSecurity(String)
+  Authorisation(String)
+  InsufficientScope(required_scopes~ : Array[String], message~ : String)
+} derive(Eq, @debug.Debug)
+pub fn FastMCPError::message(Self) -> String
+
+// Types and methods
+
+// Type aliases
+
+// Traits

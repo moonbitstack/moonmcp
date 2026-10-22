@@ -1,0 +1,688 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonmcp/types"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+  "moonmcp/tasks",
+}
+
+// Values
+pub let client_capabilities_meta_key : String
+
+pub let client_info_meta_key : String
+
+pub fn client_request_frame(RequestId, ClientRequest) -> Json
+
+pub fn core_result_types() -> Array[String]
+
+pub fn handshake_protocol_versions() -> Array[String]
+
+pub let internal_error : Int32
+
+pub let invalid_params : Int32
+
+pub let invalid_request : Int32
+
+pub let latest_protocol_version : String
+
+pub fn logging_level_from_wire(String) -> LoggingLevel?
+
+pub let method_completion_complete : String
+
+pub let method_elicitation_create : String
+
+pub let method_elicitation_create_form : String
+
+pub let method_initialize : String
+
+pub let method_input_response : String
+
+pub let method_logging_set_level : String
+
+pub let method_not_found : Int32
+
+pub let method_ping : String
+
+pub let method_prompts_get : String
+
+pub let method_prompts_list : String
+
+pub let method_resources_list : String
+
+pub let method_resources_read : String
+
+pub let method_resources_subscribe : String
+
+pub let method_resources_unsubscribe : String
+
+pub let method_roots_list : String
+
+pub let method_sampling_create_message : String
+
+pub let method_server_discover : String
+
+pub let method_tools_call : String
+
+pub let method_tools_list : String
+
+pub fn modern_protocol_versions() -> Array[String]
+
+pub let notification_cancelled : String
+
+pub let notification_initialized : String
+
+pub let notification_message : String
+
+pub let notification_progress : String
+
+pub let notification_prompt_list_changed : String
+
+pub let notification_resource_list_changed : String
+
+pub let notification_resource_updated : String
+
+pub let notification_roots_list_changed : String
+
+pub let notification_tool_list_changed : String
+
+pub fn parse_client_request(Json) -> ClientRequest raise @json.JsonDecodeError
+
+pub let parse_error : Int32
+
+pub fn parse_message(Json) -> JSONRPCMessage raise @json.JsonDecodeError
+
+pub fn parse_server_request(Json) -> ServerRequest raise @json.JsonDecodeError
+
+pub let protocol_version_meta_key : String
+
+pub fn role_from_wire(String) -> Role?
+
+pub let server_info_meta_key : String
+
+pub fn server_request_frame(RequestId, ServerRequest) -> Json
+
+pub fn text_block(String) -> ContentBlock
+
+// Errors
+
+// Types and methods
+pub(all) struct Annotations {
+  audience : Array[String]?
+  priority : Double?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Annotations
+pub impl @json.FromJson for Annotations
+
+pub(all) struct CallToolRequestParams {
+  name : String
+  arguments : Map[String, Json]?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn CallToolRequestParams::progress_token(Self) -> String?
+pub impl ToJson for CallToolRequestParams
+pub impl @json.FromJson for CallToolRequestParams
+
+pub(all) struct CallToolResult {
+  content : Array[ContentBlock]
+  structured_content : Map[String, Json]?
+  is_error : Bool
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn CallToolResult::error(String) -> Self
+pub fn CallToolResult::new(Array[ContentBlock]) -> Self
+pub impl ToJson for CallToolResult
+pub impl @json.FromJson for CallToolResult
+
+pub(all) struct CancelledNotificationParams {
+  request_id : RequestId
+  reason : String?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CancelledNotificationParams
+pub impl @json.FromJson for CancelledNotificationParams
+
+pub(all) struct ClientCapabilities {
+  experimental : Map[String, Json]?
+  roots_list_changed : Bool?
+  sampling : Bool?
+  elicitation : Bool?
+  tasks : Bool?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ClientCapabilities
+pub impl @json.FromJson for ClientCapabilities
+
+pub(all) enum ClientRequest {
+  Initialize(InitializeRequestParams)
+  Ping(meta~ : Map[String, Json]?)
+  ListTools(PaginatedRequestParams)
+  CallTool(CallToolRequestParams)
+  ListResources(PaginatedRequestParams)
+  ReadResource(ReadResourceRequestParams)
+  Subscribe(SubscribeRequestParams)
+  Unsubscribe(SubscribeRequestParams)
+  ListPrompts(PaginatedRequestParams)
+  GetPrompt(GetPromptRequestParams)
+  Complete(CompleteRequestParams)
+  SetLevel(SetLevelRequestParams)
+  InputResponse(InputResponseRequestParams)
+} derive(Eq, @debug.Debug)
+pub fn ClientRequest::method(Self) -> String
+pub impl @json.FromJson for ClientRequest
+
+pub(all) struct CompleteRequestParams {
+  context : CompletionContext
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CompleteRequestParams
+pub impl @json.FromJson for CompleteRequestParams
+
+pub(all) struct CompleteResult {
+  completion : Completion
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CompleteResult
+pub impl @json.FromJson for CompleteResult
+
+pub(all) struct Completion {
+  values : Array[String]
+  total : Int32?
+  has_more : Bool?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Completion
+pub impl @json.FromJson for Completion
+
+pub(all) struct CompletionArgument {
+  name : String
+  value : String
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CompletionArgument
+pub impl @json.FromJson for CompletionArgument
+
+pub(all) struct CompletionContext {
+  reference : Reference
+  argument : CompletionArgument
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CompletionContext
+pub impl @json.FromJson for CompletionContext
+
+pub(all) enum ContentBlock {
+  Text(text~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  Image(data~ : String, mime_type~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  Audio(data~ : String, mime_type~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  ResourceLink(uri~ : String, name~ : String, title~ : String?, description~ : String?, mime_type~ : String?, size~ : Int32?, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  EmbeddedResource(resource~ : ResourceContents, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ContentBlock
+pub impl @json.FromJson for ContentBlock
+
+pub(all) struct CreateMessageRequestParams {
+  messages : Array[SamplingMessage]
+  system_message : String?
+  include_context : String?
+  max_tokens : Int32
+  temperature : Double?
+  stop_sequences : Array[String]?
+  model_preferences : ModelPreferences?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CreateMessageRequestParams
+pub impl @json.FromJson for CreateMessageRequestParams
+
+pub(all) struct CreateMessageResult {
+  model : String
+  stop_reason : String?
+  role : Role
+  content : ContentBlock
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CreateMessageResult
+pub impl @json.FromJson for CreateMessageResult
+
+pub(all) struct CreateTaskResult {
+  task : Json
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for CreateTaskResult
+pub impl @json.FromJson for CreateTaskResult
+
+pub(all) struct DiscoverResult {
+  result_type : String
+  result : Json
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for DiscoverResult
+pub impl @json.FromJson for DiscoverResult
+
+pub(all) struct ElicitRequestParams {
+  message : String
+  requested_schema : Map[String, Json]?
+  url : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ElicitRequestParams
+pub impl @json.FromJson for ElicitRequestParams
+
+pub(all) struct ElicitResult {
+  action : String
+  content : Map[String, Json]?
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn ElicitResult::accept(Map[String, Json]) -> Self
+pub fn ElicitResult::cancel() -> Self
+pub fn ElicitResult::decline() -> Self
+pub impl ToJson for ElicitResult
+pub impl @json.FromJson for ElicitResult
+
+pub(all) struct EmptyResult {
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for EmptyResult
+pub impl @json.FromJson for EmptyResult
+
+pub(all) struct ErrorData {
+  code : Int32
+  message : String
+  data : Json?
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+
+pub(all) struct GetPromptRequestParams {
+  name : String
+  arguments : Map[String, Json]?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for GetPromptRequestParams
+pub impl @json.FromJson for GetPromptRequestParams
+
+pub(all) struct GetPromptResult {
+  description : String?
+  messages : Array[PromptMessage]
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for GetPromptResult
+pub impl @json.FromJson for GetPromptResult
+
+pub(all) struct Icon {
+  src : String
+  mime_type : String?
+  sizes : Array[String]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Icon
+pub impl @json.FromJson for Icon
+
+pub(all) struct Implementation {
+  name : String
+  title : String?
+  version : String
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Implementation
+pub impl @json.FromJson for Implementation
+
+pub(all) struct InitializeRequestParams {
+  protocol_version : String
+  capabilities : ClientCapabilities
+  client_info : Implementation
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InitializeRequestParams
+pub impl @json.FromJson for InitializeRequestParams
+
+pub(all) struct InitializeResult {
+  protocol_version : String
+  capabilities : ServerCapabilities
+  server_info : Implementation
+  instructions : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InitializeResult
+pub impl @json.FromJson for InitializeResult
+
+pub(all) struct InputRequest {
+  id : String
+  request : Json
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InputRequest
+pub impl @json.FromJson for InputRequest
+
+pub(all) struct InputRequiredResult {
+  input_requests : Array[InputRequest]
+  request_state : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InputRequiredResult
+pub impl @json.FromJson for InputRequiredResult
+
+pub(all) struct InputResponse {
+  request_id : String
+  action : String
+  content : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InputResponse
+pub impl @json.FromJson for InputResponse
+
+pub(all) struct InputResponseRequestParams {
+  input_responses : Map[String, Json]
+  request_state : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for InputResponseRequestParams
+pub impl @json.FromJson for InputResponseRequestParams
+
+pub(all) enum JSONRPCMessage {
+  Request(id~ : RequestId, method~ : String, params~ : Json?)
+  Notification(method~ : String, params~ : Json?)
+  Response(id~ : RequestId, result~ : Json)
+  Error(id~ : RequestId, error~ : ErrorData)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for JSONRPCMessage
+pub impl @json.FromJson for JSONRPCMessage
+
+pub(all) struct ListPromptsResult {
+  prompts : Array[Prompt]
+  next_cursor : String?
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ListPromptsResult
+pub impl @json.FromJson for ListPromptsResult
+
+pub(all) struct ListResourceTemplatesResult {
+  resource_templates : Array[ResourceTemplate]
+  next_cursor : String?
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ListResourceTemplatesResult
+pub impl @json.FromJson for ListResourceTemplatesResult
+
+pub(all) struct ListResourcesResult {
+  resources : Array[Resource]
+  next_cursor : String?
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ListResourcesResult
+pub impl @json.FromJson for ListResourcesResult
+
+pub(all) struct ListRootsResult {
+  roots : Array[Root]
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ListRootsResult
+pub impl @json.FromJson for ListRootsResult
+
+pub(all) struct ListToolsResult {
+  tools : Array[Tool]
+  next_cursor : String?
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ListToolsResult
+pub impl @json.FromJson for ListToolsResult
+
+pub(all) enum LoggingLevel {
+  Debug
+  Info
+  Notice
+  Warning
+  Error
+  Critical
+  Alert
+  Emergency
+} derive(Eq, @debug.Debug)
+pub fn LoggingLevel::to_wire(Self) -> String
+
+pub(all) struct LoggingMessageNotificationParams {
+  level : LoggingLevel
+  logger : String?
+  data : Json
+} derive(Eq, @debug.Debug)
+pub impl ToJson for LoggingMessageNotificationParams
+pub impl @json.FromJson for LoggingMessageNotificationParams
+
+pub(all) struct ModelHint {
+  name : String
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ModelHint
+pub impl @json.FromJson for ModelHint
+
+pub(all) struct ModelPreferences {
+  hints : Array[ModelHint]?
+  cost_priority : Double?
+  speed_priority : Double?
+  intelligence_priority : Double?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ModelPreferences
+pub impl @json.FromJson for ModelPreferences
+
+pub(all) struct PaginatedRequestParams {
+  cursor : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn PaginatedRequestParams::progress_token(Self) -> String?
+pub impl ToJson for PaginatedRequestParams
+pub impl @json.FromJson for PaginatedRequestParams
+
+pub(all) struct ProgressNotificationParams {
+  progress_token : String
+  progress : Double
+  message : String?
+  total : Double?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ProgressNotificationParams
+pub impl @json.FromJson for ProgressNotificationParams
+
+pub(all) struct Prompt {
+  name : String
+  title : String?
+  description : String?
+  arguments : Array[PromptArgument]?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Prompt
+pub impl @json.FromJson for Prompt
+
+pub(all) struct PromptArgument {
+  name : String
+  title : String?
+  description : String?
+  required : Bool?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for PromptArgument
+pub impl @json.FromJson for PromptArgument
+
+pub(all) struct PromptMessage {
+  role : Role
+  content : ContentBlock
+} derive(Eq, @debug.Debug)
+pub impl ToJson for PromptMessage
+pub impl @json.FromJson for PromptMessage
+
+pub(all) struct PromptsCapabilities {
+  list_changed : Bool?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ReadResourceRequestParams {
+  uri : String
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ReadResourceRequestParams
+pub impl @json.FromJson for ReadResourceRequestParams
+
+pub(all) struct ReadResourceResult {
+  contents : Array[ResourceContents]
+  cache_control : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ReadResourceResult
+pub impl @json.FromJson for ReadResourceResult
+
+pub(all) enum Reference {
+  PromptReference(name~ : String)
+  ResourceTemplateReference(uri~ : String)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Reference
+pub impl @json.FromJson for Reference
+
+pub(all) enum RequestId {
+  Number(id~ : Int32)
+  Text(id~ : String)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for RequestId
+pub impl @json.FromJson for RequestId
+
+pub(all) struct RequestParamsMeta {
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn RequestParamsMeta::progress_token(Self) -> String?
+pub impl ToJson for RequestParamsMeta
+pub impl @json.FromJson for RequestParamsMeta
+
+pub(all) struct Resource {
+  uri : String
+  name : String
+  title : String?
+  description : String?
+  mime_type : String?
+  size : Int32?
+  annotations : Annotations?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Resource
+pub impl @json.FromJson for Resource
+
+pub(all) enum ResourceContents {
+  Text(uri~ : String, mime_type~ : String?, text~ : String)
+  Blob(uri~ : String, mime_type~ : String?, blob~ : String)
+} derive(Eq, @debug.Debug)
+pub fn ResourceContents::uri(Self) -> String
+pub impl ToJson for ResourceContents
+pub impl @json.FromJson for ResourceContents
+
+pub(all) struct ResourceTemplate {
+  uri_template : String
+  name : String
+  title : String?
+  description : String?
+  mime_type : String?
+  annotations : Annotations?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ResourceTemplate
+pub impl @json.FromJson for ResourceTemplate
+
+pub(all) struct ResourcesCapabilities {
+  subscribe : Bool?
+  list_changed : Bool?
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Role {
+  User
+  Assistant
+} derive(Eq, @debug.Debug)
+pub fn Role::to_wire(Self) -> String
+
+pub(all) struct Root {
+  uri : String
+  name : String?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Root
+pub impl @json.FromJson for Root
+
+pub(all) struct SamplingMessage {
+  role : Role
+  content : ContentBlock
+} derive(Eq, @debug.Debug)
+pub impl ToJson for SamplingMessage
+pub impl @json.FromJson for SamplingMessage
+
+pub(all) struct ServerCapabilities {
+  experimental : Map[String, Json]?
+  logging : Bool?
+  completions : Bool?
+  prompts : PromptsCapabilities?
+  resources : ResourcesCapabilities?
+  tools : ToolCapabilities?
+  tasks : Bool?
+} derive(Eq, @debug.Debug)
+pub fn ServerCapabilities::new() -> Self
+pub impl ToJson for ServerCapabilities
+pub impl @json.FromJson for ServerCapabilities
+
+pub(all) enum ServerNotification {
+  Cancelled(CancelledNotificationParams)
+  Progress(ProgressNotificationParams)
+  Message(LoggingMessageNotificationParams)
+  ResourceUpdated(uri~ : String)
+  ResourceListChanged
+  ToolListChanged
+  PromptListChanged
+  Initialized
+  RootsListChanged
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ServerNotification
+
+pub(all) enum ServerRequest {
+  Ping(meta~ : Map[String, Json]?)
+  CreateMessage(CreateMessageRequestParams)
+  Elicit(ElicitRequestParams)
+  ListRoots(meta~ : Map[String, Json]?)
+} derive(Eq, @debug.Debug)
+pub impl @json.FromJson for ServerRequest
+
+pub(all) struct SetLevelRequestParams {
+  level : LoggingLevel
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for SetLevelRequestParams
+pub impl @json.FromJson for SetLevelRequestParams
+
+pub(all) struct SubscribeRequestParams {
+  uri : String
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for SubscribeRequestParams
+pub impl @json.FromJson for SubscribeRequestParams
+
+pub(all) struct Tool {
+  name : String
+  title : String?
+  description : String?
+  input_schema : Json
+  output_schema : Json?
+  icons : Array[Icon]?
+  annotations : ToolAnnotations?
+  execution : ToolExecution?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Tool
+pub impl @json.FromJson for Tool
+
+pub(all) struct ToolAnnotations {
+  title : String?
+  read_only_hint : Bool?
+  destructive_hint : Bool?
+  idempotent_hint : Bool?
+  open_world_hint : Bool?
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ToolAnnotations
+pub impl @json.FromJson for ToolAnnotations
+
+pub(all) struct ToolCapabilities {
+  list_changed : Bool?
+} derive(Eq, @debug.Debug)
+
+pub(all) struct ToolExecution {
+  task_support : @tasks.TaskMode
+} derive(Eq, @debug.Debug)
+pub impl ToJson for ToolExecution
+pub impl @json.FromJson for ToolExecution
+
+// Type aliases
+
+// Traits

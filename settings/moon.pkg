@@ -1,0 +1,10 @@
+import {
+  "moonbitlang/core/env" @env,
+  "moonbitlang/core/string" @string,
+  "moonmcp/types" @types,
+}
+
+import {
+  "moonbitlang/core/env" @env,
+  "moonmcp/settings" @settings,
+} for "test"

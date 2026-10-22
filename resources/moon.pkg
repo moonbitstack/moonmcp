@@ -1,0 +1,18 @@
+import {
+  "moonbitlang/core/encoding/base64" @base64,
+  "moonbitlang/core/encoding/percent" @percent,
+  "moonbitlang/core/encoding/utf8" @utf8,
+  "moonbitlang/core/json",
+  "moonbitlang/core/set" @set,
+  "moonmcp/component" @component,
+  "moonmcp/exceptions" @exceptions,
+  "moonmcp/types" @types,
+}
+
+import {
+  "moonmcp/component" @component,
+  "moonmcp/exceptions" @exceptions,
+  "moonmcp/resources" @resources,
+  "moonbitlang/core/set" @set,
+  "moonmcp/types" @types,
+} for "test"

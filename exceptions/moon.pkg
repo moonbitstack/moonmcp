@@ -1,0 +1,8 @@
+import {
+  "moonmcp/types" @types,
+}
+
+import {
+  "moonmcp/exceptions" @exceptions,
+  "moonmcp/types" @types,
+} for "test"

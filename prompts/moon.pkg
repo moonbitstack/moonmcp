@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/core/json",
+  "moonbitlang/core/set" @set,
+  "moonmcp/component" @component,
+  "moonmcp/exceptions" @exceptions,
+  "moonmcp/types" @types,
+}
+
+import {
+  "moonmcp/component" @component,
+  "moonmcp/prompts" @prompts,
+  "moonmcp/types" @types,
+} for "test"

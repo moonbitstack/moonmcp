@@ -1,0 +1,99 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonmcp/settings"
+
+import {
+  "moonbitlang/core/debug",
+  "moonmcp/types",
+}
+
+// Values
+pub fn log_level_from_wire(String) -> LogLevel?
+
+pub fn session_idle_timeout_from_wire(String) -> SessionIdleTimeout?
+
+pub fn telemetry_mode_from_wire(String) -> TelemetryMode?
+
+pub let ten_mb_in_bytes : Int32
+
+pub fn transport_kind_from_wire(String) -> TransportKind?
+
+// Errors
+
+// Types and methods
+pub(all) enum CheckForUpdates {
+  Stable
+  Prerelease
+  Off
+} derive(Eq, @debug.Debug)
+
+pub(all) enum LogLevel {
+  Debug
+  Info
+  Warning
+  Error
+  Critical
+} derive(Eq, @debug.Debug)
+pub fn LogLevel::to_wire(Self) -> String
+
+pub(all) enum SessionIdleTimeout {
+  Auto
+  Never
+  Seconds(Double)
+} derive(Eq, @debug.Debug)
+pub fn SessionIdleTimeout::to_wire(Self) -> String
+
+pub(all) struct Settings {
+  home : String
+  oauth_encryption_key : String?
+  test_mode : Bool
+  log_enabled : Bool
+  log_level : LogLevel
+  enable_rich_logging : Bool
+  enable_rich_tracebacks : Bool
+  deprecation_warnings : Bool
+  telemetry_mode : TelemetryMode
+  client_init_timeout : Double?
+  client_disconnect_timeout : Double
+  transport : TransportKind
+  host : String
+  port : Int32
+  sse_path : String
+  message_path : String
+  streamable_http_path : String
+  debug : Bool
+  mask_error_details : Bool
+  client_log_level : @types.LoggingLevel?
+  strict_input_validation : Bool
+  ssrf_trust_proxy : Bool
+  server_dependencies : Array[String]
+  json_response : Bool
+  stateless_http : Bool
+  http_host_origin_protection : Bool
+  http_allowed_hosts : Array[String]?
+  http_allowed_origins : Array[String]?
+  http_session_idle_timeout : SessionIdleTimeout
+  mounted_components_raise_on_load_error : Bool
+  show_server_banner : Bool
+  check_for_updates : CheckForUpdates
+} derive(Eq, @debug.Debug)
+pub fn Settings::from_env() -> Self
+pub fn Settings::new() -> Self
+
+pub(all) enum TelemetryMode {
+  Native
+  PropagationOnly
+  Off
+} derive(Eq, @debug.Debug)
+pub fn TelemetryMode::to_wire(Self) -> String
+
+pub(all) enum TransportKind {
+  Stdio
+  Http
+  Sse
+  StreamableHttp
+} derive(Eq, @debug.Debug)
+pub fn TransportKind::to_wire(Self) -> String
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonmcp/utilities"
+
+import {
+  "moonmcp/exceptions",
+  "moonmcp/types",
+}
+
+// Values
+pub fn encode_base64(Bytes) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct Audio {
+  path : String?
+  data : Bytes?
+  format : String?
+  mime_type : String
+  annotations : @types.Annotations?
+}
+pub fn Audio::new(path? : String, data? : Bytes, format? : String, annotations? : @types.Annotations) -> Self raise @exceptions.FastMCPError
+pub fn Audio::to_audio_content(Self, mime_type? : String, annotations? : @types.Annotations) -> @types.ContentBlock raise @exceptions.FastMCPError
+
+pub(all) struct File {
+  path : String?
+  data : Bytes?
+  format : String?
+  name : String?
+  mime_type : String
+  annotations : @types.Annotations?
+}
+pub fn File::new(path? : String, data? : Bytes, format? : String, name? : String, annotations? : @types.Annotations) -> Self raise @exceptions.FastMCPError
+pub fn File::to_resource_content(Self, mime_type? : String, annotations? : @types.Annotations) -> @types.ContentBlock raise @exceptions.FastMCPError
+
+pub(all) struct Image {
+  path : String?
+  data : Bytes?
+  format : String?
+  mime_type : String
+  annotations : @types.Annotations?
+}
+pub fn Image::new(path? : String, data? : Bytes, format? : String, annotations? : @types.Annotations) -> Self raise @exceptions.FastMCPError
+pub fn Image::to_data_uri(Self, mime_type? : String) -> String raise @exceptions.FastMCPError
+pub fn Image::to_image_content(Self, mime_type? : String, annotations? : @types.Annotations) -> @types.ContentBlock raise @exceptions.FastMCPError
+
+// Type aliases
+
+// Traits
