@@ -1,9 +1,9 @@
+///|
 /// Media helper classes mirroring fastmcp/utilities/types.py.
 ///
 /// Byte-backed helpers return image/audio/resource content blocks; path-based
 /// loading requires native file IO, which is deferred until the transport
 /// layer introduces it.
-
 fn lower_ascii(value : String) -> String {
   let buf = StringBuilder::StringBuilder()
   for ch in value {
@@ -12,11 +12,13 @@ fn lower_ascii(value : String) -> String {
   buf.to_string()
 }
 
+///|
 /// Base64-encode raw bytes for wire transport.
 pub fn encode_base64(data : Bytes) -> String {
   @base64.encode(data)
 }
 
+///|
 /// A helper for returning images from tools.
 pub(all) struct Image {
   path : String?
@@ -26,6 +28,7 @@ pub(all) struct Image {
   annotations : @types.Annotations?
 }
 
+///|
 fn image_mime_from_format(format : String) -> String {
   let fmt = lower_ascii(format)
   match fmt {
@@ -36,11 +39,12 @@ fn image_mime_from_format(format : String) -> String {
   }
 }
 
+///|
 fn image_mime_from_path(path : String) -> String {
   let dot = path.rev_find(".")
   match dot {
     Some(index) => {
-      let ext = lower_ascii(path[index + 1:].to_string())
+      let ext = lower_ascii(path[index + 1:].to_owned())
       match ext {
         "png" => "image/png"
         "jpg" | "jpeg" => "image/jpeg"
@@ -56,6 +60,7 @@ fn image_mime_from_path(path : String) -> String {
   }
 }
 
+///|
 /// Create an image from a file path or raw data, not both.
 pub fn Image::new(
   path? : String,
@@ -71,20 +76,16 @@ pub fn Image::new(
   }
   let mime_type = match format {
     Some(fmt) => image_mime_from_format(fmt)
-    None => match path {
-      Some(p) => image_mime_from_path(p)
-      None => "image/png"
-    }
+    None =>
+      match path {
+        Some(p) => image_mime_from_path(p)
+        None => "image/png"
+      }
   }
-  {
-    path,
-    data,
-    format,
-    mime_type,
-    annotations,
-  }
+  { path, data, format, mime_type, annotations, }
 }
 
+///|
 fn Image::encoded_data(self : Image) -> String raise @exceptions.FastMCPError {
   match self.data {
     Some(data) => encode_base64(data)
@@ -95,6 +96,7 @@ fn Image::encoded_data(self : Image) -> String raise @exceptions.FastMCPError {
   }
 }
 
+///|
 /// Convert to an image content block.
 pub fn Image::to_image_content(
   self : Image,
@@ -109,6 +111,7 @@ pub fn Image::to_image_content(
   )
 }
 
+///|
 /// Render as a `data:` URI.
 pub fn Image::to_data_uri(
   self : Image,
@@ -117,6 +120,7 @@ pub fn Image::to_data_uri(
   "data:\{mime_type.unwrap_or(self.mime_type)};base64,\{self.encoded_data()}"
 }
 
+///|
 /// A helper for returning audio from tools.
 pub(all) struct Audio {
   path : String?
@@ -126,6 +130,7 @@ pub(all) struct Audio {
   annotations : @types.Annotations?
 }
 
+///|
 fn audio_mime_from_format(format : String) -> String {
   let fmt = lower_ascii(format)
   match fmt {
@@ -142,15 +147,16 @@ fn audio_mime_from_format(format : String) -> String {
   }
 }
 
+///|
 fn audio_mime_from_path(path : String) -> String {
   let dot = path.rev_find(".")
   match dot {
-    Some(index) =>
-      audio_mime_from_format(path[index + 1:].to_string())
+    Some(index) => audio_mime_from_format(path[index + 1:].to_owned())
     None => "application/octet-stream"
   }
 }
 
+///|
 /// Create an audio clip from a file path or raw data, not both.
 pub fn Audio::new(
   path? : String,
@@ -166,14 +172,16 @@ pub fn Audio::new(
   }
   let mime_type = match format {
     Some(fmt) => audio_mime_from_format(fmt)
-    None => match path {
-      Some(p) => audio_mime_from_path(p)
-      None => "audio/wav"
-    }
+    None =>
+      match path {
+        Some(p) => audio_mime_from_path(p)
+        None => "audio/wav"
+      }
   }
-  { path, data, format, mime_type, annotations }
+  { path, data, format, mime_type, annotations, }
 }
 
+///|
 fn Audio::encoded_data(self : Audio) -> String raise @exceptions.FastMCPError {
   match self.data {
     Some(data) => encode_base64(data)
@@ -184,6 +192,7 @@ fn Audio::encoded_data(self : Audio) -> String raise @exceptions.FastMCPError {
   }
 }
 
+///|
 /// Convert to an audio content block.
 pub fn Audio::to_audio_content(
   self : Audio,
@@ -198,6 +207,7 @@ pub fn Audio::to_audio_content(
   )
 }
 
+///|
 /// A helper for returning file data from tools.
 pub(all) struct File {
   path : String?
@@ -208,6 +218,7 @@ pub(all) struct File {
   annotations : @types.Annotations?
 }
 
+///|
 fn file_mime_from_format(format : String) -> String {
   let fmt = lower_ascii(format)
   match fmt {
@@ -219,11 +230,12 @@ fn file_mime_from_format(format : String) -> String {
   }
 }
 
+///|
 fn file_mime_from_path(path : String) -> String {
   let dot = path.rev_find(".")
   match dot {
     Some(index) => {
-      let ext = lower_ascii(path[index + 1:].to_string())
+      let ext = lower_ascii(path[index + 1:].to_owned())
       match ext {
         "txt" => "text/plain"
         "csv" => "text/csv"
@@ -245,6 +257,7 @@ fn file_mime_from_path(path : String) -> String {
   }
 }
 
+///|
 /// Create a file payload from a path or raw data, not both.
 pub fn File::new(
   path? : String,
@@ -261,28 +274,27 @@ pub fn File::new(
   }
   let mime_type = match format {
     Some(fmt) => file_mime_from_format(fmt)
-    None => match path {
-      Some(p) => file_mime_from_path(p)
-      None => "application/octet-stream"
-    }
+    None =>
+      match path {
+        Some(p) => file_mime_from_path(p)
+        None => "application/octet-stream"
+      }
   }
-  {
-    path,
-    data,
-    format,
-    name,
-    mime_type,
-    annotations,
-  }
+  { path, data, format, name, mime_type, annotations, }
 }
 
+///|
 fn is_unreserved(ch : Char) -> Bool {
   (ch >= 'A' && ch <= 'Z') ||
   (ch >= 'a' && ch <= 'z') ||
   (ch >= '0' && ch <= '9') ||
-  ch == '-' || ch == '.' || ch == '_' || ch == '~'
+  ch == '-' ||
+  ch == '.' ||
+  ch == '_' ||
+  ch == '~'
 }
 
+///|
 fn write_hex_byte(buf : StringBuilder, byte : Byte) -> Unit {
   let digits = "0123456789ABCDEF"
   buf.write_char('%')
@@ -290,6 +302,7 @@ fn write_hex_byte(buf : StringBuilder, byte : Byte) -> Unit {
   buf.write_char(digits.get_char((byte % 16).to_int()).unwrap())
 }
 
+///|
 /// Percent-encode every non-unreserved character, UTF-8 for non-ASCII.
 fn pct_encode_component(text : String) -> String {
   let buf = StringBuilder::StringBuilder()
@@ -305,17 +318,19 @@ fn pct_encode_component(text : String) -> String {
   buf.to_string()
 }
 
+///|
 fn pick_annotations(
-  override : @types.Annotations?,
+  chosen : @types.Annotations?,
   fallback : @types.Annotations?,
 ) -> @types.Annotations? {
-  if override is Some(_) {
-    override
+  if chosen is Some(_) {
+    chosen
   } else {
     fallback
   }
 }
 
+///|
 fn File::embedded_uri(self : File) -> String raise @exceptions.FastMCPError {
   match self.path {
     Some(path) => "file:///\{pct_encode_component(path)}"
@@ -328,8 +343,7 @@ fn File::embedded_uri(self : File) -> String raise @exceptions.FastMCPError {
         None => {
           let slash = self.mime_type.find("/")
           match slash {
-            Some(index) =>
-              ".\{self.mime_type[index + 1:].to_string()}"
+            Some(index) => ".\{self.mime_type[index + 1:].to_owned()}"
             None => ""
           }
         }
@@ -348,6 +362,7 @@ fn File::embedded_uri(self : File) -> String raise @exceptions.FastMCPError {
   }
 }
 
+///|
 /// Convert to an embedded resource content block.
 pub fn File::to_resource_content(
   self : File,

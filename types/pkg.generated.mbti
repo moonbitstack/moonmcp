@@ -1,10 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/types"
+package "moonbitstack/moonmcp/types"
 
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
-  "moonmcp/tasks",
+  "moonbitstack/moonmcp/tasks",
 }
 
 // Values
@@ -111,6 +111,11 @@ pub(all) struct Annotations {
   audience : Array[String]?
   priority : Double?
 } derive(Eq, @debug.Debug)
+pub fn Annotations::equal(Self, Self) -> Bool
+pub fn Annotations::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Annotations::not_equal(Self, Self) -> Bool
+pub fn Annotations::to_json(Self) -> Json
+pub fn Annotations::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Annotations
 pub impl @json.FromJson for Annotations
 
@@ -119,7 +124,12 @@ pub(all) struct CallToolRequestParams {
   arguments : Map[String, Json]?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CallToolRequestParams::equal(Self, Self) -> Bool
+pub fn CallToolRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CallToolRequestParams::not_equal(Self, Self) -> Bool
 pub fn CallToolRequestParams::progress_token(Self) -> String?
+pub fn CallToolRequestParams::to_json(Self) -> Json
+pub fn CallToolRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CallToolRequestParams
 pub impl @json.FromJson for CallToolRequestParams
 
@@ -130,8 +140,13 @@ pub(all) struct CallToolResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CallToolResult::equal(Self, Self) -> Bool
 pub fn CallToolResult::error(String) -> Self
+pub fn CallToolResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn CallToolResult::new(Array[ContentBlock]) -> Self
+pub fn CallToolResult::not_equal(Self, Self) -> Bool
+pub fn CallToolResult::to_json(Self) -> Json
+pub fn CallToolResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CallToolResult
 pub impl @json.FromJson for CallToolResult
 
@@ -139,6 +154,11 @@ pub(all) struct CancelledNotificationParams {
   request_id : RequestId
   reason : String?
 } derive(Eq, @debug.Debug)
+pub fn CancelledNotificationParams::equal(Self, Self) -> Bool
+pub fn CancelledNotificationParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CancelledNotificationParams::not_equal(Self, Self) -> Bool
+pub fn CancelledNotificationParams::to_json(Self) -> Json
+pub fn CancelledNotificationParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CancelledNotificationParams
 pub impl @json.FromJson for CancelledNotificationParams
 
@@ -149,6 +169,11 @@ pub(all) struct ClientCapabilities {
   elicitation : Bool?
   tasks : Bool?
 } derive(Eq, @debug.Debug)
+pub fn ClientCapabilities::equal(Self, Self) -> Bool
+pub fn ClientCapabilities::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ClientCapabilities::not_equal(Self, Self) -> Bool
+pub fn ClientCapabilities::to_json(Self) -> Json
+pub fn ClientCapabilities::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ClientCapabilities
 pub impl @json.FromJson for ClientCapabilities
 
@@ -167,13 +192,22 @@ pub(all) enum ClientRequest {
   SetLevel(SetLevelRequestParams)
   InputResponse(InputResponseRequestParams)
 } derive(Eq, @debug.Debug)
-pub fn ClientRequest::method(Self) -> String
+pub fn ClientRequest::equal(Self, Self) -> Bool
+pub fn ClientRequest::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ClientRequest::not_equal(Self, Self) -> Bool
+pub fn ClientRequest::to_repr(Self) -> @debug.Repr
+pub fn ClientRequest::verb(Self) -> String
 pub impl @json.FromJson for ClientRequest
 
 pub(all) struct CompleteRequestParams {
   context : CompletionContext
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CompleteRequestParams::equal(Self, Self) -> Bool
+pub fn CompleteRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CompleteRequestParams::not_equal(Self, Self) -> Bool
+pub fn CompleteRequestParams::to_json(Self) -> Json
+pub fn CompleteRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CompleteRequestParams
 pub impl @json.FromJson for CompleteRequestParams
 
@@ -182,6 +216,11 @@ pub(all) struct CompleteResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CompleteResult::equal(Self, Self) -> Bool
+pub fn CompleteResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CompleteResult::not_equal(Self, Self) -> Bool
+pub fn CompleteResult::to_json(Self) -> Json
+pub fn CompleteResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CompleteResult
 pub impl @json.FromJson for CompleteResult
 
@@ -190,6 +229,11 @@ pub(all) struct Completion {
   total : Int32?
   has_more : Bool?
 } derive(Eq, @debug.Debug)
+pub fn Completion::equal(Self, Self) -> Bool
+pub fn Completion::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Completion::not_equal(Self, Self) -> Bool
+pub fn Completion::to_json(Self) -> Json
+pub fn Completion::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Completion
 pub impl @json.FromJson for Completion
 
@@ -197,6 +241,11 @@ pub(all) struct CompletionArgument {
   name : String
   value : String
 } derive(Eq, @debug.Debug)
+pub fn CompletionArgument::equal(Self, Self) -> Bool
+pub fn CompletionArgument::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CompletionArgument::not_equal(Self, Self) -> Bool
+pub fn CompletionArgument::to_json(Self) -> Json
+pub fn CompletionArgument::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CompletionArgument
 pub impl @json.FromJson for CompletionArgument
 
@@ -204,6 +253,11 @@ pub(all) struct CompletionContext {
   reference : Reference
   argument : CompletionArgument
 } derive(Eq, @debug.Debug)
+pub fn CompletionContext::equal(Self, Self) -> Bool
+pub fn CompletionContext::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CompletionContext::not_equal(Self, Self) -> Bool
+pub fn CompletionContext::to_json(Self) -> Json
+pub fn CompletionContext::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CompletionContext
 pub impl @json.FromJson for CompletionContext
 
@@ -214,6 +268,11 @@ pub(all) enum ContentBlock {
   ResourceLink(uri~ : String, name~ : String, title~ : String?, description~ : String?, mime_type~ : String?, size~ : Int32?, annotations~ : Annotations?, meta~ : Map[String, Json]?)
   EmbeddedResource(resource~ : ResourceContents, annotations~ : Annotations?, meta~ : Map[String, Json]?)
 } derive(Eq, @debug.Debug)
+pub fn ContentBlock::equal(Self, Self) -> Bool
+pub fn ContentBlock::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ContentBlock::not_equal(Self, Self) -> Bool
+pub fn ContentBlock::to_json(Self) -> Json
+pub fn ContentBlock::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ContentBlock
 pub impl @json.FromJson for ContentBlock
 
@@ -227,6 +286,11 @@ pub(all) struct CreateMessageRequestParams {
   model_preferences : ModelPreferences?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CreateMessageRequestParams::equal(Self, Self) -> Bool
+pub fn CreateMessageRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CreateMessageRequestParams::not_equal(Self, Self) -> Bool
+pub fn CreateMessageRequestParams::to_json(Self) -> Json
+pub fn CreateMessageRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CreateMessageRequestParams
 pub impl @json.FromJson for CreateMessageRequestParams
 
@@ -238,6 +302,11 @@ pub(all) struct CreateMessageResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CreateMessageResult::equal(Self, Self) -> Bool
+pub fn CreateMessageResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CreateMessageResult::not_equal(Self, Self) -> Bool
+pub fn CreateMessageResult::to_json(Self) -> Json
+pub fn CreateMessageResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CreateMessageResult
 pub impl @json.FromJson for CreateMessageResult
 
@@ -245,6 +314,11 @@ pub(all) struct CreateTaskResult {
   task : Json
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn CreateTaskResult::equal(Self, Self) -> Bool
+pub fn CreateTaskResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CreateTaskResult::not_equal(Self, Self) -> Bool
+pub fn CreateTaskResult::to_json(Self) -> Json
+pub fn CreateTaskResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for CreateTaskResult
 pub impl @json.FromJson for CreateTaskResult
 
@@ -253,6 +327,11 @@ pub(all) struct DiscoverResult {
   result : Json
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn DiscoverResult::equal(Self, Self) -> Bool
+pub fn DiscoverResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn DiscoverResult::not_equal(Self, Self) -> Bool
+pub fn DiscoverResult::to_json(Self) -> Json
+pub fn DiscoverResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for DiscoverResult
 pub impl @json.FromJson for DiscoverResult
 
@@ -262,6 +341,11 @@ pub(all) struct ElicitRequestParams {
   url : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ElicitRequestParams::equal(Self, Self) -> Bool
+pub fn ElicitRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ElicitRequestParams::not_equal(Self, Self) -> Bool
+pub fn ElicitRequestParams::to_json(Self) -> Json
+pub fn ElicitRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ElicitRequestParams
 pub impl @json.FromJson for ElicitRequestParams
 
@@ -274,12 +358,22 @@ pub(all) struct ElicitResult {
 pub fn ElicitResult::accept(Map[String, Json]) -> Self
 pub fn ElicitResult::cancel() -> Self
 pub fn ElicitResult::decline() -> Self
+pub fn ElicitResult::equal(Self, Self) -> Bool
+pub fn ElicitResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ElicitResult::not_equal(Self, Self) -> Bool
+pub fn ElicitResult::to_json(Self) -> Json
+pub fn ElicitResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ElicitResult
 pub impl @json.FromJson for ElicitResult
 
 pub(all) struct EmptyResult {
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn EmptyResult::equal(Self, Self) -> Bool
+pub fn EmptyResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn EmptyResult::not_equal(Self, Self) -> Bool
+pub fn EmptyResult::to_json(Self) -> Json
+pub fn EmptyResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for EmptyResult
 pub impl @json.FromJson for EmptyResult
 
@@ -288,12 +382,22 @@ pub(all) struct ErrorData {
   message : String
   data : Json?
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn ErrorData::equal(Self, Self) -> Bool
+pub fn ErrorData::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ErrorData::not_equal(Self, Self) -> Bool
+pub fn ErrorData::to_json(Self) -> Json
+pub fn ErrorData::to_repr(Self) -> @debug.Repr
 
 pub(all) struct GetPromptRequestParams {
   name : String
   arguments : Map[String, Json]?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn GetPromptRequestParams::equal(Self, Self) -> Bool
+pub fn GetPromptRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn GetPromptRequestParams::not_equal(Self, Self) -> Bool
+pub fn GetPromptRequestParams::to_json(Self) -> Json
+pub fn GetPromptRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for GetPromptRequestParams
 pub impl @json.FromJson for GetPromptRequestParams
 
@@ -303,6 +407,11 @@ pub(all) struct GetPromptResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn GetPromptResult::equal(Self, Self) -> Bool
+pub fn GetPromptResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn GetPromptResult::not_equal(Self, Self) -> Bool
+pub fn GetPromptResult::to_json(Self) -> Json
+pub fn GetPromptResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for GetPromptResult
 pub impl @json.FromJson for GetPromptResult
 
@@ -311,6 +420,11 @@ pub(all) struct Icon {
   mime_type : String?
   sizes : Array[String]?
 } derive(Eq, @debug.Debug)
+pub fn Icon::equal(Self, Self) -> Bool
+pub fn Icon::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Icon::not_equal(Self, Self) -> Bool
+pub fn Icon::to_json(Self) -> Json
+pub fn Icon::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Icon
 pub impl @json.FromJson for Icon
 
@@ -319,6 +433,11 @@ pub(all) struct Implementation {
   title : String?
   version : String
 } derive(Eq, @debug.Debug)
+pub fn Implementation::equal(Self, Self) -> Bool
+pub fn Implementation::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Implementation::not_equal(Self, Self) -> Bool
+pub fn Implementation::to_json(Self) -> Json
+pub fn Implementation::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Implementation
 pub impl @json.FromJson for Implementation
 
@@ -328,6 +447,11 @@ pub(all) struct InitializeRequestParams {
   client_info : Implementation
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn InitializeRequestParams::equal(Self, Self) -> Bool
+pub fn InitializeRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InitializeRequestParams::not_equal(Self, Self) -> Bool
+pub fn InitializeRequestParams::to_json(Self) -> Json
+pub fn InitializeRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InitializeRequestParams
 pub impl @json.FromJson for InitializeRequestParams
 
@@ -338,6 +462,11 @@ pub(all) struct InitializeResult {
   instructions : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn InitializeResult::equal(Self, Self) -> Bool
+pub fn InitializeResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InitializeResult::not_equal(Self, Self) -> Bool
+pub fn InitializeResult::to_json(Self) -> Json
+pub fn InitializeResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InitializeResult
 pub impl @json.FromJson for InitializeResult
 
@@ -345,6 +474,11 @@ pub(all) struct InputRequest {
   id : String
   request : Json
 } derive(Eq, @debug.Debug)
+pub fn InputRequest::equal(Self, Self) -> Bool
+pub fn InputRequest::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InputRequest::not_equal(Self, Self) -> Bool
+pub fn InputRequest::to_json(Self) -> Json
+pub fn InputRequest::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InputRequest
 pub impl @json.FromJson for InputRequest
 
@@ -353,6 +487,11 @@ pub(all) struct InputRequiredResult {
   request_state : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn InputRequiredResult::equal(Self, Self) -> Bool
+pub fn InputRequiredResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InputRequiredResult::not_equal(Self, Self) -> Bool
+pub fn InputRequiredResult::to_json(Self) -> Json
+pub fn InputRequiredResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InputRequiredResult
 pub impl @json.FromJson for InputRequiredResult
 
@@ -361,6 +500,11 @@ pub(all) struct InputResponse {
   action : String
   content : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn InputResponse::equal(Self, Self) -> Bool
+pub fn InputResponse::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InputResponse::not_equal(Self, Self) -> Bool
+pub fn InputResponse::to_json(Self) -> Json
+pub fn InputResponse::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InputResponse
 pub impl @json.FromJson for InputResponse
 
@@ -369,15 +513,25 @@ pub(all) struct InputResponseRequestParams {
   request_state : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn InputResponseRequestParams::equal(Self, Self) -> Bool
+pub fn InputResponseRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn InputResponseRequestParams::not_equal(Self, Self) -> Bool
+pub fn InputResponseRequestParams::to_json(Self) -> Json
+pub fn InputResponseRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for InputResponseRequestParams
 pub impl @json.FromJson for InputResponseRequestParams
 
 pub(all) enum JSONRPCMessage {
-  Request(id~ : RequestId, method~ : String, params~ : Json?)
-  Notification(method~ : String, params~ : Json?)
+  Request(id~ : RequestId, verb~ : String, params~ : Json?)
+  Notification(verb~ : String, params~ : Json?)
   Response(id~ : RequestId, result~ : Json)
   Error(id~ : RequestId, error~ : ErrorData)
 } derive(Eq, @debug.Debug)
+pub fn JSONRPCMessage::equal(Self, Self) -> Bool
+pub fn JSONRPCMessage::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn JSONRPCMessage::not_equal(Self, Self) -> Bool
+pub fn JSONRPCMessage::to_json(Self) -> Json
+pub fn JSONRPCMessage::to_repr(Self) -> @debug.Repr
 pub impl ToJson for JSONRPCMessage
 pub impl @json.FromJson for JSONRPCMessage
 
@@ -387,6 +541,11 @@ pub(all) struct ListPromptsResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ListPromptsResult::equal(Self, Self) -> Bool
+pub fn ListPromptsResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ListPromptsResult::not_equal(Self, Self) -> Bool
+pub fn ListPromptsResult::to_json(Self) -> Json
+pub fn ListPromptsResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ListPromptsResult
 pub impl @json.FromJson for ListPromptsResult
 
@@ -396,6 +555,11 @@ pub(all) struct ListResourceTemplatesResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ListResourceTemplatesResult::equal(Self, Self) -> Bool
+pub fn ListResourceTemplatesResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ListResourceTemplatesResult::not_equal(Self, Self) -> Bool
+pub fn ListResourceTemplatesResult::to_json(Self) -> Json
+pub fn ListResourceTemplatesResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ListResourceTemplatesResult
 pub impl @json.FromJson for ListResourceTemplatesResult
 
@@ -405,6 +569,11 @@ pub(all) struct ListResourcesResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ListResourcesResult::equal(Self, Self) -> Bool
+pub fn ListResourcesResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ListResourcesResult::not_equal(Self, Self) -> Bool
+pub fn ListResourcesResult::to_json(Self) -> Json
+pub fn ListResourcesResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ListResourcesResult
 pub impl @json.FromJson for ListResourcesResult
 
@@ -413,6 +582,11 @@ pub(all) struct ListRootsResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ListRootsResult::equal(Self, Self) -> Bool
+pub fn ListRootsResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ListRootsResult::not_equal(Self, Self) -> Bool
+pub fn ListRootsResult::to_json(Self) -> Json
+pub fn ListRootsResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ListRootsResult
 pub impl @json.FromJson for ListRootsResult
 
@@ -422,6 +596,11 @@ pub(all) struct ListToolsResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ListToolsResult::equal(Self, Self) -> Bool
+pub fn ListToolsResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ListToolsResult::not_equal(Self, Self) -> Bool
+pub fn ListToolsResult::to_json(Self) -> Json
+pub fn ListToolsResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ListToolsResult
 pub impl @json.FromJson for ListToolsResult
 
@@ -435,6 +614,9 @@ pub(all) enum LoggingLevel {
   Alert
   Emergency
 } derive(Eq, @debug.Debug)
+pub fn LoggingLevel::equal(Self, Self) -> Bool
+pub fn LoggingLevel::not_equal(Self, Self) -> Bool
+pub fn LoggingLevel::to_repr(Self) -> @debug.Repr
 pub fn LoggingLevel::to_wire(Self) -> String
 
 pub(all) struct LoggingMessageNotificationParams {
@@ -442,12 +624,22 @@ pub(all) struct LoggingMessageNotificationParams {
   logger : String?
   data : Json
 } derive(Eq, @debug.Debug)
+pub fn LoggingMessageNotificationParams::equal(Self, Self) -> Bool
+pub fn LoggingMessageNotificationParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn LoggingMessageNotificationParams::not_equal(Self, Self) -> Bool
+pub fn LoggingMessageNotificationParams::to_json(Self) -> Json
+pub fn LoggingMessageNotificationParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for LoggingMessageNotificationParams
 pub impl @json.FromJson for LoggingMessageNotificationParams
 
 pub(all) struct ModelHint {
   name : String
 } derive(Eq, @debug.Debug)
+pub fn ModelHint::equal(Self, Self) -> Bool
+pub fn ModelHint::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ModelHint::not_equal(Self, Self) -> Bool
+pub fn ModelHint::to_json(Self) -> Json
+pub fn ModelHint::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ModelHint
 pub impl @json.FromJson for ModelHint
 
@@ -457,6 +649,11 @@ pub(all) struct ModelPreferences {
   speed_priority : Double?
   intelligence_priority : Double?
 } derive(Eq, @debug.Debug)
+pub fn ModelPreferences::equal(Self, Self) -> Bool
+pub fn ModelPreferences::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ModelPreferences::not_equal(Self, Self) -> Bool
+pub fn ModelPreferences::to_json(Self) -> Json
+pub fn ModelPreferences::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ModelPreferences
 pub impl @json.FromJson for ModelPreferences
 
@@ -464,7 +661,12 @@ pub(all) struct PaginatedRequestParams {
   cursor : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn PaginatedRequestParams::equal(Self, Self) -> Bool
+pub fn PaginatedRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn PaginatedRequestParams::not_equal(Self, Self) -> Bool
 pub fn PaginatedRequestParams::progress_token(Self) -> String?
+pub fn PaginatedRequestParams::to_json(Self) -> Json
+pub fn PaginatedRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for PaginatedRequestParams
 pub impl @json.FromJson for PaginatedRequestParams
 
@@ -474,6 +676,11 @@ pub(all) struct ProgressNotificationParams {
   message : String?
   total : Double?
 } derive(Eq, @debug.Debug)
+pub fn ProgressNotificationParams::equal(Self, Self) -> Bool
+pub fn ProgressNotificationParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ProgressNotificationParams::not_equal(Self, Self) -> Bool
+pub fn ProgressNotificationParams::to_json(Self) -> Json
+pub fn ProgressNotificationParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ProgressNotificationParams
 pub impl @json.FromJson for ProgressNotificationParams
 
@@ -484,6 +691,11 @@ pub(all) struct Prompt {
   arguments : Array[PromptArgument]?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn Prompt::equal(Self, Self) -> Bool
+pub fn Prompt::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Prompt::not_equal(Self, Self) -> Bool
+pub fn Prompt::to_json(Self) -> Json
+pub fn Prompt::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Prompt
 pub impl @json.FromJson for Prompt
 
@@ -493,6 +705,11 @@ pub(all) struct PromptArgument {
   description : String?
   required : Bool?
 } derive(Eq, @debug.Debug)
+pub fn PromptArgument::equal(Self, Self) -> Bool
+pub fn PromptArgument::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn PromptArgument::not_equal(Self, Self) -> Bool
+pub fn PromptArgument::to_json(Self) -> Json
+pub fn PromptArgument::to_repr(Self) -> @debug.Repr
 pub impl ToJson for PromptArgument
 pub impl @json.FromJson for PromptArgument
 
@@ -500,17 +717,30 @@ pub(all) struct PromptMessage {
   role : Role
   content : ContentBlock
 } derive(Eq, @debug.Debug)
+pub fn PromptMessage::equal(Self, Self) -> Bool
+pub fn PromptMessage::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn PromptMessage::not_equal(Self, Self) -> Bool
+pub fn PromptMessage::to_json(Self) -> Json
+pub fn PromptMessage::to_repr(Self) -> @debug.Repr
 pub impl ToJson for PromptMessage
 pub impl @json.FromJson for PromptMessage
 
 pub(all) struct PromptsCapabilities {
   list_changed : Bool?
 } derive(Eq, @debug.Debug)
+pub fn PromptsCapabilities::equal(Self, Self) -> Bool
+pub fn PromptsCapabilities::not_equal(Self, Self) -> Bool
+pub fn PromptsCapabilities::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ReadResourceRequestParams {
   uri : String
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ReadResourceRequestParams::equal(Self, Self) -> Bool
+pub fn ReadResourceRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ReadResourceRequestParams::not_equal(Self, Self) -> Bool
+pub fn ReadResourceRequestParams::to_json(Self) -> Json
+pub fn ReadResourceRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ReadResourceRequestParams
 pub impl @json.FromJson for ReadResourceRequestParams
 
@@ -519,6 +749,11 @@ pub(all) struct ReadResourceResult {
   cache_control : String?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ReadResourceResult::equal(Self, Self) -> Bool
+pub fn ReadResourceResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ReadResourceResult::not_equal(Self, Self) -> Bool
+pub fn ReadResourceResult::to_json(Self) -> Json
+pub fn ReadResourceResult::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ReadResourceResult
 pub impl @json.FromJson for ReadResourceResult
 
@@ -526,6 +761,11 @@ pub(all) enum Reference {
   PromptReference(name~ : String)
   ResourceTemplateReference(uri~ : String)
 } derive(Eq, @debug.Debug)
+pub fn Reference::equal(Self, Self) -> Bool
+pub fn Reference::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Reference::not_equal(Self, Self) -> Bool
+pub fn Reference::to_json(Self) -> Json
+pub fn Reference::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Reference
 pub impl @json.FromJson for Reference
 
@@ -533,13 +773,23 @@ pub(all) enum RequestId {
   Number(id~ : Int32)
   Text(id~ : String)
 } derive(Eq, @debug.Debug)
+pub fn RequestId::equal(Self, Self) -> Bool
+pub fn RequestId::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn RequestId::not_equal(Self, Self) -> Bool
+pub fn RequestId::to_json(Self) -> Json
+pub fn RequestId::to_repr(Self) -> @debug.Repr
 pub impl ToJson for RequestId
 pub impl @json.FromJson for RequestId
 
 pub(all) struct RequestParamsMeta {
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn RequestParamsMeta::equal(Self, Self) -> Bool
+pub fn RequestParamsMeta::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn RequestParamsMeta::not_equal(Self, Self) -> Bool
 pub fn RequestParamsMeta::progress_token(Self) -> String?
+pub fn RequestParamsMeta::to_json(Self) -> Json
+pub fn RequestParamsMeta::to_repr(Self) -> @debug.Repr
 pub impl ToJson for RequestParamsMeta
 pub impl @json.FromJson for RequestParamsMeta
 
@@ -553,6 +803,11 @@ pub(all) struct Resource {
   annotations : Annotations?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn Resource::equal(Self, Self) -> Bool
+pub fn Resource::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Resource::not_equal(Self, Self) -> Bool
+pub fn Resource::to_json(Self) -> Json
+pub fn Resource::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Resource
 pub impl @json.FromJson for Resource
 
@@ -560,6 +815,11 @@ pub(all) enum ResourceContents {
   Text(uri~ : String, mime_type~ : String?, text~ : String)
   Blob(uri~ : String, mime_type~ : String?, blob~ : String)
 } derive(Eq, @debug.Debug)
+pub fn ResourceContents::equal(Self, Self) -> Bool
+pub fn ResourceContents::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ResourceContents::not_equal(Self, Self) -> Bool
+pub fn ResourceContents::to_json(Self) -> Json
+pub fn ResourceContents::to_repr(Self) -> @debug.Repr
 pub fn ResourceContents::uri(Self) -> String
 pub impl ToJson for ResourceContents
 pub impl @json.FromJson for ResourceContents
@@ -573,6 +833,11 @@ pub(all) struct ResourceTemplate {
   annotations : Annotations?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn ResourceTemplate::equal(Self, Self) -> Bool
+pub fn ResourceTemplate::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ResourceTemplate::not_equal(Self, Self) -> Bool
+pub fn ResourceTemplate::to_json(Self) -> Json
+pub fn ResourceTemplate::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ResourceTemplate
 pub impl @json.FromJson for ResourceTemplate
 
@@ -580,17 +845,28 @@ pub(all) struct ResourcesCapabilities {
   subscribe : Bool?
   list_changed : Bool?
 } derive(Eq, @debug.Debug)
+pub fn ResourcesCapabilities::equal(Self, Self) -> Bool
+pub fn ResourcesCapabilities::not_equal(Self, Self) -> Bool
+pub fn ResourcesCapabilities::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Role {
   User
   Assistant
 } derive(Eq, @debug.Debug)
+pub fn Role::equal(Self, Self) -> Bool
+pub fn Role::not_equal(Self, Self) -> Bool
+pub fn Role::to_repr(Self) -> @debug.Repr
 pub fn Role::to_wire(Self) -> String
 
 pub(all) struct Root {
   uri : String
   name : String?
 } derive(Eq, @debug.Debug)
+pub fn Root::equal(Self, Self) -> Bool
+pub fn Root::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Root::not_equal(Self, Self) -> Bool
+pub fn Root::to_json(Self) -> Json
+pub fn Root::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Root
 pub impl @json.FromJson for Root
 
@@ -598,6 +874,11 @@ pub(all) struct SamplingMessage {
   role : Role
   content : ContentBlock
 } derive(Eq, @debug.Debug)
+pub fn SamplingMessage::equal(Self, Self) -> Bool
+pub fn SamplingMessage::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn SamplingMessage::not_equal(Self, Self) -> Bool
+pub fn SamplingMessage::to_json(Self) -> Json
+pub fn SamplingMessage::to_repr(Self) -> @debug.Repr
 pub impl ToJson for SamplingMessage
 pub impl @json.FromJson for SamplingMessage
 
@@ -610,7 +891,12 @@ pub(all) struct ServerCapabilities {
   tools : ToolCapabilities?
   tasks : Bool?
 } derive(Eq, @debug.Debug)
+pub fn ServerCapabilities::equal(Self, Self) -> Bool
+pub fn ServerCapabilities::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn ServerCapabilities::new() -> Self
+pub fn ServerCapabilities::not_equal(Self, Self) -> Bool
+pub fn ServerCapabilities::to_json(Self) -> Json
+pub fn ServerCapabilities::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ServerCapabilities
 pub impl @json.FromJson for ServerCapabilities
 
@@ -625,6 +911,10 @@ pub(all) enum ServerNotification {
   Initialized
   RootsListChanged
 } derive(Eq, @debug.Debug)
+pub fn ServerNotification::equal(Self, Self) -> Bool
+pub fn ServerNotification::not_equal(Self, Self) -> Bool
+pub fn ServerNotification::to_json(Self) -> Json
+pub fn ServerNotification::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ServerNotification
 
 pub(all) enum ServerRequest {
@@ -633,12 +923,21 @@ pub(all) enum ServerRequest {
   Elicit(ElicitRequestParams)
   ListRoots(meta~ : Map[String, Json]?)
 } derive(Eq, @debug.Debug)
+pub fn ServerRequest::equal(Self, Self) -> Bool
+pub fn ServerRequest::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ServerRequest::not_equal(Self, Self) -> Bool
+pub fn ServerRequest::to_repr(Self) -> @debug.Repr
 pub impl @json.FromJson for ServerRequest
 
 pub(all) struct SetLevelRequestParams {
   level : LoggingLevel
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn SetLevelRequestParams::equal(Self, Self) -> Bool
+pub fn SetLevelRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn SetLevelRequestParams::not_equal(Self, Self) -> Bool
+pub fn SetLevelRequestParams::to_json(Self) -> Json
+pub fn SetLevelRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for SetLevelRequestParams
 pub impl @json.FromJson for SetLevelRequestParams
 
@@ -646,6 +945,11 @@ pub(all) struct SubscribeRequestParams {
   uri : String
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn SubscribeRequestParams::equal(Self, Self) -> Bool
+pub fn SubscribeRequestParams::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn SubscribeRequestParams::not_equal(Self, Self) -> Bool
+pub fn SubscribeRequestParams::to_json(Self) -> Json
+pub fn SubscribeRequestParams::to_repr(Self) -> @debug.Repr
 pub impl ToJson for SubscribeRequestParams
 pub impl @json.FromJson for SubscribeRequestParams
 
@@ -660,6 +964,11 @@ pub(all) struct Tool {
   execution : ToolExecution?
   meta : Map[String, Json]?
 } derive(Eq, @debug.Debug)
+pub fn Tool::equal(Self, Self) -> Bool
+pub fn Tool::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Tool::not_equal(Self, Self) -> Bool
+pub fn Tool::to_json(Self) -> Json
+pub fn Tool::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Tool
 pub impl @json.FromJson for Tool
 
@@ -670,16 +979,29 @@ pub(all) struct ToolAnnotations {
   idempotent_hint : Bool?
   open_world_hint : Bool?
 } derive(Eq, @debug.Debug)
+pub fn ToolAnnotations::equal(Self, Self) -> Bool
+pub fn ToolAnnotations::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ToolAnnotations::not_equal(Self, Self) -> Bool
+pub fn ToolAnnotations::to_json(Self) -> Json
+pub fn ToolAnnotations::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ToolAnnotations
 pub impl @json.FromJson for ToolAnnotations
 
 pub(all) struct ToolCapabilities {
   list_changed : Bool?
 } derive(Eq, @debug.Debug)
+pub fn ToolCapabilities::equal(Self, Self) -> Bool
+pub fn ToolCapabilities::not_equal(Self, Self) -> Bool
+pub fn ToolCapabilities::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ToolExecution {
   task_support : @tasks.TaskMode
 } derive(Eq, @debug.Debug)
+pub fn ToolExecution::equal(Self, Self) -> Bool
+pub fn ToolExecution::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn ToolExecution::not_equal(Self, Self) -> Bool
+pub fn ToolExecution::to_json(Self) -> Json
+pub fn ToolExecution::to_repr(Self) -> @debug.Repr
 pub impl ToJson for ToolExecution
 pub impl @json.FromJson for ToolExecution
 

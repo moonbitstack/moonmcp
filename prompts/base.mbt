@@ -1,32 +1,37 @@
 /// Prompt base classes mirroring fastmcp/prompts/base.py.
 
+///|
 /// A wrapper for a prompt message with a role.
 pub(all) struct Message {
   role : @types.Role
   content : @types.ContentBlock
 } derive(Debug, Eq)
 
+///|
 /// Create a message from plain text, user role by default.
 pub fn Message::text(
   text : String,
-  role? : @types.Role = @types.User,
+  role~ : @types.Role = @types.User,
 ) -> Message {
-  { role, content: @types.text_block(text) }
+  { role, content: @types.text_block(text), }
 }
 
+///|
 /// Create a message from an existing content block, user role by default.
 pub fn Message::of_content(
   content : @types.ContentBlock,
-  role? : @types.Role = @types.User,
+  role~ : @types.Role = @types.User,
 ) -> Message {
-  { role, content }
+  { role, content, }
 }
 
+///|
 /// Convert to the wire prompt message.
 pub fn Message::to_mcp_prompt_message(self : Message) -> @types.PromptMessage {
-  { role: self.role, content: self.content }
+  { role: self.role, content: self.content, }
 }
 
+///|
 /// The canonical result of rendering a prompt.
 pub(all) struct PromptResult {
   messages : Array[Message]
@@ -37,20 +42,17 @@ pub(all) struct PromptResult {
   input_required : @types.InputRequiredResult?
 } derive(Debug, Eq)
 
+///|
 /// Create a prompt result from a list of messages.
 pub fn PromptResult::new(
   messages : Array[Message],
   description? : String,
   meta? : Map[String, Json],
 ) -> PromptResult {
-  {
-    messages,
-    description,
-    meta,
-    input_required: None,
-  }
+  { messages, description, meta, input_required: None, }
 }
 
+///|
 /// Wrap a client-input ask (SEP-2322) as an ordinary prompt result.
 pub fn PromptResult::input_required(
   input_required : @types.InputRequiredResult,
@@ -63,11 +65,13 @@ pub fn PromptResult::input_required(
   }
 }
 
+///|
 /// Whether this result carries a client-input ask (SEP-2322).
 pub fn PromptResult::is_input_required(self : PromptResult) -> Bool {
   self.input_required is Some(_)
 }
 
+///|
 /// Convert to the wire get-prompt result.
 pub fn PromptResult::to_mcp_prompt_result(
   self : PromptResult,
@@ -80,6 +84,7 @@ pub fn PromptResult::to_mcp_prompt_result(
   }
 }
 
+///|
 /// What a prompt's render function may return: plain text, a message list,
 /// or an already-assembled result.
 pub(all) enum RenderedPrompt {
@@ -88,6 +93,7 @@ pub(all) enum RenderedPrompt {
   Ready(PromptResult)
 }
 
+///|
 /// A prompt template that can be rendered with arguments.
 pub(all) struct Prompt {
   component : @component.ComponentBase
@@ -96,22 +102,27 @@ pub(all) struct Prompt {
   render_fn : (Map[String, Json]) -> RenderedPrompt raise @exceptions.FastMCPError
 }
 
-pub impl @component.Component for Prompt with base(self) {
+///|
+pub impl @component.Component for Prompt with fn base(self) {
   self.component
 }
 
-pub impl @component.Component for Prompt with identifier(self) {
+///|
+pub impl @component.Component for Prompt with fn identifier(self) {
   self.component.name
 }
 
-pub impl @component.Component for Prompt with key(self) {
+///|
+pub impl @component.Component for Prompt with fn key(self) {
   self.component.key(self.component.name)
 }
 
-pub impl @component.Component for Prompt with get_meta(self) {
+///|
+pub impl @component.Component for Prompt with fn get_meta(self) {
   self.component.get_meta()
 }
 
+///|
 /// Register a prompt; `render_fn` renders it with the given arguments.
 pub fn Prompt::new(
   name : String,
@@ -120,7 +131,7 @@ pub fn Prompt::new(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   arguments? : Array[@types.PromptArgument],
 ) -> Prompt {
@@ -128,18 +139,19 @@ pub fn Prompt::new(
     component: @component.ComponentBase::new(
       "prompt",
       name,
-      version?=version,
-      title?=title,
-      description?=description,
-      icons?=icons,
-      tags=tags,
-      meta?=meta,
+      version?,
+      title?,
+      description?,
+      icons?,
+      tags~,
+      meta?,
     ),
     arguments,
     render_fn,
   }
 }
 
+///|
 /// Render the prompt with arguments.
 pub fn Prompt::render(
   self : Prompt,
@@ -148,11 +160,12 @@ pub fn Prompt::render(
   (self.render_fn)(arguments)
 }
 
+///|
 /// Convert a rendered value to a canonical result.
 pub fn Prompt::convert_result(
   self : Prompt,
   raw_value : RenderedPrompt,
-) -> PromptResult raise @exceptions.FastMCPError {
+) -> PromptResult {
   match raw_value {
     Ready(result) => result
     Text(text) =>
@@ -170,6 +183,7 @@ pub fn Prompt::convert_result(
   }
 }
 
+///|
 /// Server entry point for prompt rendering.
 pub fn Prompt::render_result(
   self : Prompt,
@@ -178,6 +192,7 @@ pub fn Prompt::render_result(
   self.convert_result(self.render(arguments))
 }
 
+///|
 /// Convert the prompt to its wire representation.
 pub fn Prompt::to_mcp_prompt(self : Prompt) -> @types.Prompt {
   {
@@ -188,3 +203,18 @@ pub fn Prompt::to_mcp_prompt(self : Prompt) -> @types.Prompt {
     meta: Some(Prompt::get_meta(self)),
   }
 }
+
+///|
+pub extend Message with Debug::{to_repr}
+
+///|
+pub extend Message with Eq::{not_equal, equal}
+
+///|
+pub extend Prompt with @component.Component::{base, identifier, key, get_meta}
+
+///|
+pub extend PromptResult with Debug::{to_repr}
+
+///|
+pub extend PromptResult with Eq::{not_equal, equal}

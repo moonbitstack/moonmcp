@@ -1,3 +1,4 @@
+///|
 test "settings defaults mirror fastmcp" {
   let settings = @settings.Settings::new()
   assert_eq(settings.log_enabled, true)
@@ -14,6 +15,7 @@ test "settings defaults mirror fastmcp" {
   assert_eq(settings.check_for_updates, @settings.Stable)
 }
 
+///|
 test "settings apply environment overrides" {
   @env.set_env_var("FASTMCP_PORT", "9000")
   @env.set_env_var("FASTMCP_LOG_ENABLED", "false")
@@ -33,9 +35,13 @@ test "settings apply environment overrides" {
   assert_eq(settings.http_session_idle_timeout, @settings.Never)
 }
 
+///|
 test "log level wire conversion is case-insensitive" {
   assert_eq(@settings.log_level_from_wire("debug"), Some(@settings.Debug))
   assert_eq(@settings.log_level_from_wire("Info"), Some(@settings.Info))
   assert_eq(@settings.log_level_from_wire("bogus"), None)
-  assert_eq(@settings.telemetry_mode_from_wire("propagation_only"), Some(@settings.PropagationOnly))
+  assert_eq(
+    @settings.telemetry_mode_from_wire("propagation_only"),
+    Some(@settings.PropagationOnly),
+  )
 }

@@ -1,8 +1,8 @@
 import {
-  "moonmcp/types" @types,
+  "moonbitstack/moonmcp/types",
 }
 
 import {
-  "moonmcp/exceptions" @exceptions,
-  "moonmcp/types" @types,
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
 } for "test"

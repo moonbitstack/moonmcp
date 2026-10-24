@@ -4,6 +4,7 @@
 /// tools overriding `run`) maps to a struct carrying a run closure: every
 /// concrete tool in fastmcp is ultimately function-backed.
 
+///|
 /// Derive a display title from a tool name.
 ///
 /// The MCP spec says clients should fall back to `name` for display when
@@ -26,6 +27,7 @@ pub fn default_title(name : String) -> String {
   buf.to_string()
 }
 
+///|
 /// Whether a tool name is valid per the MCP specification (SEP-986):
 /// 1-64 characters of letters, digits, underscores and hyphens.
 pub fn is_valid_tool_name(name : String) -> Bool {
@@ -38,13 +40,14 @@ pub fn is_valid_tool_name(name : String) -> Bool {
       (ch >= '0' && ch <= '9') ||
       ch == '_' ||
       ch == '-'
-    if not(valid) {
+    if !valid {
       return false
     }
   }
   true
 }
 
+///|
 /// The canonical result of running a tool.
 pub(all) struct ToolResult {
   content : Array[@types.ContentBlock]
@@ -58,6 +61,7 @@ pub(all) struct ToolResult {
   input_required : @types.InputRequiredResult?
 } derive(Debug, Eq)
 
+///|
 /// Create a tool result from explicit parts; content or structured content
 /// must be provided.
 pub fn ToolResult::new(
@@ -68,13 +72,14 @@ pub fn ToolResult::new(
 ) -> ToolResult raise @exceptions.FastMCPError {
   let content = match content {
     Some(blocks) => blocks
-    None => match structured_content {
-      Some(_) => []
-      None =>
-        raise @exceptions.Validation(
-          "Either content or structured_content must be provided",
-        )
-    }
+    None =>
+      match structured_content {
+        Some(_) => []
+        None =>
+          raise @exceptions.Validation(
+            "Either content or structured_content must be provided",
+          )
+      }
   }
   {
     content,
@@ -86,6 +91,7 @@ pub fn ToolResult::new(
   }
 }
 
+///|
 /// Wrap a protocol result while preserving its exact wire representation.
 pub fn ToolResult::from_mcp_result(
   result : @types.CallToolResult,
@@ -100,6 +106,7 @@ pub fn ToolResult::from_mcp_result(
   }
 }
 
+///|
 /// Wrap a client-input ask (SEP-2322) as an ordinary tool result.
 pub fn ToolResult::input_required(
   input_required : @types.InputRequiredResult,
@@ -114,26 +121,30 @@ pub fn ToolResult::input_required(
   }
 }
 
+///|
 /// Whether this result carries a client-input ask (SEP-2322).
 pub fn ToolResult::is_input_required(self : ToolResult) -> Bool {
   self.input_required is Some(_)
 }
 
+///|
 /// Convert to the protocol result, keeping the original wire representation
 /// when one was preserved.
 pub fn ToolResult::to_mcp_result(self : ToolResult) -> @types.CallToolResult {
   match self.raw_mcp_result {
     Some(raw) => raw
-    None => {
-      content: self.content,
-      structured_content: self.structured_content,
-      is_error: self.is_error,
-      cache_control: None,
-      meta: self.meta,
-    }
+    None =>
+      {
+        content: self.content,
+        structured_content: self.structured_content,
+        is_error: self.is_error,
+        cache_control: None,
+        meta: self.meta,
+      }
   }
 }
 
+///|
 /// A registered tool.
 pub(all) struct Tool {
   component : @component.ComponentBase
@@ -149,22 +160,27 @@ pub(all) struct Tool {
   run_fn : (Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError
 }
 
-pub impl @component.Component for Tool with base(self) {
+///|
+pub impl @component.Component for Tool with fn base(self) {
   self.component
 }
 
-pub impl @component.Component for Tool with identifier(self) {
+///|
+pub impl @component.Component for Tool with fn identifier(self) {
   self.component.name
 }
 
-pub impl @component.Component for Tool with key(self) {
+///|
+pub impl @component.Component for Tool with fn key(self) {
   self.component.key(self.component.name)
 }
 
-pub impl @component.Component for Tool with get_meta(self) {
+///|
+pub impl @component.Component for Tool with fn get_meta(self) {
   self.component.get_meta()
 }
 
+///|
 /// Register a tool. `parameters` is the JSON schema of its arguments and
 /// `run_fn` executes it.
 pub fn Tool::new(
@@ -175,17 +191,17 @@ pub fn Tool::new(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.ToolAnnotations,
   output_schema? : Json,
   execution? : @types.ToolExecution,
   timeout? : Double,
-  task_config? : @tasks.TaskConfig = @tasks.TaskConfig::new(
+  task_config~ : @tasks.TaskConfig = @tasks.TaskConfig::new(
     mode=@tasks.Forbidden,
   ),
 ) -> Tool raise @exceptions.FastMCPError {
-  if not(is_valid_tool_name(name)) {
+  if !is_valid_tool_name(name) {
     raise @exceptions.Validation(
       "Invalid tool name '\{name}': must be 1-64 characters of letters, digits, underscores and hyphens",
     )
@@ -194,13 +210,13 @@ pub fn Tool::new(
     component: @component.ComponentBase::new(
       "tool",
       name,
-      version?=version,
-      title?=title,
-      description?=description,
-      icons?=icons,
-      tags=tags,
-      meta?=meta,
-      task_config=task_config,
+      version?,
+      title?,
+      description?,
+      icons?,
+      tags~,
+      meta?,
+      task_config~,
     ),
     parameters,
     output_schema,
@@ -211,6 +227,7 @@ pub fn Tool::new(
   }
 }
 
+///|
 /// Run the tool with arguments.
 pub fn Tool::run(
   self : Tool,
@@ -219,6 +236,7 @@ pub fn Tool::run(
   (self.run_fn)(arguments)
 }
 
+///|
 /// Server entry point for tool execution; subclasses customise dispatch by
 /// supplying a different `run_fn` at construction.
 pub fn Tool::dispatch(
@@ -228,6 +246,7 @@ pub fn Tool::dispatch(
   self.run(arguments)
 }
 
+///|
 /// Convert the tool to its wire representation.
 ///
 /// Title precedence: explicit title, then annotation title, then a title
@@ -235,15 +254,16 @@ pub fn Tool::dispatch(
 pub fn Tool::to_mcp_tool(self : Tool) -> @types.Tool {
   let title = match self.component.title {
     Some(title) => Some(title)
-    None => match self.annotations {
-      Some(annotations) => annotations.title
-      None => None
-    }
+    None =>
+      match self.annotations {
+        Some(annotations) => annotations.title
+        None => None
+      }
   }
   let title = Some(title.unwrap_or(default_title(self.component.name)))
   let mut execution = self.execution
   if self.component.task_config.supports_tasks() && execution is None {
-    execution = Some({ task_support: self.component.task_config.mode })
+    execution = Some({ task_support: self.component.task_config.mode, })
   }
   {
     name: self.component.name,
@@ -258,22 +278,21 @@ pub fn Tool::to_mcp_tool(self : Tool) -> @types.Tool {
   }
 }
 
+///|
 /// Convert a raw return value to a `ToolResult`, honouring the declared
 /// output schema.
 pub fn Tool::convert_result(
   self : Tool,
   raw_value : Json,
 ) -> ToolResult raise @exceptions.FastMCPError {
-  let content : Array[@types.ContentBlock] = try {
-    convert_to_content(raw_value)
-  } catch {
-    e => raise @exceptions.Tool("Could not convert tool result")
+  let content : Array[@types.ContentBlock] = convert_to_content(raw_value) catch {
+    _ => raise @exceptions.Tool("Could not convert tool result")
   }
   let is_content = is_content_result(raw_value)
   // Content-block results skip structured content unless an output schema
   // obliges it.
   if self.output_schema is None && is_content {
-    return ToolResult::new(content=content)
+    return ToolResult::new(content~)
   }
   guard raw_value is Object(structured) else {
     // A non-object value cannot back structured content.
@@ -282,11 +301,11 @@ pub fn Tool::convert_result(
         "Could not serialise the return value of tool '\{self.component.name}' for its output schema",
       )
     }
-    return ToolResult::new(content=content)
+    return ToolResult::new(content~)
   }
   if self.output_schema is None {
     // No schema: structured content only for objects.
-    return ToolResult::new(content=content, structured_content=structured)
+    return ToolResult::new(content~, structured_content=structured)
   }
   // Has output schema: wrap when x-fastmcp-wrap-result is set.
   let wrap_result = match self.output_schema {
@@ -295,15 +314,20 @@ pub fn Tool::convert_result(
     _ => false
   }
   if wrap_result {
-    let wrapped : Map[String, Json] = { "result": structured.to_json() }
+    let wrapped : Map[String, Json] = { "result": Json(structured) }
     let fastmcp : Map[String, Json] = { "wrap_result": Json::boolean(true) }
-    let meta : Map[String, Json] = { "fastmcp": fastmcp.to_json() }
-    ToolResult::new(
-      content=content,
-      structured_content=wrapped,
-      meta=meta,
-    )
+    let meta : Map[String, Json] = { "fastmcp": Json(fastmcp) }
+    ToolResult::new(content~, structured_content=wrapped, meta~)
   } else {
-    ToolResult::new(content=content, structured_content=structured)
+    ToolResult::new(content~, structured_content=structured)
   }
 }
+
+///|
+pub extend Tool with @component.Component::{base, identifier, key, get_meta}
+
+///|
+pub extend ToolResult with Debug::{to_repr}
+
+///|
+pub extend ToolResult with Eq::{not_equal, equal}

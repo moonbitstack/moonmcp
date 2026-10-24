@@ -1,10 +1,10 @@
 import {
-  "moonbitlang/core/env" @env,
-  "moonbitlang/core/string" @string,
-  "moonmcp/types" @types,
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "moonbitstack/moonmcp/types",
 }
 
 import {
-  "moonbitlang/core/env" @env,
-  "moonmcp/settings" @settings,
+  "moonbitlang/core/env",
+  "moonbitstack/moonmcp/settings",
 } for "test"

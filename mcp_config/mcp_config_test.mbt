@@ -1,3 +1,4 @@
+///|
 test "transport inference from url" {
   assert_eq(
     @mcp_config.infer_transport_type_from_url("https://example.com/sse"),
@@ -21,6 +22,7 @@ test "transport inference from url" {
   )
 }
 
+///|
 test "stdio server config round trips" {
   let config = @mcp_config.config_from_json(
     Json::object({
@@ -53,6 +55,7 @@ test "stdio server config round trips" {
   assert_eq(round_tripped.mcp_servers.get("my-server"), Some(entry))
 }
 
+///|
 test "remote server config infers sse transport" {
   let config = @mcp_config.config_from_json(
     Json::object({
@@ -75,16 +78,16 @@ test "remote server config infers sse transport" {
   assert_eq(headers.get("X-Key"), Some("v"))
 }
 
+///|
 test "server configs at root wrap under mcpServers" {
   let config = @mcp_config.config_from_json(
-    Json::object({
-      "helper": Json::object({ "command": Json::string("uvx") }),
-    }),
+    Json::object({ "helper": Json::object({ "command": Json::string("uvx") }) }),
   )
-  assert_eq(config.mcp_servers.size(), 1)
+  assert_eq(config.mcp_servers.length(), 1)
   assert_true(config.mcp_servers.contains("helper"))
 }
 
+///|
 test "transform fields decode into the server transform" {
   let config = @mcp_config.config_from_json(
     Json::object({

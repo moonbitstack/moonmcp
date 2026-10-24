@@ -1,9 +1,9 @@
 import {
   "moonbitlang/core/json",
-  "moonmcp/tasks" @tasks,
+  "moonbitstack/moonmcp/tasks",
 }
 
 import {
-  "moonmcp/types" @types,
+  "moonbitstack/moonmcp/types",
   "moonbitlang/core/json",
 } for "test"

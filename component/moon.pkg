@@ -1,12 +1,12 @@
 import {
-  "moonbitlang/core/set" @set,
-  "moonmcp/types" @types,
-  "moonmcp/tasks" @tasks,
-  "moonmcp/exceptions" @exceptions,
+  "moonbitlang/core/set",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/tasks",
+  "moonbitstack/moonmcp/exceptions",
 }
 
 import {
-  "moonmcp/component" @component,
-  "moonmcp/exceptions" @exceptions,
-  "moonbitlang/core/set" @set,
+  "moonbitstack/moonmcp/component",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitlang/core/set",
 } for "test"

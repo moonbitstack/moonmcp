@@ -1,3 +1,4 @@
+///|
 /// Common state shared by all moonmcp components.
 pub(all) struct ComponentBase {
   /// Type prefix used in lookup keys, e.g. `"tool"` or `"resource"`.
@@ -12,6 +13,7 @@ pub(all) struct ComponentBase {
   task_config : @tasks.TaskConfig
 }
 
+///|
 pub fn ComponentBase::new(
   key_prefix : String,
   name : String,
@@ -19,9 +21,11 @@ pub fn ComponentBase::new(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
-  task_config? : @tasks.TaskConfig = @tasks.TaskConfig::new(mode=@tasks.Forbidden),
+  task_config~ : @tasks.TaskConfig = @tasks.TaskConfig::new(
+    mode=@tasks.Forbidden,
+  ),
 ) -> ComponentBase {
   {
     key_prefix,
@@ -36,6 +40,7 @@ pub fn ComponentBase::new(
   }
 }
 
+///|
 /// Construct the lookup key for a component type, e.g. `"tool:name"`.
 pub fn ComponentBase::make_key(prefix : String, identifier : String) -> String {
   if prefix.is_empty() {
@@ -45,6 +50,7 @@ pub fn ComponentBase::make_key(prefix : String, identifier : String) -> String {
   }
 }
 
+///|
 /// The globally unique lookup key for a component.
 ///
 /// Format: `"{key_prefix}:{identifier}@{version}"`; the `@` delimiter is
@@ -55,6 +61,7 @@ pub fn ComponentBase::key(self : ComponentBase, identifier : String) -> String {
   "\{base_key}@\{self.version.unwrap_or("")}"
 }
 
+///|
 /// The public meta information about the component.
 ///
 /// Always includes a `fastmcp` key containing the sorted `tags` list and the
@@ -66,42 +73,44 @@ pub fn ComponentBase::get_meta(self : ComponentBase) -> Map[String, Json] {
   // fastmcp's lexicographic `sorted()` instead.
   let sorted_tags = self.tags.to_array()
   sorted_tags.sort_by(String::lexical_compare)
-  let fastmcp_meta : Map[String, Json] = {
-    "tags": sorted_tags.to_json(),
-  }
+  let fastmcp_meta : Map[String, Json] = { "tags": Json(sorted_tags) }
   if self.version is Some(version) {
-    fastmcp_meta["version"] = version.to_json()
+    fastmcp_meta["version"] = Json(version)
   }
   if meta.get("fastmcp") is Some(Object(upstream)) {
     for key, value in upstream {
-      if not(key.has_prefix("_")) {
+      if !key.has_prefix("_") {
         fastmcp_meta[key] = value
       }
     }
   }
-  meta["fastmcp"] = fastmcp_meta.to_json()
+  meta["fastmcp"] = Json(fastmcp_meta)
   meta
 }
 
+///|
 /// A moonmcp component: tool, prompt, resource or resource template.
 pub(open) trait Component {
-  base(Self) -> ComponentBase
+  fn base(Self) -> ComponentBase
 
   /// The raw identifier: the name for tools and prompts, the URI for
   /// resources and resource templates.
-  identifier(Self) -> String = _
-  key(Self) -> String = _
-  get_meta(Self) -> Map[String, Json] = _
+  fn identifier(Self) -> String = _
+  fn key(Self) -> String = _
+  fn get_meta(Self) -> Map[String, Json] = _
 }
 
-impl Component with identifier(self) {
+///|
+impl Component with fn identifier(self) {
   self.base().name
 }
 
-impl Component with key(self) {
+///|
+impl Component with fn key(self) {
   self.base().key(self.identifier())
 }
 
-impl Component with get_meta(self) {
+///|
+impl Component with fn get_meta(self) {
   self.base().get_meta()
 }

@@ -1,18 +1,17 @@
 import {
-  "moonbitlang/core/encoding/base64" @base64,
-  "moonbitlang/core/encoding/percent" @percent,
-  "moonbitlang/core/encoding/utf8" @utf8,
-  "moonbitlang/core/json",
-  "moonbitlang/core/set" @set,
-  "moonmcp/component" @component,
-  "moonmcp/exceptions" @exceptions,
-  "moonmcp/types" @types,
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/percent",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/set",
+  "moonbitstack/moonmcp/component",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
 }
 
 import {
-  "moonmcp/component" @component,
-  "moonmcp/exceptions" @exceptions,
-  "moonmcp/resources" @resources,
-  "moonbitlang/core/set" @set,
-  "moonmcp/types" @types,
+  "moonbitstack/moonmcp/component",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/resources",
+  "moonbitlang/core/set",
+  "moonbitstack/moonmcp/types",
 } for "test"

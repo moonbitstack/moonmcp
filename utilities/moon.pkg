@@ -1,12 +1,12 @@
 import {
-  "moonbitlang/core/encoding/base64" @base64,
-  "moonbitlang/core/encoding/utf8" @utf8,
-  "moonmcp/exceptions" @exceptions,
-  "moonmcp/types" @types,
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
 }
 
 import {
-  "moonmcp/exceptions" @exceptions,
-  "moonmcp/types" @types,
-  "moonmcp/utilities" @utilities,
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/utilities",
 } for "test"

@@ -1,3 +1,4 @@
+///|
 test "message wraps text and content blocks" {
   let text = @prompts.Message::text("hello")
   assert_eq(text.role, @types.User)
@@ -8,6 +9,7 @@ test "message wraps text and content blocks" {
   assert_eq(wire.role, @types.Assistant)
 }
 
+///|
 test "prompt result renders to wire messages" {
   let result = @prompts.PromptResult::new(
     [
@@ -22,14 +24,14 @@ test "prompt result renders to wire messages" {
   assert_eq(wire.messages[1].role, @types.Assistant)
 }
 
+///|
 test "prompt renders text and message lists" {
   let prompt = @prompts.Prompt::new(
     "greet",
     render_fn=fn(args) {
       match args.get("user") {
-        Some(Json::String(name)) => @prompts.RenderedPrompt::Text(
-          "hello \{name}",
-        )
+        Some(Json::String(name)) =>
+          @prompts.RenderedPrompt::Text("hello \{name}")
         _ => @prompts.RenderedPrompt::Messages([])
       }
     },
@@ -41,6 +43,7 @@ test "prompt renders text and message lists" {
   assert_eq(result.description, Some("Greet a user"))
 }
 
+///|
 test "prompt wire form carries arguments and meta" {
   let prompt = @prompts.Prompt::new(
     "review",
@@ -61,11 +64,9 @@ test "prompt wire form carries arguments and meta" {
   assert_eq(@component.Component::key(prompt), "prompt:review@")
 }
 
+///|
 test "input required prompt result keeps empty messages" {
-  let request : @types.InputRequest = {
-    id: "q1",
-    request: Json::object({}),
-  }
+  let request : @types.InputRequest = { id: "q1", request: Json::object({}), }
   let ask : @types.InputRequiredResult = {
     input_requests: [request],
     request_state: None,

@@ -6,6 +6,7 @@
 /// read closure. File-, HTTP- and directory-backed resources need native
 /// IO and are deferred to the transport layer.
 
+///|
 /// A registered resource.
 pub(all) struct Resource {
   component : @component.ComponentBase
@@ -15,15 +16,18 @@ pub(all) struct Resource {
   read_fn : () -> RawResourceValue raise @exceptions.FastMCPError
 }
 
-pub impl @component.Component for Resource with base(self) {
+///|
+pub impl @component.Component for Resource with fn base(self) {
   self.component
 }
 
-pub impl @component.Component for Resource with identifier(self) {
+///|
+pub impl @component.Component for Resource with fn identifier(self) {
   self.uri
 }
 
-pub impl @component.Component for Resource with key(self) {
+///|
+pub impl @component.Component for Resource with fn key(self) {
   let base_key = @component.ComponentBase::make_key(
     self.component.key_prefix,
     self.uri,
@@ -31,10 +35,12 @@ pub impl @component.Component for Resource with key(self) {
   "\{base_key}@\{self.component.version.unwrap_or("")}"
 }
 
-pub impl @component.Component for Resource with get_meta(self) {
+///|
+pub impl @component.Component for Resource with fn get_meta(self) {
   self.component.get_meta()
 }
 
+///|
 /// Register a resource at `uri`. The name defaults to the URI when absent.
 pub fn Resource::new(
   uri : String,
@@ -44,8 +50,8 @@ pub fn Resource::new(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  mime_type? : String = "text/plain",
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  mime_type~ : String = "text/plain",
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
 ) -> Resource {
@@ -53,12 +59,12 @@ pub fn Resource::new(
     component: @component.ComponentBase::new(
       "resource",
       name.unwrap_or(uri),
-      version?=version,
-      title?=title,
-      description?=description,
-      icons?=icons,
-      tags=tags,
-      meta?=meta,
+      version?,
+      title?,
+      description?,
+      icons?,
+      tags~,
+      meta?,
     ),
     uri,
     mime_type,
@@ -67,6 +73,7 @@ pub fn Resource::new(
   }
 }
 
+///|
 /// A resource backed by inline text.
 pub fn Resource::text(
   uri : String,
@@ -76,26 +83,27 @@ pub fn Resource::text(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  mime_type? : String = "text/plain",
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  mime_type~ : String = "text/plain",
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
 ) -> Resource {
   Resource::new(
     uri,
     read_fn=fn() { Text(text) },
-    name?=name,
-    version?=version,
-    title?=title,
-    description?=description,
-    icons?=icons,
-    mime_type=mime_type,
-    tags=tags,
-    meta?=meta,
-    annotations?=annotations,
+    name?,
+    version?,
+    title?,
+    description?,
+    icons?,
+    mime_type~,
+    tags~,
+    meta?,
+    annotations?,
   )
 }
 
+///|
 /// A resource backed by inline bytes.
 pub fn Resource::binary(
   uri : String,
@@ -105,26 +113,27 @@ pub fn Resource::binary(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  mime_type? : String = "application/octet-stream",
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  mime_type~ : String = "application/octet-stream",
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
 ) -> Resource {
   Resource::new(
     uri,
     read_fn=fn() { Blob(data) },
-    name?=name,
-    version?=version,
-    title?=title,
-    description?=description,
-    icons?=icons,
-    mime_type=mime_type,
-    tags=tags,
-    meta?=meta,
-    annotations?=annotations,
+    name?,
+    version?,
+    title?,
+    description?,
+    icons?,
+    mime_type~,
+    tags~,
+    meta?,
+    annotations?,
   )
 }
 
+///|
 /// A resource backed by a closure computing its value on read.
 pub fn Resource::from_function(
   uri : String,
@@ -134,26 +143,27 @@ pub fn Resource::from_function(
   title? : String,
   description? : String,
   icons? : Array[@types.Icon],
-  mime_type? : String = "text/plain",
-  tags? : @set.Set[String] = @set.Set::from_array([]),
+  mime_type~ : String = "text/plain",
+  tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
 ) -> Resource {
   Resource::new(
     uri,
     read_fn~,
-    name?=name,
-    version?=version,
-    title?=title,
-    description?=description,
-    icons?=icons,
-    mime_type=mime_type,
-    tags=tags,
-    meta?=meta,
-    annotations?=annotations,
+    name?,
+    version?,
+    title?,
+    description?,
+    icons?,
+    mime_type~,
+    tags~,
+    meta?,
+    annotations?,
   )
 }
 
+///|
 /// Read the resource content.
 pub fn Resource::read(
   self : Resource,
@@ -161,6 +171,7 @@ pub fn Resource::read(
   (self.read_fn)()
 }
 
+///|
 /// Convert a raw result to a `ResourceResult`, forwarding this resource's
 /// declared MIME type and component metadata to each content item.
 pub fn Resource::convert_result(
@@ -174,6 +185,7 @@ pub fn Resource::convert_result(
   )
 }
 
+///|
 /// Server entry point for resource reads.
 pub fn Resource::read_result(
   self : Resource,
@@ -181,6 +193,7 @@ pub fn Resource::read_result(
   self.convert_result(self.read())
 }
 
+///|
 /// Convert the resource to its wire representation.
 pub fn Resource::to_mcp_resource(self : Resource) -> @types.Resource {
   {
@@ -194,3 +207,6 @@ pub fn Resource::to_mcp_resource(self : Resource) -> @types.Resource {
     meta: Some(Resource::get_meta(self)),
   }
 }
+
+///|
+pub extend Resource with @component.Component::{base, identifier, key, get_meta}

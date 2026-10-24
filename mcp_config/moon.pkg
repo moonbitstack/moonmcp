@@ -1,9 +1,8 @@
 import {
   "moonbitlang/core/json",
-  "moonbitlang/core/set" @set,
+  "moonbitlang/core/set",
 }
 
 import {
-  "moonmcp/mcp_config" @mcp_config,
-  "moonbitlang/core/json",
+  "moonbitstack/moonmcp/mcp_config",
 } for "test"

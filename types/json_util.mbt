@@ -1,38 +1,48 @@
+///|
 /// Helpers for hand-rolled JSON codecs; the wire format uses camelCase keys
 /// that differ from MoonBit field names.
-
 fn put_str(obj : Map[String, Json], key : String, value : String) -> Unit {
   obj[key] = Json::string(value)
 }
 
+///|
 fn put_opt_str(obj : Map[String, Json], key : String, value : String?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::string(v)
   }
 }
 
+///|
 fn put_opt_bool(obj : Map[String, Json], key : String, value : Bool?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::boolean(v)
   }
 }
 
-fn put_opt_int(obj : Map[String, Json], key : String, value : Int?) -> Unit {
+///|
+fn put_opt_int(obj : Map[String, Json], key : String, value : Int32?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::number(v.to_double())
   }
 }
 
-fn put_opt_double(obj : Map[String, Json], key : String, value : Double) -> Unit {
+///|
+fn put_opt_double(
+  obj : Map[String, Json],
+  key : String,
+  value : Double,
+) -> Unit {
   obj[key] = Json::number(value)
 }
 
+///|
 fn put_opt_json(obj : Map[String, Json], key : String, value : Json?) -> Unit {
   if value is Some(v) {
     obj[key] = v
   }
 }
 
+///|
 fn put_opt_array(
   obj : Map[String, Json],
   key : String,
@@ -43,16 +53,18 @@ fn put_opt_array(
   }
 }
 
+///|
 fn put_opt_map(
   obj : Map[String, Json],
   key : String,
   value : Map[String, Json]?,
 ) -> Unit {
   if value is Some(v) {
-    obj[key] = v.to_json()
+    obj[key] = Json(v)
   }
 }
 
+///|
 fn decode_error(
   path : @json.JsonPath,
   message : String,
@@ -60,6 +72,7 @@ fn decode_error(
   @json.JsonDecodeError((path, message))
 }
 
+///|
 fn expect_obj(
   json : Json,
   path : @json.JsonPath,
@@ -71,6 +84,7 @@ fn expect_obj(
   obj
 }
 
+///|
 fn req_str(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -83,6 +97,7 @@ fn req_str(
   v
 }
 
+///|
 fn opt_str(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -95,6 +110,7 @@ fn opt_str(
   }
 }
 
+///|
 fn opt_bool(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -108,11 +124,12 @@ fn opt_bool(
   }
 }
 
+///|
 fn opt_int(
   obj : Map[String, Json],
   path : @json.JsonPath,
   key : String,
-) -> Int? raise @json.JsonDecodeError {
+) -> Int32? raise @json.JsonDecodeError {
   match obj.get(key) {
     Some(Number(v, ..)) => Some(v.to_int())
     Some(Null) | None => None
@@ -120,6 +137,7 @@ fn opt_int(
   }
 }
 
+///|
 fn opt_double(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -132,6 +150,7 @@ fn opt_double(
   }
 }
 
+///|
 fn opt_obj(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -144,18 +163,7 @@ fn opt_obj(
   }
 }
 
-fn req_obj(
-  obj : Map[String, Json],
-  path : @json.JsonPath,
-  context : String,
-  key : String,
-) -> Map[String, Json] raise @json.JsonDecodeError {
-  guard opt_obj(obj, path, key) is Some(v) else {
-    raise decode_error(path, "\{context}: missing object field \{key}")
-  }
-  v
-}
-
+///|
 fn opt_array(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -168,6 +176,7 @@ fn opt_array(
   }
 }
 
+///|
 fn req_array(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -180,17 +189,22 @@ fn req_array(
   v
 }
 
+///|
 fn opt_str_array(
   obj : Map[String, Json],
   path : @json.JsonPath,
   key : String,
 ) -> Array[String]? raise @json.JsonDecodeError {
   match opt_array(obj, path, key) {
-    Some(values) => Some(values.filter_map(fn(v) { v.as_string() }))
+    Some(values) =>
+      Some(
+        values.filter_map(fn(v) { if v is String(s) { Some(s) } else { None } }),
+      )
     None => None
   }
 }
 
+///|
 fn progress_token_of(meta : Map[String, Json]?) -> String? {
   guard meta is Some(meta) else { return None }
   match meta.get("progressToken") {
@@ -199,6 +213,7 @@ fn progress_token_of(meta : Map[String, Json]?) -> String? {
   }
 }
 
+///|
 fn put_opt_str_array(
   obj : Map[String, Json],
   key : String,

@@ -1,8 +1,10 @@
+///|
 test "make key prefixes the identifier" {
   assert_eq(@component.ComponentBase::make_key("tool", "add"), "tool:add")
   assert_eq(@component.ComponentBase::make_key("", "add"), "add")
 }
 
+///|
 test "component key always carries the version delimiter" {
   let base = @component.ComponentBase::new("tool", "add", version="v2")
   assert_eq(base.key("add"), "tool:add@v2")
@@ -10,6 +12,7 @@ test "component key always carries the version delimiter" {
   assert_eq(unversioned.key("file://x.txt"), "resource:file://x.txt@")
 }
 
+///|
 test "get meta merges sorted tags and version" {
   let base = @component.ComponentBase::new(
     "tool",
@@ -28,19 +31,16 @@ test "get meta merges sorted tags and version" {
   assert_eq(fastmcp.get("version"), Some(Json::string("v2")))
 }
 
+///|
 test "get meta strips internal keys from the fastmcp namespace" {
-  let base = @component.ComponentBase::new(
-    "tool",
-    "add",
-    meta={
-      "fastmcp": Json::object(
-        Map::from_array([
-          ("_internal", Json::object({ "visibility": Json::string("private") })),
-          ("custom", Json::string("kept")),
-        ]),
-      ),
-    },
-  )
+  let base = @component.ComponentBase::new("tool", "add", meta={
+    "fastmcp": Json::object(
+      Map::from_array([
+        ("_internal", Json::object({ "visibility": Json::string("private") })),
+        ("custom", Json::string("kept")),
+      ]),
+    ),
+  })
   let meta = base.get_meta()
   guard meta.get("fastmcp") is Some(Object(fastmcp)) else {
     fail("expected fastmcp namespace")
@@ -49,12 +49,11 @@ test "get meta strips internal keys from the fastmcp namespace" {
   assert_eq(fastmcp.get("custom"), Some(Json::string("kept")))
 }
 
+///|
 test "public result meta strips bookkeeping and empty shells" {
   assert_eq(@component.public_result_meta(None), None)
   let stripped = @component.public_result_meta(
-    Some({
-      "fastmcp": Json::object({ "_internal": Json::null() }),
-    }),
+    Some({ "fastmcp": Json::object({ "_internal": Json::null() }) }),
   )
   assert_eq(stripped, None)
   let kept = @component.public_result_meta(
@@ -67,6 +66,7 @@ test "public result meta strips bookkeeping and empty shells" {
   assert_eq(obj.get("other"), Some(Json::number(1)))
 }
 
+///|
 test "fastmcp metadata falls back to the legacy namespace" {
   let meta : Map[String, Json] = {
     "_fastmcp": Json::object({
@@ -80,9 +80,10 @@ test "fastmcp metadata falls back to the legacy namespace" {
   assert_eq(@component.get_fastmcp_metadata(None).tags, [])
 }
 
+///|
 test "coerce version accepts scalars and rejects the rest" {
   fn attempt(value : Json?) -> Result[String?, @exceptions.FastMCPError] {
-    try Ok(@component.coerce_version(value)) catch {
+    Ok(@component.coerce_version(value)) catch {
       e => Err(e)
     }
   }

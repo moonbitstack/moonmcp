@@ -1,59 +1,43 @@
 # moonmcp
 
-A MoonBit transcription of [FastMCP](https://github.com/jlowin/fastmcp): a framework
-for building Model Context Protocol (MCP) servers and clients.
+Model Context Protocol servers and clients for MoonBit, after
+[FastMCP](https://github.com/jlowin/fastmcp). Python's machinery (pydantic
+introspection, decorators, camelCase shims) becomes MoonBit's own: records with
+`ToJson` and `FromJson`, closures in place of subclasses, one error enum.
 
-This project transcribes the Python `fastmcp` library (reference source under
-`.fastmcp-ref/`) into idiomatic MoonBit. It is not a line-by-line port —
-Python-specific machinery (pydantic introspection, decorators, rich logging,
-camelCase compatibility shims) is mapped to MoonBit-idiomatic equivalents — but
-every capability of the original is preserved.
+> **Status:** the foundation layer is in: the wire model and the components.
+> The server core, the transports and the client come next.
 
-## Requirements
+## Packages
 
-- MoonBit toolchain (`moon`) — built and verified with `0.1.20261016`
-- Moon check with `moon check`, tests with `moon test`
+| Package | What it holds |
+|:--:|:--|
+| `types` | The MCP wire model: protocol constants, the JSON-RPC envelope, content blocks, tools, prompts, resources, capabilities, request parameters, every result |
+| `exceptions` | `FastMCPError`, one enum whose variants carry their payloads, and the mapping to MCP error codes |
+| `component` | `ComponentBase`, the open `Component` trait, metadata and version handling |
+| `tools` | `Tool` with `run` and `prepare_run`, `ToolResult`, structured-output wrapping |
+| `prompts` | `Prompt`, `Message`, `PromptResult` |
+| `resources` | `Resource`, `ResourceTemplate` with an RFC 6570 URI template engine, path screening |
+| `tasks` | Task mode, configuration and metadata |
+| `settings` | `Settings`, read from `FASTMCP_*` variables |
+| `mcp_config` | The `mcp.json` client configuration: server kinds, transforms, transport inference |
+| `utilities` | Image, audio and file helpers that become content blocks |
 
-## Status
+## How Python maps over
 
-| Package | Contents | Status |
-|---|---|---|
-| `types/` | Full MCP wire model: protocol constants, JSON-RPC envelope, content blocks, tools, prompts, resources, capabilities, request params (incl. SEP-2322 input mechanism), all result types | Done |
-| `exceptions/` | Unified `FastMCPError` suberror enum with payload-carrying variants and `to_mcp_error` mapping | Done |
-| `tasks/` | Task mode, task configuration, task metadata, `TASKS_EXTENSION_ID` | Done |
-| `component/` | `ComponentBase`, open `Component` trait, `FastMCPMeta`, version coercion | Done |
-| `settings/` | `Settings` struct with `from_env()` reading `FASTMCP_*` variables | Done |
-| `mcp_config/` | Server kinds, transforms, `MCPConfig` with root-level auto-wrap, transport inference | Done |
-| `utilities/` | Image / Audio / File helpers with `to_content_block`, percent-encoding | Done |
-| `tools/` | `ToolResult`, `Tool` with `run` / `prepare_run`, structured-output wrapping | Done |
-| `prompts/` | `Message`, `PromptResult`, `Prompt` | Done |
-| `resources/` | `ResourceContent`, `ResourceResult`, `Resource`, `ResourceTemplate`, hand-written RFC 6570 URI template engine, path screening | Done |
-| `server/` | Server core, middleware stack, stdio transport loop | In progress |
-| `client/` | Client SDK and transports (stdio / http / sse / memory) | Pending |
+| FastMCP | moonmcp |
+|:--|:--|
+| Exception class hierarchy | `pub(all) suberror FastMCPError`, a variant per class |
+| Pydantic models | `pub(all) struct`s with `ToJson` and `FromJson` written out, so wire names such as `mimeType` stay exact |
+| `FunctionTool`, `FunctionPrompt`, `FunctionResource` subclasses | a struct with a closure field (`run_fn`, `render_fn`, `read_fn`); components implement the open `Component` trait |
+| `TransformingMCPServer` mixin | a `transform` field on `MCPServerEntry` |
 
-All 90 current tests pass across every completed package.
+## Install
 
-Deferred (requires native I/O or is deferred until the server/client layers land):
-MCPConfig file I/O, path-backed media helpers, and file / HTTP / directory
-resource readers.
-
-## Design decisions
-
-- **Exception hierarchy** — Python's class hierarchy becomes a single
-  `pub(all) suberror FastMCPError` enum; variants carry their payloads directly.
-- **Pydantic models** — become `pub(all) struct`s with hand-written
-  `ToJson` / `FromJson` implementations (the toolchain has no `@json.rename`),
-  so wire names such as `mimeType` are preserved exactly. Validators become
-  constructor functions raising `FastMCPError`.
-- **Subclass dispatch** — Python's `FunctionTool` / `FunctionPrompt` /
-  `FunctionResource` subclassing becomes a struct with a closure field
-  (`run_fn` / `render_fn` / `read_fn`); components implement the open
-  `Component` trait. Resources are keyed by URI, templates by `uri_template`.
-- **TransformingMCPServer** — the Python mixin folds into `MCPServerEntry`
-  as a `transform` field.
-- **Spelling** — all documentation and identifiers follow Oxford / EN-ZA
-  spelling (`authorisation`, `serialise`, `initialise`).
+```bash
+moon add moonbitstack/moonmcp
+```
 
 ## Licence
 
-Apache-2.0, matching the upstream FastMCP project.
+Apache-2.0. See [LICENSE](LICENSE).

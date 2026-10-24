@@ -1,3 +1,4 @@
+///|
 /// Custom errors for moonmcp, mirroring fastmcp/exceptions.py.
 pub(all) suberror FastMCPError {
   /// A wire-format protocol error, already carrying a JSON-RPC code.
@@ -29,6 +30,7 @@ pub(all) suberror FastMCPError {
   InsufficientScope(required_scopes~ : Array[String], message~ : String)
 } derive(Debug, Eq)
 
+///|
 /// Construct an `InsufficientScope` error with the standard message.
 pub fn insufficient_scope(required_scopes : Array[String]) -> FastMCPError {
   let named = if required_scopes.is_empty() {
@@ -42,6 +44,7 @@ pub fn insufficient_scope(required_scopes : Array[String]) -> FastMCPError {
   )
 }
 
+///|
 /// Translate a moonmcp error into a wire-format error payload.
 ///
 /// `NotFound`, `Disabled` and `Validation` map to `invalid_params` (-32602);
@@ -50,18 +53,19 @@ pub fn insufficient_scope(required_scopes : Array[String]) -> FastMCPError {
 /// `default_code` (`internal_error` by default).
 pub fn to_mcp_error(
   exc : FastMCPError,
-  default_code? : Int = @types.internal_error,
+  default_code~ : Int32 = @types.internal_error,
 ) -> @types.ErrorData {
   match exc {
     Mcp(data) => data
     NotFound(message) | Disabled(message) | Validation(message) =>
-      { code: @types.invalid_params, message, data: None }
+      { code: @types.invalid_params, message, data: None, }
     ResourceSecurity(message) =>
-      { code: @types.invalid_params, message, data: None }
-    _ => { code: default_code, message: exc.message(), data: None }
+      { code: @types.invalid_params, message, data: None, }
+    _ => { code: default_code, message: exc.message(), data: None, }
   }
 }
 
+///|
 /// Render the human-readable message carried by the error.
 pub fn FastMCPError::message(self : FastMCPError) -> String {
   match self {
@@ -79,3 +83,9 @@ pub fn FastMCPError::message(self : FastMCPError) -> String {
     InsufficientScope(message~, ..) => message
   }
 }
+
+///|
+pub extend FastMCPError with Debug::{to_repr}
+
+///|
+pub extend FastMCPError with Eq::{not_equal, equal}

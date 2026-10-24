@@ -3,17 +3,23 @@
 /// Supports the same subset as fastmcp: `{var}` simple path parameters,
 /// `{var*}` wildcard path parameters and `{?a,b}` / `{?list*}` query blocks.
 
+///|
 /// RFC 3986 reserved characters, which stay as written in a template literal.
 let reserved : String = ":/?#[]@!$&'()*+,;="
 
+///|
 fn is_unreserved_char(ch : Char) -> Bool {
   (ch >= 'A' && ch <= 'Z') ||
   (ch >= 'a' && ch <= 'z') ||
   (ch >= '0' && ch <= '9') ||
-  ch == '-' || ch == '.' || ch == '_' || ch == '~'
+  ch == '-' ||
+  ch == '.' ||
+  ch == '_' ||
+  ch == '~'
 }
 
-fn hex_digit_value(ch : Char) -> Int? {
+///|
+fn hex_digit_value(ch : Char) -> Int32? {
   if ch >= '0' && ch <= '9' {
     Some(ch.to_int() - '0'.to_int())
   } else if ch >= 'a' && ch <= 'f' {
@@ -25,10 +31,12 @@ fn hex_digit_value(ch : Char) -> Int? {
   }
 }
 
+///|
 fn is_hex_digit(ch : Char) -> Bool {
   hex_digit_value(ch) is Some(_)
 }
 
+///|
 fn write_hex_byte(buf : StringBuilder, byte : Byte) -> Unit {
   let digits = "0123456789ABCDEF"
   buf.write_char('%')
@@ -36,11 +44,13 @@ fn write_hex_byte(buf : StringBuilder, byte : Byte) -> Unit {
   buf.write_char(digits.get_char((byte % 16).to_int()).unwrap())
 }
 
+///|
 /// Percent-encode `text`, keeping unreserved characters plus `safe`.
 pub fn pct_encode(text : String, safe~ : String = "") -> String {
   let buf = StringBuilder::StringBuilder()
   for ch in text {
-    if is_unreserved_char(ch) || (safe.length() > 0 && safe.contains(ch.to_string())) {
+    if is_unreserved_char(ch) ||
+      (safe.length() > 0 && safe.contains(ch.to_string())) {
       buf.write_char(ch)
     } else {
       for byte in @utf8.encode(ch.to_string()) {
@@ -51,6 +61,7 @@ pub fn pct_encode(text : String, safe~ : String = "") -> String {
   buf.to_string()
 }
 
+///|
 /// Percent-encode literal template text per RFC 6570 section 3.1.
 ///
 /// Existing `%XX` triplets pass through so an already-encoded literal is not
@@ -84,20 +95,24 @@ pub fn encode_literal(text : String) -> String {
   buf.to_string()
 }
 
+///|
 fn unquote(value : String) -> String {
   @percent.decode_lossy(value)
 }
 
+///|
 fn unquote_plus(value : String) -> String {
   @percent.decode_lossy(value.replace(old="+", new="%20"))
 }
 
+///|
 /// One parsed chunk of a template's path portion.
 pub(all) enum TemplateSegment {
   Literal(Array[Char])
   PathVar(name~ : String, wildcard~ : Bool)
 }
 
+///|
 fn strip_query_blocks(uri_template : String) -> String {
   let buf = StringBuilder::StringBuilder()
   let chars = uri_template.to_array()
@@ -122,6 +137,7 @@ fn strip_query_blocks(uri_template : String) -> String {
   buf.to_string()
 }
 
+///|
 /// Parse the path portion of a URI template into literal and variable
 /// segments; query blocks are dropped for path matching.
 pub fn parse_template(uri_template : String) -> Array[TemplateSegment] {
@@ -154,7 +170,7 @@ pub fn parse_template(uri_template : String) -> Array[TemplateSegment] {
         let mut wildcard = false
         if name.has_suffix("*") {
           wildcard = true
-          name = name[:name.length() - 1].to_string()
+          name = name[:name.length() - 1].to_owned()
         }
         segments.push(PathVar(name~, wildcard~))
         i = j + 1
@@ -168,6 +184,7 @@ pub fn parse_template(uri_template : String) -> Array[TemplateSegment] {
   segments
 }
 
+///|
 /// Extract query parameter names from RFC 6570 `{?param1,param2}` syntax.
 ///
 /// The explode modifier is stripped, so `{?tags*}` yields `tags`.
@@ -176,33 +193,33 @@ pub fn extract_query_params(uri_template : String) -> Array[String] {
   let block = query_block(uri_template)
   guard block is Some(inner) else { return names }
   for raw in inner.split(",") {
-    let name = raw.to_string().trim()
+    let name = raw.to_owned().trim()
     if name.has_suffix("*") {
-      names.push(name[:name.length() - 1].to_string())
+      names.push(name[:name.length() - 1].to_owned())
     } else {
-      names.push(name.to_string())
+      names.push(name.to_owned())
     }
   }
   names
 }
 
+///|
 /// Extract query parameter names declared with the explode modifier:
 /// `{?tags*}` marks `tags` as repeatable.
-pub fn extract_exploded_query_params(
-  uri_template : String,
-) -> Array[String] {
+pub fn extract_exploded_query_params(uri_template : String) -> Array[String] {
   let names : Array[String] = []
   let block = query_block(uri_template)
   guard block is Some(inner) else { return names }
   for raw in inner.split(",") {
-    let name = raw.to_string().trim()
+    let name = raw.to_owned().trim()
     if name.has_suffix("*") {
-      names.push(name[:name.length() - 1].to_string())
+      names.push(name[:name.length() - 1].to_owned())
     }
   }
   names
 }
 
+///|
 fn query_block(uri_template : String) -> String? {
   let chars = uri_template.to_array()
   let mut i = 0
@@ -228,7 +245,8 @@ fn query_block(uri_template : String) -> String? {
   None
 }
 
-fn chars_to_string(u : Array[Char], start : Int, end_ : Int) -> String {
+///|
+fn chars_to_string(u : Array[Char], start : Int32, end_ : Int32) -> String {
   let buf = StringBuilder::StringBuilder()
   for i in start..<end_ {
     buf.write_char(u[i])
@@ -236,21 +254,18 @@ fn chars_to_string(u : Array[Char], start : Int, end_ : Int) -> String {
   buf.to_string()
 }
 
+///|
 /// Match consecutive `%XX` triplets at `pos` against the UTF-8 bytes of
 /// `want`; hex digits may be either case. Returns the position after the
 /// matched triplets.
-fn match_percent_encoded(
-  u : Array[Char],
-  pos : Int,
-  want : Bytes,
-) -> Int? {
+fn match_percent_encoded(u : Array[Char], pos : Int32, want : Bytes) -> Int32? {
   let count = want.length()
   guard pos + 3 * count <= u.length() else { return None }
   for i in 0..<count {
     let at = pos + 3 * i
-    guard u[at] == '%' &&
-      is_hex_digit(u[at + 1]) &&
-      is_hex_digit(u[at + 2]) else { return None }
+    guard u[at] == '%' && is_hex_digit(u[at + 1]) && is_hex_digit(u[at + 2]) else {
+      return None
+    }
     let hi = hex_digit_value(u[at + 1]).unwrap()
     let lo = hex_digit_value(u[at + 2]).unwrap()
     if hi * 16 + lo != want[i].to_int() {
@@ -260,13 +275,14 @@ fn match_percent_encoded(
   Some(pos + 3 * count)
 }
 
+///|
 fn match_literal(
   segs : Array[TemplateSegment],
-  seg_idx : Int,
+  seg_idx : Int32,
   lit : Array[Char],
-  k : Int,
+  k : Int32,
   u : Array[Char],
-  pos : Int,
+  pos : Int32,
   params : Map[String, String],
 ) -> Map[String, String]? {
   if k == lit.length() {
@@ -282,25 +298,21 @@ fn match_literal(
   }
   // Option 2: the character percent-encoded, hex digits in either case.
   match match_percent_encoded(u, pos, want) {
-    Some(next) =>
-      match_literal(segs, seg_idx, lit, k + 1, u, next, params)
+    Some(next) => match_literal(segs, seg_idx, lit, k + 1, u, next, params)
     None => None
   }
 }
 
+///|
 fn match_segments(
   segs : Array[TemplateSegment],
-  seg_idx : Int,
+  seg_idx : Int32,
   u : Array[Char],
-  pos : Int,
+  pos : Int32,
   params : Map[String, String],
 ) -> Map[String, String]? {
   if seg_idx == segs.length() {
-    return if pos == u.length() {
-      Some(params)
-    } else {
-      None
-    }
+    return if pos == u.length() { Some(params) } else { None }
   }
   match segs[seg_idx] {
     Literal(lit) => match_literal(segs, seg_idx, lit, 0, u, pos, params)
@@ -339,10 +351,12 @@ fn match_segments(
   }
 }
 
+///|
 fn json_of_param(value : String) -> Json {
   Json::string(value)
 }
 
+///|
 /// Match a URI against a template and extract both path and query
 /// parameters, percent-decoded.
 ///
@@ -352,7 +366,7 @@ fn json_of_param(value : String) -> Json {
 pub fn match_uri_template(
   uri : String,
   uri_template : String,
-  list_params? : Array[String] = [],
+  list_params~ : Array[String] = [],
   segments? : Array[TemplateSegment],
 ) -> Map[String, Json]? {
   // A fragment is not part of the resource identity; drop it before
@@ -361,7 +375,7 @@ pub fn match_uri_template(
     uri
   } else {
     match uri.find("#") {
-      Some(index) => uri[:index].to_string()
+      Some(index) => uri[:index].to_owned()
       None => uri
     }
   }
@@ -369,8 +383,8 @@ pub fn match_uri_template(
   let mut query_part = ""
   match uri.find("?") {
     Some(index) => {
-      path_part = uri[:index].to_string()
-      query_part = uri[index + 1:].to_string()
+      path_part = uri[:index].to_owned()
+      query_part = uri[index + 1:].to_owned()
     }
     None => ()
   }
@@ -383,17 +397,17 @@ pub fn match_uri_template(
     return None
   }
   // Percent-decode captured path values.
-  let params : Map[String, Json] = {}
+  let params : Map[String, Json] = Map([])
   for name, value in raw_params {
     params[name] = json_of_param(unquote(value))
   }
   if query_part.length() > 0 {
     // Repeated keys collect; blank values are preserved so callers can
     // distinguish "explicitly empty" from "missing".
-    let parsed_query : Map[String, Array[String]] = {}
-    let raw_query : Map[String, String] = {}
+    let parsed_query : Map[String, Array[String]] = Map([])
+    let raw_query : Map[String, String] = Map([])
     for pair in query_part.split("&") {
-      let pair_str = pair.to_string()
+      let pair_str = pair.to_owned()
       if pair_str.is_empty() {
         continue
       }
@@ -401,8 +415,8 @@ pub fn match_uri_template(
       let mut value = ""
       match pair_str.find("=") {
         Some(index) => {
-          name = unquote_plus(pair_str[:index].to_string())
-          value = pair_str[index + 1:].to_string()
+          name = unquote_plus(pair_str[:index].to_owned())
+          value = pair_str[index + 1:].to_owned()
         }
         None => {
           name = unquote_plus(pair_str)
@@ -456,7 +470,7 @@ pub fn match_uri_template(
         } else {
           let items : Array[Json] = []
           for item in raw.split(",") {
-            items.push(Json::string(unquote_plus(item.to_string())))
+            items.push(Json::string(unquote_plus(item.to_owned())))
           }
           params[key] = Json::array(items)
         }
@@ -468,6 +482,7 @@ pub fn match_uri_template(
   Some(params)
 }
 
+///|
 fn json_param_to_string(value : Json) -> String {
   match value {
     String(text) => text
@@ -475,6 +490,7 @@ fn json_param_to_string(value : Json) -> String {
   }
 }
 
+///|
 /// Expand a URI template with parameters — the inverse of
 /// `match_uri_template`. Params use underscored keys but templates may use
 /// hyphens, so both spellings are tried.
@@ -494,10 +510,10 @@ pub fn expand_uri_template(
   fn expand_query(inner : String) -> Unit {
     let parts : Array[String] = []
     for raw in inner.split(",") {
-      let mut name = raw.to_string().trim().to_string()
+      let mut name = raw.to_owned().trim().to_owned()
       let exploded = name.has_suffix("*")
       if exploded {
-        name = name[:name.length() - 1].to_string()
+        name = name[:name.length() - 1].to_owned()
       }
       let underscored = name.replace(old="-", new="_")
       let value = match params.get(name) {
@@ -550,7 +566,7 @@ pub fn expand_uri_template(
         let inner = inner_buf.to_string()
         if inner.has_prefix("?") {
           flush_literal(buf, lit)
-          expand_query(inner[1:].to_string())
+          expand_query(inner[1:].to_owned())
           i = j + 1
           continue
         }
@@ -559,7 +575,7 @@ pub fn expand_uri_template(
         let mut wildcard = false
         if name.has_suffix("*") {
           wildcard = true
-          name = name[:name.length() - 1].to_string()
+          name = name[:name.length() - 1].to_owned()
         }
         let underscored = name.replace(old="-", new="_")
         let hyphenated = name.replace(old="_", new="-")
@@ -590,7 +606,7 @@ pub fn expand_uri_template(
             None => ()
           }
         }
-        if not(substituted) {
+        if !substituted {
           buf.write_char('{')
           buf.write_string(name)
           if wildcard {
@@ -609,6 +625,7 @@ pub fn expand_uri_template(
   buf.to_string()
 }
 
+///|
 /// Build the URI a forwarding layer (mount or proxy) sends to the server
 /// behind it: the path is expanded from the template, but the query string
 /// is carried over from the incoming URI byte for byte.
@@ -621,7 +638,7 @@ pub fn forward_uri(
   let forwarded = expand_uri_template(path_template, params)
   match uri.find("?") {
     Some(index) => {
-      let query = uri[index + 1:].to_string()
+      let query = uri[index + 1:].to_owned()
       let result = "\{forwarded}?\{query}"
       result
     }

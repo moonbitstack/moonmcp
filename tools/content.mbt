@@ -1,6 +1,6 @@
+///|
 /// Result-to-content conversion helpers mirroring the private functions of
 /// fastmcp/tools/base.py.
-
 fn is_content_block(value : Json) -> Bool {
   guard value is Object(obj) else { return false }
   guard obj.get("type") is Some(String(kind)) else { return false }
@@ -10,14 +10,17 @@ fn is_content_block(value : Json) -> Bool {
   }
 }
 
+///|
 fn parse_block(value : Json) -> @types.ContentBlock raise @json.JsonDecodeError {
   @json.from_json(value)
 }
 
+///|
 fn serialize_json(value : Json) -> String {
   value.stringify()
 }
 
+///|
 /// Whether a raw JSON value is content-block shaped: one block, or a list
 /// where any element is a block.
 fn is_content_result(value : Json) -> Bool {
@@ -37,6 +40,7 @@ fn is_content_result(value : Json) -> Bool {
   }
 }
 
+///|
 /// Convert one item to a content block: blocks pass through, strings become
 /// text, everything else serialises to JSON text.
 fn convert_to_single_content_block(
@@ -51,6 +55,7 @@ fn convert_to_single_content_block(
   }
 }
 
+///|
 /// Convert a raw result to a sequence of content blocks.
 pub fn convert_to_content(
   result : Json,
@@ -60,7 +65,7 @@ pub fn convert_to_content(
     Array(items) => {
       let mut all_blocks = true
       for item in items {
-        if not(is_content_block(item)) {
+        if !is_content_block(item) {
           all_blocks = false
           break
         }

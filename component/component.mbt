@@ -1,6 +1,7 @@
 /// Base component machinery shared by tools, prompts, resources and
 /// resource templates, mirroring fastmcp/utilities/components.py.
 
+///|
 /// FastMCP-namespaced metadata carried in a component's `_meta`.
 pub(all) struct FastMCPMeta {
   tags : Array[String]
@@ -8,10 +9,12 @@ pub(all) struct FastMCPMeta {
   versions : Array[String]
 } derive(Debug, Eq)
 
+///|
 pub fn FastMCPMeta::empty() -> FastMCPMeta {
-  { tags: [], version: None, versions: [] }
+  { tags: [], version: None, versions: [], }
 }
 
+///|
 /// Extract moonmcp metadata from a component's meta object.
 ///
 /// Handles both the current `fastmcp` namespace and the legacy `_fastmcp`
@@ -22,7 +25,13 @@ pub fn get_fastmcp_metadata(meta : Map[String, Json]?) -> FastMCPMeta {
     if meta.get(key) is Some(Object(metadata)) {
       let tags : Array[String] = match metadata.get("tags") {
         Some(Array(values)) =>
-          values.filter_map(fn(v) { v.as_string() })
+          values.filter_map(fn(v) {
+            if v is String(s) {
+              Some(s)
+            } else {
+              None
+            }
+          })
         _ => []
       }
       let version : String? = match metadata.get("version") {
@@ -31,15 +40,22 @@ pub fn get_fastmcp_metadata(meta : Map[String, Json]?) -> FastMCPMeta {
       }
       let versions : Array[String] = match metadata.get("versions") {
         Some(Array(values)) =>
-          values.filter_map(fn(v) { v.as_string() })
+          values.filter_map(fn(v) {
+            if v is String(s) {
+              Some(s)
+            } else {
+              None
+            }
+          })
         _ => []
       }
-      return { tags, version, versions }
+      return { tags, version, versions, }
     }
   }
   FastMCPMeta::empty()
 }
 
+///|
 /// Strip moonmcp's internal bookkeeping out of component meta.
 ///
 /// Returns `None` when nothing public remains, so components without user
@@ -48,16 +64,16 @@ pub fn public_result_meta(meta : Map[String, Json]?) -> Map[String, Json]? {
   guard meta is Some(meta) else { return None }
   let public = meta.copy()
   if public.get("fastmcp") is Some(Object(fastmcp_meta)) {
-    let public_fastmcp : Map[String, Json] = {}
+    let public_fastmcp : Map[String, Json] = Map([])
     for key, value in fastmcp_meta {
-      if not(key.has_prefix("_")) {
+      if !key.has_prefix("_") {
         public_fastmcp[key] = value
       }
     }
     if public_fastmcp.is_empty() {
       public.remove("fastmcp")
     } else {
-      public["fastmcp"] = public_fastmcp.to_json()
+      public["fastmcp"] = Json(public_fastmcp)
     }
   }
   if public.is_empty() {
@@ -67,20 +83,19 @@ pub fn public_result_meta(meta : Map[String, Json]?) -> Map[String, Json]? {
   }
 }
 
+///|
 /// Coerce a JSON scalar to a version string.
 ///
 /// Raises `Validation` for non-scalar values or versions containing `@`
 /// (used as the key delimiter).
-pub fn coerce_version(
-  value : Json?,
-) -> String? raise @exceptions.FastMCPError {
+pub fn coerce_version(value : Json?) -> String? raise @exceptions.FastMCPError {
   match value {
     None | Some(Null) => None
     Some(String(v)) => check_version(v)
     Some(Number(n, ..)) => {
       let repr = n.to_string()
       let version = if repr.has_suffix(".0") {
-        repr[:repr.length() - 2].to_string()
+        repr[:repr.length() - 2].to_owned()
       } else {
         repr
       }
@@ -95,6 +110,7 @@ pub fn coerce_version(
   }
 }
 
+///|
 fn check_version(version : String) -> String? raise @exceptions.FastMCPError {
   if version.contains("@") {
     raise @exceptions.Validation(
@@ -103,3 +119,9 @@ fn check_version(version : String) -> String? raise @exceptions.FastMCPError {
   }
   Some(version)
 }
+
+///|
+pub extend FastMCPMeta with Debug::{to_repr}
+
+///|
+pub extend FastMCPMeta with Eq::{not_equal, equal}

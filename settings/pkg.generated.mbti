@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/settings"
+package "moonbitstack/moonmcp/settings"
 
 import {
   "moonbitlang/core/debug",
-  "moonmcp/types",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values
@@ -25,6 +25,9 @@ pub(all) enum CheckForUpdates {
   Prerelease
   Off
 } derive(Eq, @debug.Debug)
+pub fn CheckForUpdates::equal(Self, Self) -> Bool
+pub fn CheckForUpdates::not_equal(Self, Self) -> Bool
+pub fn CheckForUpdates::to_repr(Self) -> @debug.Repr
 
 pub(all) enum LogLevel {
   Debug
@@ -33,6 +36,9 @@ pub(all) enum LogLevel {
   Error
   Critical
 } derive(Eq, @debug.Debug)
+pub fn LogLevel::equal(Self, Self) -> Bool
+pub fn LogLevel::not_equal(Self, Self) -> Bool
+pub fn LogLevel::to_repr(Self) -> @debug.Repr
 pub fn LogLevel::to_wire(Self) -> String
 
 pub(all) enum SessionIdleTimeout {
@@ -40,6 +46,9 @@ pub(all) enum SessionIdleTimeout {
   Never
   Seconds(Double)
 } derive(Eq, @debug.Debug)
+pub fn SessionIdleTimeout::equal(Self, Self) -> Bool
+pub fn SessionIdleTimeout::not_equal(Self, Self) -> Bool
+pub fn SessionIdleTimeout::to_repr(Self) -> @debug.Repr
 pub fn SessionIdleTimeout::to_wire(Self) -> String
 
 pub(all) struct Settings {
@@ -76,14 +85,20 @@ pub(all) struct Settings {
   show_server_banner : Bool
   check_for_updates : CheckForUpdates
 } derive(Eq, @debug.Debug)
+pub fn Settings::equal(Self, Self) -> Bool
 pub fn Settings::from_env() -> Self
 pub fn Settings::new() -> Self
+pub fn Settings::not_equal(Self, Self) -> Bool
+pub fn Settings::to_repr(Self) -> @debug.Repr
 
 pub(all) enum TelemetryMode {
   Native
   PropagationOnly
   Off
 } derive(Eq, @debug.Debug)
+pub fn TelemetryMode::equal(Self, Self) -> Bool
+pub fn TelemetryMode::not_equal(Self, Self) -> Bool
+pub fn TelemetryMode::to_repr(Self) -> @debug.Repr
 pub fn TelemetryMode::to_wire(Self) -> String
 
 pub(all) enum TransportKind {
@@ -92,6 +107,9 @@ pub(all) enum TransportKind {
   Sse
   StreamableHttp
 } derive(Eq, @debug.Debug)
+pub fn TransportKind::equal(Self, Self) -> Bool
+pub fn TransportKind::not_equal(Self, Self) -> Bool
+pub fn TransportKind::to_repr(Self) -> @debug.Repr
 pub fn TransportKind::to_wire(Self) -> String
 
 // Type aliases

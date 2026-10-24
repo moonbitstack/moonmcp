@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/utilities"
+package "moonbitstack/moonmcp/utilities"
 
 import {
-  "moonmcp/exceptions",
-  "moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values

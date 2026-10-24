@@ -1,12 +1,12 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/component"
+package "moonbitstack/moonmcp/component"
 
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/set",
-  "moonmcp/exceptions",
-  "moonmcp/tasks",
-  "moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/tasks",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values
@@ -41,6 +41,9 @@ pub(all) struct FastMCPMeta {
   versions : Array[String]
 } derive(Eq, @debug.Debug)
 pub fn FastMCPMeta::empty() -> Self
+pub fn FastMCPMeta::equal(Self, Self) -> Bool
+pub fn FastMCPMeta::not_equal(Self, Self) -> Bool
+pub fn FastMCPMeta::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

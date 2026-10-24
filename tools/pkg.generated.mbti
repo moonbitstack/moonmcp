@@ -1,14 +1,14 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/tools"
+package "moonbitstack/moonmcp/tools"
 
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
   "moonbitlang/core/set",
-  "moonmcp/component",
-  "moonmcp/exceptions",
-  "moonmcp/tasks",
-  "moonmcp/types",
+  "moonbitstack/moonmcp/component",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/tasks",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values
@@ -30,8 +30,12 @@ pub(all) struct Tool {
   timeout : Double?
   run_fn : (Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError
 }
+pub fn Tool::base(Self) -> @component.ComponentBase
 pub fn Tool::convert_result(Self, Json) -> ToolResult raise @exceptions.FastMCPError
 pub fn Tool::dispatch(Self, Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError
+pub fn Tool::get_meta(Self) -> Map[String, Json]
+pub fn Tool::identifier(Self) -> String
+pub fn Tool::key(Self) -> String
 pub fn Tool::new(String, parameters~ : Json, run_fn~ : (Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.ToolAnnotations, output_schema? : Json, execution? : @types.ToolExecution, timeout? : Double, task_config? : @tasks.TaskConfig) -> Self raise @exceptions.FastMCPError
 pub fn Tool::run(Self, Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError
 pub fn Tool::to_mcp_tool(Self) -> @types.Tool
@@ -45,11 +49,14 @@ pub(all) struct ToolResult {
   raw_mcp_result : @types.CallToolResult?
   input_required : @types.InputRequiredResult?
 } derive(Eq, @debug.Debug)
+pub fn ToolResult::equal(Self, Self) -> Bool
 pub fn ToolResult::from_mcp_result(@types.CallToolResult) -> Self
 pub fn ToolResult::input_required(@types.InputRequiredResult) -> Self
 pub fn ToolResult::is_input_required(Self) -> Bool
 pub fn ToolResult::new(content? : Array[@types.ContentBlock], structured_content? : Map[String, Json], meta? : Map[String, Json], is_error? : Bool) -> Self raise @exceptions.FastMCPError
+pub fn ToolResult::not_equal(Self, Self) -> Bool
 pub fn ToolResult::to_mcp_result(Self) -> @types.CallToolResult
+pub fn ToolResult::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

@@ -1,13 +1,15 @@
 /// Content blocks exchanged over the wire.
 
+///|
 /// Audience and priority hints attached to content.
 pub(all) struct Annotations {
   audience : Array[String]?
   priority : Double?
 } derive(Debug, Eq)
 
-pub impl ToJson for Annotations with to_json(self : Annotations) -> Json {
-  let obj : Map[String, Json] = {}
+///|
+pub impl ToJson for Annotations with fn to_json(self : Annotations) -> Json {
+  let obj : Map[String, Json] = Map([])
   put_opt_array(
     obj,
     "audience",
@@ -16,10 +18,11 @@ pub impl ToJson for Annotations with to_json(self : Annotations) -> Json {
   if self.priority is Some(p) {
     put_opt_double(obj, "priority", p)
   }
-  obj.to_json()
+  Json(obj)
 }
 
-pub impl FromJson for Annotations with from_json(
+///|
+pub impl FromJson for Annotations with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> Annotations raise @json.JsonDecodeError {
@@ -30,12 +33,14 @@ pub impl FromJson for Annotations with from_json(
   }
 }
 
+///|
 /// The contents of a resource, either inline text or base64-encoded bytes.
 pub(all) enum ResourceContents {
   Text(uri~ : String, mime_type~ : String?, text~ : String)
   Blob(uri~ : String, mime_type~ : String?, blob~ : String)
 } derive(Debug, Eq)
 
+///|
 pub fn ResourceContents::uri(self : ResourceContents) -> String {
   match self {
     Text(uri~, ..) => uri
@@ -43,10 +48,9 @@ pub fn ResourceContents::uri(self : ResourceContents) -> String {
   }
 }
 
-pub impl ToJson for ResourceContents with to_json(
-  self : ResourceContents,
-) -> Json {
-  let obj : Map[String, Json] = {}
+///|
+pub impl ToJson for ResourceContents with fn to_json(self : ResourceContents) -> Json {
+  let obj : Map[String, Json] = Map([])
   match self {
     Text(uri~, mime_type~, text~) => {
       put_str(obj, "uri", uri)
@@ -59,10 +63,11 @@ pub impl ToJson for ResourceContents with to_json(
       put_str(obj, "blob", blob)
     }
   }
-  obj.to_json()
+  Json(obj)
 }
 
-pub impl FromJson for ResourceContents with from_json(
+///|
+pub impl FromJson for ResourceContents with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> ResourceContents raise @json.JsonDecodeError {
@@ -78,14 +83,25 @@ pub impl FromJson for ResourceContents with from_json(
   raise decode_error(path, "ResourceContents: missing text or blob")
 }
 
+///|
 /// A block of content in a tool result, sampling message or prompt message.
 pub(all) enum ContentBlock {
   /// Plain text content.
   Text(text~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
   /// Base64-encoded image content.
-  Image(data~ : String, mime_type~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  Image(
+    data~ : String,
+    mime_type~ : String,
+    annotations~ : Annotations?,
+    meta~ : Map[String, Json]?
+  )
   /// Base64-encoded audio content.
-  Audio(data~ : String, mime_type~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  Audio(
+    data~ : String,
+    mime_type~ : String,
+    annotations~ : Annotations?,
+    meta~ : Map[String, Json]?
+  )
   /// A link to a resource the client should read separately.
   ResourceLink(
     uri~ : String,
@@ -93,21 +109,27 @@ pub(all) enum ContentBlock {
     title~ : String?,
     description~ : String?,
     mime_type~ : String?,
-    size~ : Int?,
+    size~ : Int32?,
     annotations~ : Annotations?,
-    meta~ : Map[String, Json]?,
+    meta~ : Map[String, Json]?
   )
   /// A resource embedded directly in the content.
-  EmbeddedResource(resource~ : ResourceContents, annotations~ : Annotations?, meta~ : Map[String, Json]?)
+  EmbeddedResource(
+    resource~ : ResourceContents,
+    annotations~ : Annotations?,
+    meta~ : Map[String, Json]?
+  )
 } derive(Debug, Eq)
 
+///|
 /// Shorthand for a plain text block without annotations.
 pub fn text_block(text : String) -> ContentBlock {
   Text(text~, annotations=None, meta=None)
 }
 
-pub impl ToJson for ContentBlock with to_json(self : ContentBlock) -> Json {
-  let obj : Map[String, Json] = {}
+///|
+pub impl ToJson for ContentBlock with fn to_json(self : ContentBlock) -> Json {
+  let obj : Map[String, Json] = Map([])
   fn put_annotations(block_annotations : Annotations?) -> Unit {
     put_opt_json(
       obj,
@@ -149,7 +171,7 @@ pub impl ToJson for ContentBlock with to_json(self : ContentBlock) -> Json {
       mime_type~,
       size~,
       annotations~,
-      meta~,
+      meta~
     ) => {
       put_str(obj, "type", "resource_link")
       put_str(obj, "uri", uri)
@@ -168,10 +190,11 @@ pub impl ToJson for ContentBlock with to_json(self : ContentBlock) -> Json {
       put_meta(meta)
     }
   }
-  obj.to_json()
+  Json(obj)
 }
 
-pub impl FromJson for ContentBlock with from_json(
+///|
+pub impl FromJson for ContentBlock with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> ContentBlock raise @json.JsonDecodeError {
@@ -225,3 +248,39 @@ pub impl FromJson for ContentBlock with from_json(
     _ => raise decode_error(path, "ContentBlock: unknown type \{block_type}")
   }
 }
+
+///|
+pub extend Annotations with @json.FromJson::{from_json}
+
+///|
+pub extend Annotations with Debug::{to_repr}
+
+///|
+pub extend Annotations with Eq::{not_equal, equal}
+
+///|
+pub extend Annotations with ToJson::{to_json}
+
+///|
+pub extend ContentBlock with @json.FromJson::{from_json}
+
+///|
+pub extend ContentBlock with Debug::{to_repr}
+
+///|
+pub extend ContentBlock with Eq::{not_equal, equal}
+
+///|
+pub extend ContentBlock with ToJson::{to_json}
+
+///|
+pub extend ResourceContents with @json.FromJson::{from_json}
+
+///|
+pub extend ResourceContents with Debug::{to_repr}
+
+///|
+pub extend ResourceContents with Eq::{not_equal, equal}
+
+///|
+pub extend ResourceContents with ToJson::{to_json}

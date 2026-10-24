@@ -1,12 +1,13 @@
 /// Path-safety policy for templated resource parameters,
 /// mirroring fastmcp/resources/security.py.
 
+///|
 /// Whether `value` contains `..` as a path component, considering both
 /// separators. Dots inside a single segment are not traversal.
 pub fn contains_path_traversal(value : String) -> Bool {
   for segment in value.split("/") {
-    for piece in segment.to_string().split("\\") {
-      if piece.to_string() == ".." {
+    for piece in segment.to_owned().split("\\") {
+      if piece.to_owned() == ".." {
         return true
       }
     }
@@ -14,6 +15,7 @@ pub fn contains_path_traversal(value : String) -> Bool {
   false
 }
 
+///|
 /// Whether `value` looks like an absolute filesystem path: rooted at `/`
 /// or `\\`, UNC-prefixed, or a Windows drive letter path.
 pub fn is_absolute_path(value : String) -> Bool {
@@ -36,6 +38,7 @@ pub fn is_absolute_path(value : String) -> Bool {
   false
 }
 
+///|
 /// Security policy applied to extracted resource template parameters.
 ///
 /// The checks run after a URI has matched a template and its parameter
@@ -54,6 +57,7 @@ pub(all) struct ResourceSecurity {
   exempt_params : @set.Set[String]
 } derive(Debug, Eq)
 
+///|
 /// Secure-by-default policy: traversal, absolute paths and null bytes
 /// all rejected.
 pub fn ResourceSecurity::default() -> ResourceSecurity {
@@ -65,6 +69,7 @@ pub fn ResourceSecurity::default() -> ResourceSecurity {
   }
 }
 
+///|
 fn ResourceSecurity::is_exempt(self : ResourceSecurity, name : String) -> Bool {
   if self.exempt_params.contains(name) {
     return true
@@ -79,6 +84,7 @@ fn ResourceSecurity::is_exempt(self : ResourceSecurity, name : String) -> Bool {
   found
 }
 
+///|
 /// Check all parameter values against the policy. String values (and lists
 /// of strings, from wildcard parameters) are screened; non-string values are
 /// ignored. Returns the name of the first failing parameter, if any.
@@ -93,7 +99,13 @@ pub fn ResourceSecurity::validate(
     let candidates : Array[String] = match value {
       String(text) => [text]
       Array(items) =>
-        items.filter_map(fn(item) { item.as_string() })
+        items.filter_map(fn(item) {
+          if item is String(s) {
+            Some(s)
+          } else {
+            None
+          }
+        })
       _ => []
     }
     for candidate in candidates {
@@ -111,6 +123,7 @@ pub fn ResourceSecurity::validate(
   None
 }
 
+///|
 /// Per-component security setting: inherit the server-wide default,
 /// apply an explicit policy, or disable screening.
 pub(all) enum ResourceSecuritySetting {
@@ -119,6 +132,7 @@ pub(all) enum ResourceSecuritySetting {
   Disabled
 } derive(Debug, Eq)
 
+///|
 /// Resolve the effective policy for a component.
 pub fn resolve_security(
   setting : ResourceSecuritySetting,
@@ -130,3 +144,15 @@ pub fn resolve_security(
     Disabled => None
   }
 }
+
+///|
+pub extend ResourceSecurity with Debug::{to_repr}
+
+///|
+pub extend ResourceSecurity with Eq::{not_equal, equal}
+
+///|
+pub extend ResourceSecuritySetting with Debug::{to_repr}
+
+///|
+pub extend ResourceSecuritySetting with Eq::{not_equal, equal}

@@ -1,3 +1,4 @@
+///|
 test "content block round trips through the wire format" {
   let block : @types.ContentBlock = @types.ContentBlock::Image(
     data="aGk=",
@@ -28,6 +29,7 @@ test "content block round trips through the wire format" {
   assert_eq(round_tripped, link)
 }
 
+///|
 test "resource contents text and blob variants" {
   let text : @types.ResourceContents = @types.Text(
     uri="file:///a.txt",
@@ -50,6 +52,7 @@ test "resource contents text and blob variants" {
   assert_eq(@types.ResourceContents::uri(decoded_text), "file:///a.txt")
 }
 
+///|
 test "tool serialises with camelCase wire keys" {
   let tool : @types.Tool = {
     name: "add",
@@ -73,6 +76,7 @@ test "tool serialises with camelCase wire keys" {
   assert_eq(decoded, tool)
 }
 
+///|
 test "initialize result round trips" {
   let result : @types.InitializeResult = {
     protocol_version: @types.latest_protocol_version,
@@ -80,12 +84,12 @@ test "initialize result round trips" {
       experimental: None,
       logging: Some(true),
       completions: None,
-      prompts: Some({ list_changed: Some(true) }),
-      resources: Some({ subscribe: None, list_changed: Some(true) }),
-      tools: Some({ list_changed: Some(true) }),
+      prompts: Some({ list_changed: Some(true), }),
+      resources: Some({ subscribe: None, list_changed: Some(true), }),
+      tools: Some({ list_changed: Some(true), }),
       tasks: None,
     },
-    server_info: { name: "moonmcp", title: None, version: "0.1.0" },
+    server_info: { name: "moonmcp", title: None, version: "0.1.0", },
     instructions: Some("be useful"),
     meta: None,
   }
@@ -100,6 +104,7 @@ test "initialize result round trips" {
   assert_eq(decoded, result)
 }
 
+///|
 test "call tool result error flag round trips" {
   let ok = @types.CallToolResult::new([@types.text_block("done")])
   assert_false(ok.is_error)
@@ -115,6 +120,7 @@ test "call tool result error flag round trips" {
   assert_eq(text, "boom")
 }
 
+///|
 test "jsonrpc request frame parses and serialises" {
   let frame : Map[String, Json] = {
     "jsonrpc": Json::string("2.0"),
@@ -125,17 +131,18 @@ test "jsonrpc request frame parses and serialises" {
       "arguments": Json::object({ "a": Json::number(1) }),
     }),
   }
-  let message = @types.parse_message(frame.to_json())
-  guard message is @types.Request(id~, method~, params~) else {
+  let message = @types.parse_message(Json(frame))
+  guard message is @types.Request(id~, verb~, ..) else {
     fail("expected request")
   }
   assert_eq(id, @types.Number(id=1))
-  assert_eq(method, "tools/call")
+  assert_eq(verb, "tools/call")
   let re_encoded = @types.JSONRPCMessage::to_json(message)
   guard re_encoded is Object(obj) else { fail("expected object") }
   assert_eq(obj.get("jsonrpc"), Some(Json::string("2.0")))
 }
 
+///|
 test "client request parses from a frame" {
   let request = @types.parse_client_request(
     Json::object({
@@ -152,6 +159,7 @@ test "client request parses from a frame" {
   assert_eq(arguments.get("user"), Some(Json::string("heke")))
 }
 
+///|
 test "server request frame builder" {
   let frame = @types.server_request_frame(
     @types.Text(id="2"),
@@ -164,26 +172,29 @@ test "server request frame builder" {
   assert_eq(parsed, @types.ListRoots(meta=None))
 }
 
+///|
 test "server notification frames" {
   let list_changed = @types.ToolListChanged
   let json = @types.ServerNotification::to_json(list_changed)
   guard json is Object(obj) else { fail("expected object") }
-  assert_eq(obj.get("method"), Some(Json::string("notifications/tools/list_changed")))
+  assert_eq(
+    obj.get("method"),
+    Some(Json::string("notifications/tools/list_changed")),
+  )
   assert_eq(obj.get("jsonrpc"), Some(Json::string("2.0")))
 
-  let progress = @types.Progress(
-    {
-      progress_token: "t1",
-      progress: 0.5,
-      message: Some("halfway"),
-      total: None,
-    },
-  )
+  let progress = @types.Progress({
+    progress_token: "t1",
+    progress: 0.5,
+    message: Some("halfway"),
+    total: None,
+  })
   let progress_json = @types.ServerNotification::to_json(progress)
   guard progress_json is Object(obj) else { fail("expected object") }
   assert_eq(obj.get("method"), Some(Json::string("notifications/progress")))
 }
 
+///|
 test "discover result flattens the wrapped payload" {
   let result : @types.DiscoverResult = {
     result_type: "CallToolResult",
@@ -201,6 +212,7 @@ test "discover result flattens the wrapped payload" {
   assert_eq(decoded.result_type, "CallToolResult")
 }
 
+///|
 test "elicit result actions" {
   let accepted = @types.ElicitResult::accept({ "value": Json::string("yes") })
   assert_eq(accepted.action, "accept")
@@ -211,13 +223,17 @@ test "elicit result actions" {
   assert_eq(decoded, declined)
 }
 
+///|
 test "error response frame" {
   let error_data : @types.ErrorData = {
     code: @types.invalid_params,
     message: "missing",
     data: None,
   }
-  let message : @types.JSONRPCMessage = @types.JSONRPCMessage::Error(id=@types.Number(id=7), error=error_data)
+  let message : @types.JSONRPCMessage = @types.JSONRPCMessage::Error(
+    id=@types.Number(id=7),
+    error=error_data,
+  )
   let json = @types.JSONRPCMessage::to_json(message)
   guard json is Object(obj) else { fail("expected object") }
   guard obj.get("error") is Some(Object(err)) else { fail("expected error") }

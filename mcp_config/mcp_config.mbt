@@ -1,12 +1,10 @@
+///|
 /// Canonical MCP configuration format, mirroring fastmcp/mcp_config.py.
-
-fn cfg_err(
-  path : @json.JsonPath,
-  message : String,
-) -> @json.JsonDecodeError {
+fn cfg_err(path : @json.JsonPath, message : String) -> @json.JsonDecodeError {
   @json.JsonDecodeError((path, message))
 }
 
+///|
 fn expect_obj(
   json : Json,
   path : @json.JsonPath,
@@ -18,6 +16,7 @@ fn expect_obj(
   obj
 }
 
+///|
 fn opt_str(obj : Map[String, Json], key : String) -> String? {
   match obj.get(key) {
     Some(String(v)) => Some(v)
@@ -25,6 +24,7 @@ fn opt_str(obj : Map[String, Json], key : String) -> String? {
   }
 }
 
+///|
 fn req_str(
   obj : Map[String, Json],
   path : @json.JsonPath,
@@ -37,13 +37,15 @@ fn req_str(
   v
 }
 
-fn opt_int(obj : Map[String, Json], key : String) -> Int? {
+///|
+fn opt_int(obj : Map[String, Json], key : String) -> Int32? {
   match obj.get(key) {
     Some(Number(v, ..)) => Some(v.to_int())
     _ => None
   }
 }
 
+///|
 fn opt_bool(obj : Map[String, Json], key : String) -> Bool? {
   match obj.get(key) {
     Some(True) => Some(true)
@@ -52,13 +54,18 @@ fn opt_bool(obj : Map[String, Json], key : String) -> Bool? {
   }
 }
 
+///|
 fn opt_str_array(obj : Map[String, Json], key : String) -> Array[String]? {
   match obj.get(key) {
-    Some(Array(values)) => Some(values.filter_map(fn(v) { v.as_string() }))
+    Some(Array(values)) =>
+      Some(
+        values.filter_map(fn(v) { if v is String(s) { Some(s) } else { None } }),
+      )
     _ => None
   }
 }
 
+///|
 fn opt_obj(obj : Map[String, Json], key : String) -> Map[String, Json]? {
   match obj.get(key) {
     Some(Object(v)) => Some(v)
@@ -66,33 +73,36 @@ fn opt_obj(obj : Map[String, Json], key : String) -> Map[String, Json]? {
   }
 }
 
+///|
 fn put_str(obj : Map[String, Json], key : String, value : String) -> Unit {
   obj[key] = Json::string(value)
 }
 
+///|
 fn put_opt_str(obj : Map[String, Json], key : String, value : String?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::string(v)
   }
 }
 
-fn put_opt_int(obj : Map[String, Json], key : String, value : Int?) -> Unit {
+///|
+fn put_opt_int(obj : Map[String, Json], key : String, value : Int32?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::number(v.to_double())
   }
 }
 
+///|
 fn put_opt_bool(obj : Map[String, Json], key : String, value : Bool?) -> Unit {
   if value is Some(v) {
     obj[key] = Json::boolean(v)
   }
 }
 
+///|
 /// Infer `"sse"` or `"http"` from a remote server URL.
-pub fn infer_transport_type_from_url(
-  url : String,
-) -> Result[String, String] {
-  if not(url.has_prefix("http")) {
+pub fn infer_transport_type_from_url(url : String) -> Result[String, String] {
+  if !url.has_prefix("http") {
     return Err("Invalid URL: \{url}")
   }
   // Match /sse followed by /, ?, &, or end of string.
@@ -106,11 +116,14 @@ pub fn infer_transport_type_from_url(
     }
     None => 0
   }
-  let path = url[path_start:].to_string()
+  let path = url[path_start:].to_owned()
   match path.find("/sse") {
     Some(index) => {
       let after = path.get_char(index + 4)
-      if after is None || after.unwrap() == '/' || after.unwrap() == '?' || after.unwrap() == '&' {
+      if after is None ||
+        after.unwrap() == '/' ||
+        after.unwrap() == '?' ||
+        after.unwrap() == '&' {
         Ok("sse")
       } else {
         Ok("http")
@@ -120,6 +133,7 @@ pub fn infer_transport_type_from_url(
   }
 }
 
+///|
 /// FastMCP-specific tool transforms and tag filters for a proxied server.
 pub(all) struct ServerTransform {
   /// Tool transform configs keyed by tool name.
@@ -128,12 +142,14 @@ pub(all) struct ServerTransform {
   exclude_tags : @set.Set[String]?
 } derive(Debug, Eq)
 
+///|
 pub(all) enum RemoteTransport {
   Http
   StreamableHttp
   Sse
 } derive(Debug, Eq)
 
+///|
 /// One server entry: either a stdio command or a remote URL.
 pub(all) enum MCPServerKind {
   Stdio(
@@ -141,7 +157,7 @@ pub(all) enum MCPServerKind {
     args~ : Array[String],
     env~ : Map[String, Json],
     cwd~ : String?,
-    keep_alive~ : Bool?,
+    keep_alive~ : Bool?
   )
   Remote(
     url~ : String,
@@ -149,46 +165,44 @@ pub(all) enum MCPServerKind {
     headers~ : Map[String, String],
     /// Bearer token, or the literal "oauth".
     auth~ : String?,
-    sse_read_timeout_ms~ : Int?,
+    sse_read_timeout_ms~ : Int32?
   )
 } derive(Debug, Eq)
 
+///|
 pub(all) struct MCPServerEntry {
   kind : MCPServerKind
   /// Per-request timeout in milliseconds; zero disables it.
-  timeout : Int?
+  timeout : Int32?
   description : String?
   icon : String?
   authentication : Map[String, Json]?
   transform : ServerTransform?
 } derive(Debug, Eq)
 
-pub impl ToJson for MCPServerEntry with to_json(self : MCPServerEntry) -> Json {
-  let obj : Map[String, Json] = {}
+///|
+pub impl ToJson for MCPServerEntry with fn to_json(self : MCPServerEntry) -> Json {
+  let obj : Map[String, Json] = Map([])
   match self.kind {
     Stdio(command~, args~, env~, cwd~, keep_alive~) => {
       put_str(obj, "command", command)
       obj["args"] = Json::array(args.map(Json::string))
-      let env_obj : Map[String, Json] = {}
+      let env_obj : Map[String, Json] = Map([])
       for key, value in env {
         env_obj[key] = value
       }
-      obj["env"] = env_obj.to_json()
+      obj["env"] = Json(env_obj)
       put_opt_str(obj, "cwd", cwd)
       put_opt_bool(obj, "keepAlive", keep_alive)
     }
     Remote(url~, transport~, headers~, auth~, sse_read_timeout_ms~) => {
       put_str(obj, "url", url)
-      put_opt_str(
-        obj,
-        "transport",
-        transport.map(RemoteTransport::to_wire),
-      )
-      let headers_obj : Map[String, Json] = {}
+      put_opt_str(obj, "transport", transport.map(RemoteTransport::to_wire))
+      let headers_obj : Map[String, Json] = Map([])
       for key, value in headers {
         headers_obj[key] = Json::string(value)
       }
-      obj["headers"] = headers_obj.to_json()
+      obj["headers"] = Json(headers_obj)
       put_opt_str(obj, "auth", auth)
       put_opt_int(obj, "sseReadTimeout", sse_read_timeout_ms)
     }
@@ -197,14 +211,14 @@ pub impl ToJson for MCPServerEntry with to_json(self : MCPServerEntry) -> Json {
   put_opt_str(obj, "description", self.description)
   put_opt_str(obj, "icon", self.icon)
   if self.authentication is Some(auth) {
-    obj["authentication"] = auth.to_json()
+    obj["authentication"] = Json(auth)
   }
   if self.transform is Some(transform) {
-    let tools_obj : Map[String, Json] = {}
+    let tools_obj : Map[String, Json] = Map([])
     for key, value in transform.tools {
       tools_obj[key] = value
     }
-    obj["tools"] = tools_obj.to_json()
+    obj["tools"] = Json(tools_obj)
     if transform.include_tags is Some(tags) {
       obj["includeTags"] = Json::array(tags.to_array().map(Json::string))
     }
@@ -212,9 +226,10 @@ pub impl ToJson for MCPServerEntry with to_json(self : MCPServerEntry) -> Json {
       obj["excludeTags"] = Json::array(tags.to_array().map(Json::string))
     }
   }
-  obj.to_json()
+  Json(obj)
 }
 
+///|
 pub fn RemoteTransport::to_wire(self : RemoteTransport) -> String {
   match self {
     Http => "http"
@@ -223,7 +238,8 @@ pub fn RemoteTransport::to_wire(self : RemoteTransport) -> String {
   }
 }
 
-pub impl FromJson for MCPServerEntry with from_json(
+///|
+pub impl FromJson for MCPServerEntry with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> MCPServerEntry raise @json.JsonDecodeError {
@@ -234,10 +250,10 @@ pub impl FromJson for MCPServerEntry with from_json(
       let env = opt_obj(obj, "env").unwrap_or({})
       Stdio(
         command~,
-        args= args,
-        env= env,
-        cwd= opt_str(obj, "cwd"),
-        keep_alive= opt_bool(obj, "keepAlive"),
+        args~,
+        env~,
+        cwd=opt_str(obj, "cwd"),
+        keep_alive=opt_bool(obj, "keepAlive"),
       )
     }
     _ => {
@@ -246,14 +262,16 @@ pub impl FromJson for MCPServerEntry with from_json(
         Some("http") => Some(Http)
         Some("streamable-http") => Some(StreamableHttp)
         Some("sse") => Some(Sse)
-        _ => match infer_transport_type_from_url(url) {
-          Ok("sse") => Some(Sse)
-          Ok("http") => Some(Http)
-          Ok(other) => raise cfg_err(path, "MCPServerEntry: bad transport \{other}")
-          Err(message) => raise cfg_err(path, message)
-        }
+        _ =>
+          match infer_transport_type_from_url(url) {
+            Ok("sse") => Some(Sse)
+            Ok("http") => Some(Http)
+            Ok(other) =>
+              raise cfg_err(path, "MCPServerEntry: bad transport \{other}")
+            Err(message) => raise cfg_err(path, message)
+          }
       }
-      let headers : Map[String, String] = {}
+      let headers : Map[String, String] = Map([])
       if opt_obj(obj, "headers") is Some(headers_obj) {
         for key, value in headers_obj {
           if value is String(v) {
@@ -263,14 +281,14 @@ pub impl FromJson for MCPServerEntry with from_json(
       }
       Remote(
         url~,
-        transport= transport,
-        headers= headers,
-        auth= opt_str(obj, "auth"),
-        sse_read_timeout_ms= opt_int(obj, "sseReadTimeout"),
+        transport~,
+        headers~,
+        auth=opt_str(obj, "auth"),
+        sse_read_timeout_ms=opt_int(obj, "sseReadTimeout"),
       )
     }
   }
-  let tools : Map[String, Json] = {}
+  let tools : Map[String, Json] = Map([])
   if opt_obj(obj, "tools") is Some(tools_obj) {
     for key, value in tools_obj {
       tools[key] = value
@@ -278,7 +296,9 @@ pub impl FromJson for MCPServerEntry with from_json(
   }
   let include_tags : Array[String]? = opt_str_array(obj, "includeTags")
   let exclude_tags : Array[String]? = opt_str_array(obj, "excludeTags")
-  let transform : ServerTransform? = if not(tools.is_empty()) || include_tags is Some(_) || exclude_tags is Some(_) {
+  let transform : ServerTransform? = if !tools.is_empty() ||
+    include_tags is Some(_) ||
+    exclude_tags is Some(_) {
     Some({
       tools,
       include_tags: include_tags.map(fn(tags) { @set.Set::from_array(tags) }),
@@ -297,15 +317,18 @@ pub impl FromJson for MCPServerEntry with from_json(
   }
 }
 
+///|
 /// A configuration object for MCP servers.
 pub(all) struct MCPConfig {
   mcp_servers : Map[String, MCPServerEntry]
 } derive(Debug, Eq)
 
+///|
 pub fn MCPConfig::new() -> MCPConfig {
-  { mcp_servers: {} }
+  { mcp_servers: {}, }
 }
 
+///|
 /// Add or update a server in the configuration.
 pub fn MCPConfig::add_server(
   self : MCPConfig,
@@ -315,7 +338,8 @@ pub fn MCPConfig::add_server(
   self.mcp_servers[name] = server
 }
 
-pub impl FromJson for MCPConfig with from_json(
+///|
+pub impl FromJson for MCPConfig with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> MCPConfig raise @json.JsonDecodeError {
@@ -327,7 +351,8 @@ pub impl FromJson for MCPConfig with from_json(
       let has_servers = {
         let mut found = false
         for _, value in root {
-          if value is Object(entry) && (entry.get("command") is Some(_) || entry.get("url") is Some(_)) {
+          if value is Object(entry) &&
+            (entry.get("command") is Some(_) || entry.get("url") is Some(_)) {
             found = true
             break
           }
@@ -348,18 +373,57 @@ pub impl FromJson for MCPConfig with from_json(
   config
 }
 
+///|
 /// Parse MCP configuration from a JSON document.
-pub fn config_from_json(
-  json : Json,
-) -> MCPConfig raise @json.JsonDecodeError {
+pub fn config_from_json(json : Json) -> MCPConfig raise @json.JsonDecodeError {
   @json.from_json(json)
 }
 
+///|
 /// Convert the configuration to a JSON document, omitting empty fields.
 pub fn MCPConfig::to_json(self : MCPConfig) -> Json {
-  let servers : Map[String, Json] = {}
+  let servers : Map[String, Json] = Map([])
   for name, entry in self.mcp_servers {
     servers[name] = MCPServerEntry::to_json(entry)
   }
-  Json::object({ "mcpServers": servers.to_json() })
+  Json::object({ "mcpServers": Json(servers) })
 }
+
+///|
+pub extend MCPConfig with @json.FromJson::{from_json}
+
+///|
+pub extend MCPConfig with Debug::{to_repr}
+
+///|
+pub extend MCPConfig with Eq::{not_equal, equal}
+
+///|
+pub extend MCPServerEntry with @json.FromJson::{from_json}
+
+///|
+pub extend MCPServerEntry with Debug::{to_repr}
+
+///|
+pub extend MCPServerEntry with Eq::{not_equal, equal}
+
+///|
+pub extend MCPServerEntry with ToJson::{to_json}
+
+///|
+pub extend MCPServerKind with Debug::{to_repr}
+
+///|
+pub extend MCPServerKind with Eq::{not_equal, equal}
+
+///|
+pub extend RemoteTransport with Debug::{to_repr}
+
+///|
+pub extend RemoteTransport with Eq::{not_equal, equal}
+
+///|
+pub extend ServerTransform with Debug::{to_repr}
+
+///|
+pub extend ServerTransform with Eq::{not_equal, equal}

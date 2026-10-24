@@ -1,37 +1,50 @@
 /// Core protocol types shared across moonmcp, mirroring the MCP wire format.
 
+///|
 /// JSON-RPC error codes defined by the MCP specification.
-pub let parse_error : Int = -32700
+pub let parse_error : Int32 = -32700
 
-pub let invalid_request : Int = -32600
+///|
+pub let invalid_request : Int32 = -32600
 
-pub let method_not_found : Int = -32601
+///|
+pub let method_not_found : Int32 = -32601
 
-pub let invalid_params : Int = -32602
+///|
+pub let invalid_params : Int32 = -32602
 
-pub let internal_error : Int = -32603
+///|
+pub let internal_error : Int32 = -32603
 
+///|
 /// The protocol version this implementation speaks.
 pub let latest_protocol_version : String = "2025-11-25"
 
+///|
 /// Protocol versions with modern semantics (used for capability gating).
 pub fn modern_protocol_versions() -> Array[String] {
   ["2025-06-18", "2025-11-25"]
 }
 
+///|
 pub fn handshake_protocol_versions() -> Array[String] {
   ["2025-03-26", "2025-06-18", "2025-11-25"]
 }
 
+///|
 /// Request `_meta` keys used to propagate session facts.
 pub let server_info_meta_key : String = "serverInfo"
 
+///|
 pub let client_info_meta_key : String = "clientInfo"
 
+///|
 pub let protocol_version_meta_key : String = "protocolVersion"
 
+///|
 pub let client_capabilities_meta_key : String = "clientCapabilities"
 
+///|
 /// Verbosity levels for `notifications/message`, ordered debug → emergency.
 pub(all) enum LoggingLevel {
   Debug
@@ -44,6 +57,7 @@ pub(all) enum LoggingLevel {
   Emergency
 } derive(Debug, Eq)
 
+///|
 pub fn LoggingLevel::to_wire(self : LoggingLevel) -> String {
   match self {
     Debug => "debug"
@@ -57,6 +71,7 @@ pub fn LoggingLevel::to_wire(self : LoggingLevel) -> String {
   }
 }
 
+///|
 pub fn logging_level_from_wire(value : String) -> LoggingLevel? {
   match value {
     "debug" => Some(Debug)
@@ -71,85 +86,107 @@ pub fn logging_level_from_wire(value : String) -> LoggingLevel? {
   }
 }
 
+///|
 /// Canonical JSON-RPC method and notification names.
 pub let method_initialize : String = "initialize"
 
+///|
 pub let method_ping : String = "ping"
 
+///|
 pub let method_tools_list : String = "tools/list"
 
+///|
 pub let method_tools_call : String = "tools/call"
 
+///|
 pub let method_resources_list : String = "resources/list"
 
+///|
 pub let method_resources_read : String = "resources/read"
 
+///|
 pub let method_resources_subscribe : String = "resources/subscribe"
 
+///|
 pub let method_resources_unsubscribe : String = "resources/unsubscribe"
 
+///|
 pub let method_prompts_list : String = "prompts/list"
 
+///|
 pub let method_prompts_get : String = "prompts/get"
 
+///|
 pub let method_completion_complete : String = "completion/complete"
 
+///|
 pub let method_logging_set_level : String = "logging/setLevel"
 
+///|
 pub let method_roots_list : String = "roots/list"
 
+///|
 pub let method_sampling_create_message : String = "sampling/createMessage"
 
+///|
 pub let method_elicitation_create : String = "elicitation/create"
 
+///|
 pub let method_elicitation_create_form : String = "elicitation/createForm"
 
+///|
 pub let method_server_discover : String = "server/discover"
 
+///|
 pub let method_input_response : String = "input/response"
 
+///|
 pub let notification_initialized : String = "notifications/initialized"
 
+///|
 pub let notification_cancelled : String = "notifications/cancelled"
 
+///|
 pub let notification_progress : String = "notifications/progress"
 
+///|
 pub let notification_message : String = "notifications/message"
 
+///|
 pub let notification_roots_list_changed : String = "notifications/roots/list_changed"
 
+///|
 pub let notification_resource_updated : String = "notifications/resources/updated"
 
+///|
 pub let notification_resource_list_changed : String = "notifications/resources/list_changed"
 
+///|
 pub let notification_tool_list_changed : String = "notifications/tools/list_changed"
 
+///|
 pub let notification_prompt_list_changed : String = "notifications/prompts/list_changed"
 
+///|
 /// Result type names that may appear as the `resultType` of a discover reply.
 pub fn core_result_types() -> Array[String] {
   [
-    "InitializeResult",
-    "ListToolsResult",
-    "CallToolResult",
-    "ListPromptsResult",
-    "GetPromptResult",
-    "ListResourcesResult",
-    "ReadResourceResult",
-    "ListResourceTemplatesResult",
-    "CompleteResult",
-    "CreateMessageResult",
-    "EmptyResult",
+    "InitializeResult", "ListToolsResult", "CallToolResult", "ListPromptsResult",
+    "GetPromptResult", "ListResourcesResult", "ReadResourceResult", "ListResourceTemplatesResult",
+    "CompleteResult", "CreateMessageResult", "EmptyResult",
   ]
 }
 
+///|
 /// Wire-format error payload carried by JSON-RPC error responses.
 pub(all) struct ErrorData {
-  code : Int
+  code : Int32
   message : String
   data : Json?
 } derive(ToJson, FromJson, Debug, Eq)
 
+///|
 /// An icon for display in user interfaces.
 pub(all) struct Icon {
   src : String
@@ -157,21 +194,20 @@ pub(all) struct Icon {
   sizes : Array[String]?
 } derive(Debug, Eq)
 
-pub impl ToJson for Icon with to_json(self : Icon) -> Json {
-  let obj : Map[String, Json] = { "src": self.src.to_json() }
+///|
+pub impl ToJson for Icon with fn to_json(self : Icon) -> Json {
+  let obj : Map[String, Json] = { "src": Json(self.src) }
   if self.mime_type is Some(mime_type) {
-    obj["mimeType"] = mime_type.to_json()
+    obj["mimeType"] = Json(mime_type)
   }
   if self.sizes is Some(sizes) {
-    obj["sizes"] = sizes.to_json()
+    obj["sizes"] = Json(sizes)
   }
-  obj.to_json()
+  Json(obj)
 }
 
-pub impl FromJson for Icon with from_json(
-  json : Json,
-  path : @json.JsonPath,
-) -> Icon raise @json.JsonDecodeError {
+///|
+pub impl FromJson for Icon with fn from_json(json : Json, path : @json.JsonPath) -> Icon raise @json.JsonDecodeError {
   guard json is Object(obj) else {
     raise @json.JsonDecodeError((path, "Icon: expected object"))
   }
@@ -187,5 +223,35 @@ pub impl FromJson for Icon with from_json(
     Some(value) => Some(@json.from_json(value, path=path.add_key("sizes")))
     None => None
   }
-  { src, mime_type, sizes }
+  { src, mime_type, sizes, }
 }
+
+///|
+pub extend ErrorData with @json.FromJson::{from_json}
+
+///|
+pub extend ErrorData with Debug::{to_repr}
+
+///|
+pub extend ErrorData with Eq::{not_equal, equal}
+
+///|
+pub extend ErrorData with ToJson::{to_json}
+
+///|
+pub extend Icon with @json.FromJson::{from_json}
+
+///|
+pub extend Icon with Debug::{to_repr}
+
+///|
+pub extend Icon with Eq::{not_equal, equal}
+
+///|
+pub extend Icon with ToJson::{to_json}
+
+///|
+pub extend LoggingLevel with Debug::{to_repr}
+
+///|
+pub extend LoggingLevel with Eq::{not_equal, equal}

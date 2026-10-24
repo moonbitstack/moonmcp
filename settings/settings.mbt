@@ -1,5 +1,5 @@
+///|
 /// moonmcp settings, mirroring fastmcp/settings.py.
-
 fn to_upper_ascii(value : String) -> String {
   let buf = StringBuilder::StringBuilder()
   for ch in value {
@@ -8,6 +8,7 @@ fn to_upper_ascii(value : String) -> String {
   buf.to_string()
 }
 
+///|
 fn to_lower_ascii(value : String) -> String {
   let buf = StringBuilder::StringBuilder()
   for ch in value {
@@ -16,8 +17,10 @@ fn to_lower_ascii(value : String) -> String {
   buf.to_string()
 }
 
-pub let ten_mb_in_bytes : Int = 1024 * 1024 * 10
+///|
+pub let ten_mb_in_bytes : Int32 = 1024 * 1024 * 10
 
+///|
 pub(all) enum LogLevel {
   Debug
   Info
@@ -26,6 +29,7 @@ pub(all) enum LogLevel {
   Critical
 } derive(Debug, Eq)
 
+///|
 pub fn LogLevel::to_wire(self : LogLevel) -> String {
   match self {
     Debug => "DEBUG"
@@ -36,6 +40,7 @@ pub fn LogLevel::to_wire(self : LogLevel) -> String {
   }
 }
 
+///|
 pub fn log_level_from_wire(value : String) -> LogLevel? {
   match to_upper_ascii(value) {
     "DEBUG" => Some(Debug)
@@ -47,6 +52,7 @@ pub fn log_level_from_wire(value : String) -> LogLevel? {
   }
 }
 
+///|
 /// How moonmcp's native telemetry behaves.
 pub(all) enum TelemetryMode {
   Native
@@ -54,6 +60,7 @@ pub(all) enum TelemetryMode {
   Off
 } derive(Debug, Eq)
 
+///|
 pub fn TelemetryMode::to_wire(self : TelemetryMode) -> String {
   match self {
     Native => "native"
@@ -62,6 +69,7 @@ pub fn TelemetryMode::to_wire(self : TelemetryMode) -> String {
   }
 }
 
+///|
 pub fn telemetry_mode_from_wire(value : String) -> TelemetryMode? {
   match value {
     "native" => Some(Native)
@@ -71,6 +79,7 @@ pub fn telemetry_mode_from_wire(value : String) -> TelemetryMode? {
   }
 }
 
+///|
 pub(all) enum TransportKind {
   Stdio
   Http
@@ -78,6 +87,7 @@ pub(all) enum TransportKind {
   StreamableHttp
 } derive(Debug, Eq)
 
+///|
 pub fn TransportKind::to_wire(self : TransportKind) -> String {
   match self {
     Stdio => "stdio"
@@ -87,6 +97,7 @@ pub fn TransportKind::to_wire(self : TransportKind) -> String {
   }
 }
 
+///|
 pub fn transport_kind_from_wire(value : String) -> TransportKind? {
   match value {
     "stdio" => Some(Stdio)
@@ -97,18 +108,21 @@ pub fn transport_kind_from_wire(value : String) -> TransportKind? {
   }
 }
 
+///|
 pub(all) enum CheckForUpdates {
   Stable
   Prerelease
   Off
 } derive(Debug, Eq)
 
+///|
 pub(all) enum SessionIdleTimeout {
   Auto
   Never
   Seconds(Double)
 } derive(Debug, Eq)
 
+///|
 /// The `http_session_idle_timeout` wire forms: `"auto"`, `"none"`, or a number.
 pub fn SessionIdleTimeout::to_wire(self : SessionIdleTimeout) -> String {
   match self {
@@ -118,14 +132,13 @@ pub fn SessionIdleTimeout::to_wire(self : SessionIdleTimeout) -> String {
   }
 }
 
-pub fn session_idle_timeout_from_wire(
-  value : String,
-) -> SessionIdleTimeout? {
+///|
+pub fn session_idle_timeout_from_wire(value : String) -> SessionIdleTimeout? {
   match to_lower_ascii(value) {
     "auto" => Some(Auto)
     "none" => Some(Never)
     _ => {
-      let parsed = try Ok(@string.parse_double(value)) catch { _ => Err(()) }
+      let parsed = Ok(@string.parse_double(value)) catch { _ => Err(()) }
       if parsed is Ok(seconds) {
         Some(Seconds(seconds))
       } else {
@@ -135,6 +148,7 @@ pub fn session_idle_timeout_from_wire(
   }
 }
 
+///|
 /// Everything the framework reads from `FASTMCP_*` environment variables.
 pub(all) struct Settings {
   home : String
@@ -150,7 +164,7 @@ pub(all) struct Settings {
   client_disconnect_timeout : Double
   transport : TransportKind
   host : String
-  port : Int
+  port : Int32
   sse_path : String
   message_path : String
   streamable_http_path : String
@@ -171,6 +185,7 @@ pub(all) struct Settings {
   check_for_updates : CheckForUpdates
 } derive(Debug, Eq)
 
+///|
 pub fn Settings::new() -> Settings {
   {
     home: ".moonmcp",
@@ -208,10 +223,12 @@ pub fn Settings::new() -> Settings {
   }
 }
 
+///|
 fn env_str(key : String) -> String? {
   @env.get_env_var("FASTMCP_\{to_upper_ascii(key)}")
 }
 
+///|
 fn env_bool(key : String) -> Bool? {
   match env_str(key) {
     Some(value) =>
@@ -224,10 +241,11 @@ fn env_bool(key : String) -> Bool? {
   }
 }
 
-fn env_int(key : String) -> Int? {
+///|
+fn env_int(key : String) -> Int32? {
   match env_str(key) {
     Some(value) => {
-      let parsed = try Ok(@string.parse_int(value)) catch { _ => Err(()) }
+      let parsed = Ok(@string.parse_int(value)) catch { _ => Err(()) }
       if parsed is Ok(v) {
         Some(v)
       } else {
@@ -238,10 +256,11 @@ fn env_int(key : String) -> Int? {
   }
 }
 
+///|
 fn env_double(key : String) -> Double? {
   match env_str(key) {
     Some(value) => {
-      let parsed = try Ok(@string.parse_double(value)) catch { _ => Err(()) }
+      let parsed = Ok(@string.parse_double(value)) catch { _ => Err(()) }
       if parsed is Ok(v) {
         Some(v)
       } else {
@@ -252,13 +271,16 @@ fn env_double(key : String) -> Double? {
   }
 }
 
+///|
 fn env_str_array(key : String) -> Array[String]? {
   match env_str(key) {
-    Some(value) => Some(value.split(",").map(fn(part) { part.to_string() }).collect())
+    Some(value) =>
+      Some(value.split(",").map(fn(part) { part.to_owned() }).collect())
     None => None
   }
 }
 
+///|
 /// Load settings, applying `FASTMCP_*` environment overrides.
 pub fn Settings::from_env() -> Settings {
   let settings = Settings::new()
@@ -274,7 +296,8 @@ pub fn Settings::from_env() -> Settings {
     enable_rich_logging: env_bool("ENABLE_RICH_LOGGING").unwrap_or(true),
     enable_rich_tracebacks: env_bool("ENABLE_RICH_TRACEBACKS").unwrap_or(true),
     deprecation_warnings: env_bool("DEPRECATION_WARNINGS").unwrap_or(true),
-    telemetry_mode: match env_str("TELEMETRY_MODE").map(telemetry_mode_from_wire) {
+    telemetry_mode: match
+      env_str("TELEMETRY_MODE").map(telemetry_mode_from_wire) {
       Some(Some(mode)) => mode
       _ => Native
     },
@@ -282,8 +305,9 @@ pub fn Settings::from_env() -> Settings {
       Some(0) => None
       timeout => timeout
     },
-    client_disconnect_timeout: env_double("CLIENT_DISCONNECT_TIMEOUT")
-      .unwrap_or(5),
+    client_disconnect_timeout: env_double("CLIENT_DISCONNECT_TIMEOUT").unwrap_or(
+      5,
+    ),
     transport: match env_str("TRANSPORT").map(transport_kind_from_wire) {
       Some(Some(kind)) => kind
       _ => Stdio
@@ -295,22 +319,25 @@ pub fn Settings::from_env() -> Settings {
     streamable_http_path: env_str("STREAMABLE_HTTP_PATH").unwrap_or("/mcp"),
     debug: env_bool("DEBUG").unwrap_or(false),
     mask_error_details: env_bool("MASK_ERROR_DETAILS").unwrap_or(false),
-    client_log_level: match env_str("CLIENT_LOG_LEVEL")
-      .map(@types.logging_level_from_wire) {
+    client_log_level: match
+      env_str("CLIENT_LOG_LEVEL").map(@types.logging_level_from_wire) {
       Some(Some(level)) => Some(level)
       _ => None
     },
-    strict_input_validation: env_bool("STRICT_INPUT_VALIDATION").unwrap_or(false),
+    strict_input_validation: env_bool("STRICT_INPUT_VALIDATION").unwrap_or(
+      false,
+    ),
     ssrf_trust_proxy: env_bool("SSRF_TRUST_PROXY").unwrap_or(false),
     server_dependencies: env_str_array("SERVER_DEPENDENCIES").unwrap_or([]),
     json_response: env_bool("JSON_RESPONSE").unwrap_or(false),
     stateless_http: env_bool("STATELESS_HTTP").unwrap_or(false),
-    http_host_origin_protection: env_bool("HTTP_HOST_ORIGIN_PROTECTION")
-      .unwrap_or(false),
+    http_host_origin_protection: env_bool("HTTP_HOST_ORIGIN_PROTECTION").unwrap_or(
+      false,
+    ),
     http_allowed_hosts: env_str_array("HTTP_ALLOWED_HOSTS"),
     http_allowed_origins: env_str_array("HTTP_ALLOWED_ORIGINS"),
-    http_session_idle_timeout: match env_str("HTTP_SESSION_IDLE_TIMEOUT")
-      .map(session_idle_timeout_from_wire) {
+    http_session_idle_timeout: match
+      env_str("HTTP_SESSION_IDLE_TIMEOUT").map(session_idle_timeout_from_wire) {
       Some(Some(timeout)) => timeout
       _ => Auto
     },
@@ -325,3 +352,39 @@ pub fn Settings::from_env() -> Settings {
     },
   }
 }
+
+///|
+pub extend CheckForUpdates with Debug::{to_repr}
+
+///|
+pub extend CheckForUpdates with Eq::{not_equal, equal}
+
+///|
+pub extend LogLevel with Debug::{to_repr}
+
+///|
+pub extend LogLevel with Eq::{not_equal, equal}
+
+///|
+pub extend SessionIdleTimeout with Debug::{to_repr}
+
+///|
+pub extend SessionIdleTimeout with Eq::{not_equal, equal}
+
+///|
+pub extend Settings with Debug::{to_repr}
+
+///|
+pub extend Settings with Eq::{not_equal, equal}
+
+///|
+pub extend TelemetryMode with Debug::{to_repr}
+
+///|
+pub extend TelemetryMode with Eq::{not_equal, equal}
+
+///|
+pub extend TransportKind with Debug::{to_repr}
+
+///|
+pub extend TransportKind with Eq::{not_equal, equal}

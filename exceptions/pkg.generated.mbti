@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonmcp/exceptions"
+package "moonbitstack/moonmcp/exceptions"
 
 import {
   "moonbitlang/core/debug",
-  "moonmcp/types",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values
@@ -26,7 +26,10 @@ pub(all) suberror FastMCPError {
   Authorisation(String)
   InsufficientScope(required_scopes~ : Array[String], message~ : String)
 } derive(Eq, @debug.Debug)
+pub fn FastMCPError::equal(Self, Self) -> Bool
 pub fn FastMCPError::message(Self) -> String
+pub fn FastMCPError::not_equal(Self, Self) -> Bool
+pub fn FastMCPError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 
