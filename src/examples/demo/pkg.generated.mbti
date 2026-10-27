@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/examples/demo"
+
+import {
+  "moonbitstack/moonmcp/server",
+}
+
+// Values
+pub fn server() -> @server.Server
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

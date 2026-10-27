@@ -1,8 +1,0 @@
-import {
-  "moonbitlang/core/json",
-  "moonbitlang/core/set",
-}
-
-import {
-  "moonbitstack/moonmcp/mcp_config",
-} for "test"

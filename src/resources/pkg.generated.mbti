@@ -1,0 +1,155 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/resources"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/set",
+  "moonbitstack/moonmcp/component",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
+}
+
+// Values
+pub fn contains_path_traversal(String) -> Bool
+
+pub fn convert_raw_to_resource_result(RawResourceValue, mime_type? : String, meta? : Map[String, Json]) -> ResourceResult
+
+pub fn encode_literal(String) -> String
+
+pub fn expand_uri_template(String, Map[String, Json]) -> String
+
+pub fn extract_exploded_query_params(String) -> Array[String]
+
+pub fn extract_query_params(String) -> Array[String]
+
+pub fn forward_uri(String, Map[String, Json], String) -> String
+
+pub fn is_absolute_path(String) -> Bool
+
+pub fn match_uri_template(String, String, list_params? : Array[String], segments? : Array[TemplateSegment]) -> Map[String, Json]?
+
+pub fn parse_template(String) -> Array[TemplateSegment]
+
+pub fn parse_template_params(String) -> @set.Set[String]
+
+pub fn pct_encode(String, safe? : String) -> String
+
+pub fn resolve_security(ResourceSecuritySetting, ResourceSecurity?) -> ResourceSecurity?
+
+// Errors
+
+// Types and methods
+pub(all) enum ContentPayload {
+  Text(String)
+  Blob(Bytes)
+} derive(Eq, @debug.Debug)
+pub fn ContentPayload::equal(Self, Self) -> Bool
+pub fn ContentPayload::not_equal(Self, Self) -> Bool
+pub fn ContentPayload::to_repr(Self) -> @debug.Repr
+
+pub(all) enum RawResourceValue {
+  Text(String)
+  Blob(Bytes)
+  Ready(ResourceResult)
+}
+
+pub(all) struct Resource {
+  component : @component.ComponentBase
+  uri : String
+  mime_type : String
+  annotations : @types.Annotations?
+  read_fn : async () -> RawResourceValue raise @exceptions.FastMCPError
+}
+pub fn Resource::base(Self) -> @component.ComponentBase
+pub fn Resource::binary(String, data~ : Bytes, name? : String, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], mime_type? : String, tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.Annotations) -> Self
+pub fn Resource::convert_result(Self, RawResourceValue) -> ResourceResult
+pub fn Resource::from_function(String, read_fn~ : async () -> RawResourceValue raise @exceptions.FastMCPError, name? : String, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], mime_type? : String, tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.Annotations) -> Self
+pub fn Resource::get_meta(Self) -> Map[String, Json]
+pub fn Resource::identifier(Self) -> String
+pub fn Resource::key(Self) -> String
+pub fn Resource::new(String, read_fn~ : async () -> RawResourceValue raise @exceptions.FastMCPError, name? : String, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], mime_type? : String, tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.Annotations) -> Self
+pub async fn Resource::read(Self) -> RawResourceValue raise @exceptions.FastMCPError
+pub async fn Resource::read_result(Self) -> ResourceResult raise @exceptions.FastMCPError
+pub fn Resource::text(String, text~ : String, name? : String, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], mime_type? : String, tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.Annotations) -> Self
+pub fn Resource::to_mcp_resource(Self) -> @types.Resource
+pub impl @component.Component for Resource
+
+pub(all) struct ResourceContent {
+  content : ContentPayload
+  mime_type : String?
+  meta : Map[String, Json]?
+} derive(Eq, @debug.Debug)
+pub fn ResourceContent::equal(Self, Self) -> Bool
+pub fn ResourceContent::new(ContentPayload, mime_type? : String, meta? : Map[String, Json]) -> Self
+pub fn ResourceContent::not_equal(Self, Self) -> Bool
+pub fn ResourceContent::to_mcp_resource_contents(Self, String) -> @types.ResourceContents
+pub fn ResourceContent::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ResourceResult {
+  contents : Array[ResourceContent]
+  meta : Map[String, Json]?
+  input_required : @types.InputRequiredResult?
+} derive(Eq, @debug.Debug)
+pub fn ResourceResult::equal(Self, Self) -> Bool
+pub fn ResourceResult::input_required(@types.InputRequiredResult) -> Self
+pub fn ResourceResult::is_input_required(Self) -> Bool
+pub fn ResourceResult::new(Array[ResourceContent], meta? : Map[String, Json]) -> Self
+pub fn ResourceResult::not_equal(Self, Self) -> Bool
+pub fn ResourceResult::to_mcp_result(Self, String) -> @types.ReadResourceResult
+pub fn ResourceResult::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ResourceSecurity {
+  reject_path_traversal : Bool
+  reject_absolute_paths : Bool
+  reject_null_bytes : Bool
+  exempt_params : @set.Set[String]
+} derive(Eq, @debug.Debug)
+pub fn ResourceSecurity::default() -> Self
+pub fn ResourceSecurity::equal(Self, Self) -> Bool
+pub fn ResourceSecurity::not_equal(Self, Self) -> Bool
+pub fn ResourceSecurity::to_repr(Self) -> @debug.Repr
+pub fn ResourceSecurity::validate(Self, Map[String, Json]) -> String?
+
+pub(all) enum ResourceSecuritySetting {
+  Inherit
+  Explicit(ResourceSecurity)
+  Disabled
+} derive(Eq, @debug.Debug)
+pub fn ResourceSecuritySetting::equal(Self, Self) -> Bool
+pub fn ResourceSecuritySetting::not_equal(Self, Self) -> Bool
+pub fn ResourceSecuritySetting::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ResourceTemplate {
+  component : @component.ComponentBase
+  uri_template : String
+  mime_type : String
+  parameters : Json
+  annotations : @types.Annotations?
+  security : ResourceSecuritySetting
+  list_query_params : @set.Set[String]
+  segments : Array[TemplateSegment]
+  read_fn : async (Map[String, Json]) -> RawResourceValue raise @exceptions.FastMCPError
+}
+pub fn ResourceTemplate::base(Self) -> @component.ComponentBase
+pub fn ResourceTemplate::convert_result(Self, RawResourceValue) -> ResourceResult
+pub fn ResourceTemplate::create_resource(Self, String, Map[String, Json]) -> Resource
+pub fn ResourceTemplate::from_mcp_template(@types.ResourceTemplate) -> Self raise @exceptions.FastMCPError
+pub fn ResourceTemplate::get_meta(Self) -> Map[String, Json]
+pub fn ResourceTemplate::identifier(Self) -> String
+pub fn ResourceTemplate::key(Self) -> String
+pub fn ResourceTemplate::matches(Self, String, ResourceSecurity?) -> Map[String, Json]? raise @exceptions.FastMCPError
+pub fn ResourceTemplate::new(String, parameters~ : Json, read_fn~ : async (Map[String, Json]) -> RawResourceValue raise @exceptions.FastMCPError, name? : String, version? : String, title? : String, description? : String, icons? : Array[@types.Icon], mime_type? : String, tags? : @set.Set[String], meta? : Map[String, Json], annotations? : @types.Annotations, security? : ResourceSecuritySetting, list_query_params? : @set.Set[String]) -> Self raise @exceptions.FastMCPError
+pub async fn ResourceTemplate::read(Self, Map[String, Json]) -> RawResourceValue raise @exceptions.FastMCPError
+pub async fn ResourceTemplate::read_result(Self, String, Map[String, Json]) -> ResourceResult raise @exceptions.FastMCPError
+pub fn ResourceTemplate::resolve_security(Self, ResourceSecurity?) -> ResourceSecurity?
+pub fn ResourceTemplate::to_mcp_template(Self) -> @types.ResourceTemplate
+pub impl @component.Component for ResourceTemplate
+
+pub(all) enum TemplateSegment {
+  Literal(Array[Char])
+  PathVar(name~ : String, wildcard~ : Bool)
+}
+
+// Type aliases
+
+// Traits

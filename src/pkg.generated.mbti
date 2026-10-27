@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp"
+
+import {
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/tools",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @exceptions {type FastMCPError}
+
+pub using @prompts {type Message}
+
+pub using @prompts {type Prompt}
+
+pub using @resources {type Resource}
+
+pub using @resources {type ResourceTemplate}
+
+pub using @server {type Scope}
+
+pub using @server {type Server}
+
+pub using @tools {type Tool}
+
+pub using @tools {type ToolResult}
+
+// Traits

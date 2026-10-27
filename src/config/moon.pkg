@@ -1,0 +1,8 @@
+import {
+  "moonbitlang/core/json",
+  "moonbitlang/core/set",
+}
+
+import {
+  "moonbitstack/moonmcp/config",
+} for "test"

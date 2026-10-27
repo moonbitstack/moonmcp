@@ -1,0 +1,30 @@
+// The server: what it offers, one JSON-RPC message at a time in both eras of
+// the protocol, and the transports that carry those messages.
+import {
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonschema",
+  "moonbitstack/moonasgi",
+  "moonbitstack/moonbase/base64",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/async/stdio",
+  "moonbitlang/async/io",
+}
+
+import {
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonasgi",
+  "moonbitstack/moonasgi/testing",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/async",
+} for "test"
+
+// Standard input and output are native; on other targets `stdio` and `io` are
+// unused.
+
+warnings = "-29"

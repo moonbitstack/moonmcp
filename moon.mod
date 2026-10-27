@@ -1,20 +1,23 @@
 name = "moonbitstack/moonmcp"
 
-version = "0.1.0"
+version = "0.1.1"
 
 readme = "README.md"
+
+source = "src"
 
 repository = "https://github.com/moonbitstack/moonmcp"
 
 license = "Apache-2.0"
 
-keywords = [
-  "mcp",
-  "model-context-protocol",
-  "fastmcp",
-  "llm",
-  "agent",
-  "moonbit",
-]
+keywords = [ "mcp", "llm", "agent" ]
 
-description = "moonmcp — Model Context Protocol servers and clients for MoonBit (← FastMCP): the wire model, tools, resources and prompts, with the server core and transports to follow."
+description = "Model Context Protocol servers for MoonBit."
+
+import {
+  "moonbitlang/async@0.22.5",
+  "moonbitstack/moonschema@0.2.0",
+  "moonbitstack/moonasgi@0.10.2",
+  "moonbitstack/moonbase@0.4.0",
+  "moonbitstack/mooncat@0.18.6",
+}

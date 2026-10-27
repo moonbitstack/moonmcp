@@ -1,36 +1,93 @@
 # moonmcp
 
-Model Context Protocol servers and clients for MoonBit, after
-[FastMCP](https://github.com/jlowin/fastmcp). Python's machinery (pydantic
-introspection, decorators, camelCase shims) becomes MoonBit's own: records with
-`ToJson` and `FromJson`, closures in place of subclasses, one error enum.
+Model Context Protocol servers for MoonBit. Register tools, resources, resource
+templates and prompts; serve them over Streamable HTTP or stdio.
 
-> **Status:** the foundation layer is in: the wire model and the components.
-> The server core, the transports and the client come next.
+One server answers both eras of the protocol. A request that carries its
+protocol version in `_meta` is served statelessly under revision 2026-07-28; an
+`initialize` handshake selects the revisions before it (2025-11-25 back to
+2024-11-05). Clients of either era connect without configuration.
+
+## Quick start
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool(
+    "add",
+    args => {
+      guard args.get("a") is Some(Number(a, ..)) &&
+        args.get("b") is Some(Number(b, ..)) else {
+        fail("a and b must be numbers")
+      }
+      { "sum": Json(a + b) }
+    },
+    description="Add two numbers",
+    input_schema={
+      "type": "object",
+      "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+      "required": ["a", "b"],
+    },
+  )
+  mcp.resource("config://app", () => "{\"theme\":\"dark\"}", mime_type="application/json")
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
+    e => println("stopped: \{e}")
+  }
+}
+```
+
+The server is now at `http://127.0.0.1:12000/mcp`. For a client that starts the
+server as a subprocess, call `mcp.run_stdio()` instead of serving HTTP.
+
+`moon.mod` needs `moonbitstack/moonmcp`, `moonbitstack/mooncat` and
+`moonbitlang/async`, and the package with `main` imports the same three.
+
+## Registering
+
+| Call | Offers |
+|:--|:--|
+| `tool(name, handler, input_schema=, output_schema=, description=, annotations=)` | A tool. The handler returns any JSON value: an object becomes structured content as well as text. |
+| `resource(uri, read, mime_type=)` | A resource read as text. |
+| `template(uri_template, read)` | Every resource an RFC 6570 template names; `read` gets the matched parameters. |
+| `prompt(name, render, arguments=)` | A prompt rendered as one user message. |
+| `add_tool`, `add_resource`, `add_template`, `add_prompt` | A component built in full with `Tool::new`, `Resource::new`, `ResourceTemplate::new` or `Prompt::new`. |
+
+Arguments are checked against the tool's input schema (JSON Schema 2020-12)
+before the handler runs. A wrong argument or an error the handler raises comes
+back as a result marked `isError`, which the model reads and can correct itself
+from; only a tool that does not exist is a protocol error.
+
+## Transports
+
+| Transport | Call | Notes |
+|:--|:--|:--|
+| Streamable HTTP | `to_asgi(path="/mcp", origins=[])` | An ASGI application. One POST per message, answered with one JSON object or `202`. Version, method and name headers are checked against the body; a foreign `Origin` is refused with `403`. |
+| stdio | `run_stdio()` | One message per line on standard input and output. Native. |
+| Any line stream | `serve_lines(read, write)` | The stdio loop over streams of your own. |
+| In process | `handle(message)` | One JSON-RPC message in, the reply out; `None` for a notification. |
+
+Under revision 2026-07-28 every result carries `resultType` and the server's
+identity; list results also carry `ttlMs` and `cacheScope`, set with
+`Server::new(ttl_ms=, scope=)`.
+
+## Examples
+
+| Example | Shows |
+|:--|:--|
+| [`demo`](src/examples/demo/) | One server with two tools, a resource, a resource template and a prompt |
+| [`http`](src/examples/http/) | That server over Streamable HTTP: `moon run src/examples/http --target native` |
+| [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
 
 ## Packages
 
 | Package | What it holds |
-|:--:|:--|
-| `types` | The MCP wire model: protocol constants, the JSON-RPC envelope, content blocks, tools, prompts, resources, capabilities, request parameters, every result |
-| `exceptions` | `FastMCPError`, one enum whose variants carry their payloads, and the mapping to MCP error codes |
-| `component` | `ComponentBase`, the open `Component` trait, metadata and version handling |
-| `tools` | `Tool` with `run` and `prepare_run`, `ToolResult`, structured-output wrapping |
-| `prompts` | `Prompt`, `Message`, `PromptResult` |
-| `resources` | `Resource`, `ResourceTemplate` with an RFC 6570 URI template engine, path screening |
-| `tasks` | Task mode, configuration and metadata |
-| `settings` | `Settings`, read from `FASTMCP_*` variables |
-| `mcp_config` | The `mcp.json` client configuration: server kinds, transforms, transport inference |
-| `utilities` | Image, audio and file helpers that become content blocks |
-
-## How Python maps over
-
-| FastMCP | moonmcp |
 |:--|:--|
-| Exception class hierarchy | `pub(all) suberror FastMCPError`, a variant per class |
-| Pydantic models | `pub(all) struct`s with `ToJson` and `FromJson` written out, so wire names such as `mimeType` stay exact |
-| `FunctionTool`, `FunctionPrompt`, `FunctionResource` subclasses | a struct with a closure field (`run_fn`, `render_fn`, `read_fn`); components implement the open `Component` trait |
-| `TransformingMCPServer` mixin | a `transform` field on `MCPServerEntry` |
+| `moonmcp` | The names a server is written with: `Server`, `Tool`, `Resource`, `Prompt` and the rest |
+| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio |
+| `types` | The wire model: content blocks, tools, prompts, resources, capabilities, results |
+| `tools`, `resources`, `prompts` | The components a server offers |
+| `exceptions` | `FastMCPError` and the MCP error codes it maps to |
+| `component`, `tasks`, `settings`, `config`, `utilities` | Component metadata, task configuration, settings, the `mcp.json` client configuration, media helpers |
 
 ## Install
 

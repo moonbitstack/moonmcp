@@ -45,10 +45,16 @@ jobs:
       - name: moon test (all backends)
         run: moon test --target all
 
+      - name: stdio example answers
+        shell: bash
+        run: |
+          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' \
+            | moon run src/examples/stdio --target native | grep -q '"name":"add"'
+
       - name: lint (fmt is clean)
         run: |
-          moon fmt && git diff --exit-code
+          moon fmt && git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code
 
       - name: interfaces are up to date
         run: |
-          moon info --target all && git diff --exit-code
+          moon info --target all && git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code
