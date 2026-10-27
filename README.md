@@ -57,6 +57,55 @@ before the handler runs. A wrong argument or an error the handler raises comes
 back as a result marked `isError`, which the model reads and can correct itself
 from; only a tool that does not exist is a protocol error.
 
+## Annotations
+
+The same registrations, written on the functions themselves:
+
+```moonbit nocheck
+#mcp.tool(description="Add two numbers")
+fn add(a : Double, b : Double) -> Double {
+  a + b
+}
+
+#mcp.tool(name="word_count")
+fn count(text : String, unique~ : Bool = false) -> Int {
+  ...
+}
+
+#mcp.resource("users://{id}/profile")
+fn profile(id : Int) -> String {
+  "profile of user \{id}"
+}
+
+#mcp.prompt(description="Ask for a code review")
+fn review(code : String, focus? : String) -> String {
+  ...
+}
+```
+
+Each parameter becomes a property of the tool's input schema, typed from its
+MoonBit type; optional parameters and those with a default are left out of
+`required`. A URI with `{name}` makes a resource template whose matched values
+are read into the function's parameters. A tool's or resource's result goes back
+as JSON unless it is a `String`.
+
+Wire the generator into the build once. In `moon.mod`:
+
+```
+rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.1 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+```
+
+and in the `moon.pkg` of the package holding the functions:
+
+```
+dev_build(rule: "mcp", input: "tools.mbt", output: "tools.g.mbt")
+formatter(ignore: [ "tools.g.mbt" ])
+```
+
+`moon check`, `moon build` and `moon run` regenerate `tools.g.mbt` whenever
+`tools.mbt` changes. It holds `register(mcp)`, which the program calls once
+before serving.
+
 ## Transports
 
 | Transport | Call | Notes |
@@ -77,13 +126,15 @@ identity; list results also carry `ttlMs` and `cacheScope`, set with
 | [`demo`](src/examples/demo/) | One server with two tools, a resource, a resource template and a prompt |
 | [`http`](src/examples/http/) | That server over Streamable HTTP: `moon run src/examples/http --target native` |
 | [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
+| [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
 
 ## Packages
 
 | Package | What it holds |
 |:--|:--|
 | `moonmcp` | The names a server is written with: `Server`, `Tool`, `Resource`, `Prompt` and the rest |
-| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio |
+| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio; `decode`, which reads an argument as a parameter's type |
+| `cmd/mcp` | The generator behind `#mcp.tool`, `#mcp.resource` and `#mcp.prompt` |
 | `types` | The wire model: content blocks, tools, prompts, resources, capabilities, results |
 | `tools`, `resources`, `prompts` | The components a server offers |
 | `exceptions` | `FastMCPError` and the MCP error codes it maps to |

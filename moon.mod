@@ -20,4 +20,6 @@ import {
   "moonbitstack/moonasgi@0.10.2",
   "moonbitstack/moonbase@0.4.0",
   "moonbitstack/mooncat@0.18.6",
+  "moonbitstack/moonast@0.2.1",
+  "moonbitlang/parser@0.4.6",
 }

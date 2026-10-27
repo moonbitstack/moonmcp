@@ -2,6 +2,7 @@
 package "moonbitstack/moonmcp"
 
 import {
+  "moonbitlang/core/json",
   "moonbitstack/moonmcp/exceptions",
   "moonbitstack/moonmcp/prompts",
   "moonbitstack/moonmcp/resources",
@@ -10,6 +11,9 @@ import {
 }
 
 // Values
+pub fn[T : @json.FromJson] decode(Map[String, Json], String) -> T raise @json.JsonDecodeError
+
+pub fn[T : @json.FromJson] decode_option(Map[String, Json], String) -> T? raise @json.JsonDecodeError
 
 // Errors
 

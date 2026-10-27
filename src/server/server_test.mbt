@@ -312,3 +312,22 @@ async test "http: statuses for methods, origins, notifications and bad bodies" {
   )
   assert_eq(unknown_legacy.status, 400)
 }
+
+///|
+test "decode reads typed arguments, missing ones as None, and text as JSON" {
+  let args : Map[String, Json] = { "a": 2, "s": "x", "id": "7" }
+  let a : Int32 = @server.decode(args, "a")
+  let s : String = @server.decode(args, "s")
+  let id : Int32 = @server.decode(args, "id")
+  let gone : Int32? = @server.decode(args, "nope")
+  assert_eq((a, s, id, gone), (2, "x", 7, None))
+  let some : String? = @server.decode_option(args, "s")
+  assert_eq(some, Some("x"))
+  let wrong = try {
+    let n : Int32 = @server.decode(args, "s")
+    Some(n)
+  } catch {
+    _ => None
+  }
+  assert_eq(wrong, None)
+}

@@ -51,6 +51,19 @@ jobs:
           printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' \
             | moon run src/examples/stdio --target native | grep -q '"name":"add"'
 
+      - name: generated annotations are fresh
+        run: moon run src/cmd/mcp --target native -- -C . src/examples/annotations/tools.mbt -o src/examples/annotations/tools.g.mbt --check
+
+      - name: annotations example answers
+        shell: bash
+        run: |
+          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"greet","arguments":{"name":"leo","language":"zh"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' \
+            | moon run src/examples/annotations --target native | grep -q 'leo'
+
+      - name: documentation blocks compile
+        if: runner.os == 'Linux'
+        run: python3 scripts/check_docs.py
+
       - name: lint (fmt is clean)
         run: |
           moon fmt && git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code

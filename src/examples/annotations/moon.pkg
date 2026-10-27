@@ -1,0 +1,20 @@
+// Tools, resources and prompts written as annotations:
+// `moon run src/examples/annotations --target native` serves them over stdio.
+// `tools.g.mbt` comes from `cmd/mcp`; a project wires it as a dev_build rule.
+import {
+  "moonbitlang/async",
+  "moonbitstack/moonmcp",
+}
+
+pkgtype(kind: "executable")
+
+formatter(ignore: [ "tools.g.mbt" ])
+
+warnings = "-29"
+
+options(
+  targets: {
+    "main.mbt": [ "native" ],
+    "elsewhere.mbt": [ "wasm", "js", "wasm-gc" ],
+  },
+)
