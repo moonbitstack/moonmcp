@@ -91,15 +91,15 @@ def package_for(code, known):
     lines = ["import {"] + [f'  "{name}",' for name in imports] + ["}", ""]
     if re.search(r"\bfn main\b", code):
         lines += ['pkgtype(kind: "executable")', ""]
-    lines += ['warnings = "-1-2-29"', ""]
+    lines += ['warnings = "-1-2-29-67"', ""]
     return "\n".join(lines)
 
 
 def source_for(code):
     if re.search(r"\bfn main\b", code) or TOP.search(code):
         return "///|\n" + code
-    body = "\n".join("  " + line for line in code.splitlines())
-    return "///|\nasync fn snippet() -> Unit {\n" + body + "\n}\n"
+    body = "\n".join("    " + line for line in code.splitlines())
+    return "///|\nasync fn snippet() -> Unit {\n  let _ = {\n" + body + "\n  }\n}\n"
 
 
 def main():
