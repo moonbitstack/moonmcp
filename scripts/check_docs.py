@@ -62,7 +62,13 @@ CODE = re.compile(
     SKIP + r'(?:<pre[^>]*>\s*)?<code([^>]*class="[^"]*language-(?:moonbit|mbt)[^"]*"[^>]*)>(.*?)</code>',
     re.S,
 )
-TOP = re.compile(r"^(?:pub(?:\([a-z]+\))?\s+)?(?:async\s+)?(?:fn|struct|enum|let|const|test|impl|trait|type|suberror|extern|///\|)\b", re.M)
+# A top-level definition. A bare `let` is not one: documentation writes the
+# statements of a function body at the left margin as often as not.
+TOP = re.compile(
+    r"^(?:(?:pub(?:\([a-z]+\))?\s+)?(?:async\s+)?(?:fn|struct|enum|test|impl|trait|type|suberror|extern)\b"
+    r"|pub(?:\([a-z]+\))?\s+(?:let|const)\b|///\|)",
+    re.M,
+)
 
 
 def blocks():
