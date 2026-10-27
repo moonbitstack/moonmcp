@@ -12,7 +12,7 @@ license = "Apache-2.0"
 
 keywords = [ "mcp", "llm", "agent" ]
 
-description = "Model Context Protocol servers for MoonBit."
+description = "Model Context Protocol servers and clients for MoonBit."
 
 import {
   "moonbitlang/async@0.22.5",
