@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>moonmcp — an MCP server framework that feels like gravity</title>
+<script>document.documentElement.classList.add("js")</script>
+<title>moonmcp — Model Context Protocol servers for MoonBit</title>
 <meta name="description" content="moonmcp is a Model Context Protocol server framework for MoonBit: dual-era, Streamable HTTP and stdio, explicit registration and #mcp annotations.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,8 +56,8 @@
   .stat .l{color:var(--muted);font-size:.82rem;margin-top:.4rem;letter-spacing:.02em}
 
   .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.1rem;max-width:1120px;margin:2.4rem auto 0;padding:0 1rem}
-  @media (max-width:980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:560px){.cards{grid-template-columns:1fr}}
+  @media (width <= 980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (width <= 560px){.cards{grid-template-columns:1fr}}
   .card{padding:1.5rem 1.5rem 1.6rem}
   .card h3{margin:.2rem 0 .5rem;font-size:1.25rem}
   .card p{color:var(--muted);font-size:.95rem;margin:0}
@@ -75,7 +76,7 @@
   .cta .links a:hover{border-color:var(--gold);text-decoration:none;background:var(--glass-bg)}
 
   .wrap{max-width:1120px;margin:0 auto;padding:0 1rem}
-  @media (max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
+  @media (width <= 680px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -160,8 +161,8 @@
   </svg>
 
   <div class="hero-copy">
-    <h1>A capability is not an endpoint. It is a <span class="accent">body the agent is drawn toward.</span></h1>
-    <p class="sub">moonmcp is a Model Context Protocol server framework for MoonBit. A server is a star; its tools, resources and prompts are bodies in orbit; an agent is a wandering ember that draws near, calls, and drifts on.</p>
+    <h1>Model Context Protocol <span class="accent">servers for MoonBit.</span></h1>
+    <p class="sub">Register tools, resources and prompts, then serve them over Streamable HTTP or stdio. One server answers both protocol eras, so clients of either connect without configuration.</p>
     <div class="glance">
       <span class="chip">eras <b>2026&#8209;07&#8209;28</b> · <b>2025&#8209;11&#8209;25</b> · <b>2024&#8209;11&#8209;05</b></span>
       <span class="chip">transports <b>Streamable&nbsp;HTTP</b> · <b>stdio</b></span>
@@ -197,7 +198,7 @@
       <p>Call <code>server.tool(name, handler, input_schema=…)</code> by hand, or mark a function <code>#mcp.tool</code> and let the generator write the same registration — and the JSON Schema from the argument types — for you.</p>
     </div>
     <div class="card glass">
-      <div class="tag">Three kinds of gravity</div>
+      <div class="tag">Three capability kinds</div>
       <h3>Tools, resources, prompts</h3>
       <div class="gems">
         <span><i class="gem gem-jade"></i> Tools — jade</span>
@@ -211,13 +212,13 @@
 
 <section class="wrap reveal">
   <div class="cta glass">
-    <div class="kicker">Begin</div>
-    <h2>Weave your own armillary.</h2>
+    <div class="kicker">Start</div>
+    <h2>Add moonmcp to a project.</h2>
     <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
     <div class="links">
       <a href="guide.html">Read the guide &#8594;</a>
       <a href="api.html">Browse the API &#8594;</a>
-      <a href="showcase.html">See it in motion &#8594;</a>
+      <a href="showcase.html">See recorded sessions &#8594;</a>
     </div>
   </div>
 </section>

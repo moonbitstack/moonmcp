@@ -19,9 +19,9 @@ SRC = ROOT / "src"
 PACKAGES = [
     ("moonmcp", "moonmcp", "Facade", "The names a server is written with. Re-exports the server and the three capability types, plus argument decoding."),
     ("server", "server", "Server", "One server holds tools, resources, templates and prompts, and speaks both protocol eras over Streamable HTTP and stdio."),
-    ("tools", "tools", "Tools", "A tool is a jade body: a handler, an input schema, and a typed result."),
-    ("resources", "resources", "Resources", "A resource is an amber body: a URI and a reader. Templates fill a URI pattern from arguments."),
-    ("prompts", "prompts", "Prompts", "A prompt is an amethyst body: a renderer that turns arguments into messages."),
+    ("tools", "tools", "Tools", "A tool: a handler, an input schema, and a typed result."),
+    ("resources", "resources", "Resources", "A resource: a URI and a reader. Templates fill a URI pattern from arguments."),
+    ("prompts", "prompts", "Prompts", "A prompt: a renderer that turns arguments into messages."),
     ("types", "types", "Wire types", "The JSON-RPC and MCP data shapes, method constants and protocol-version helpers shared with the wire."),
     ("exceptions", "exceptions", "Errors", "The error type the handlers raise, and how it maps onto JSON-RPC error codes."),
     ("component", "component", "Component", "The shared metadata every capability carries: name, title, description, tags and icons."),
@@ -71,6 +71,54 @@ def parse_mbti(path):
         kind, name = classify(buf)
         sig = " ".join(buf.split())
         items.append((kind, sig, name))
+    return items
+
+
+def count_pub_decls(path):
+    """Number of public declarations in an mbti — each begins a line with `pub`."""
+    n = 0
+    for line in read(path).splitlines():
+        s = line.strip()
+        if s.startswith("pub ") or s.startswith("pub(") or s.startswith("pub\t"):
+            n += 1
+    return n
+
+
+def target_files(pkgdir):
+    """Target-specific sources whose public items the target-agnostic mbti omits."""
+    d = SRC / pkgdir
+    files = []
+    for pat in ("*.native.mbt", "*.js.mbt", "*.wasm.mbt", "*.wasm-gc.mbt"):
+        files.extend(sorted(d.glob(pat)))
+    return files
+
+
+def parse_pub_decls(path):
+    """Public declarations in a source file, signature only (cut at `{` or `=`)."""
+    items = []
+    lines = read(path).splitlines()
+    i = 0
+    while i < len(lines):
+        s = lines[i].strip()
+        if not (s.startswith("pub ") or s.startswith("pub(")):
+            i += 1
+            continue
+        sig = s
+        j = i
+        while j < len(lines):
+            if "{" in sig:
+                sig = sig.split("{", 1)[0]
+                break
+            if " = " in sig:
+                sig = sig.split(" = ", 1)[0]
+                break
+            if j + 1 >= len(lines):
+                break
+            j += 1
+            sig += " " + lines[j].strip()
+        kind, name = classify(sig)
+        items.append((kind, " ".join(sig.split()), name))
+        i = j + 1
     return items
 
 
@@ -229,7 +277,24 @@ def tint(sig):
     return s
 
 
+def clean_doc(t):
+    """The site must not name other libraries (docs.md). The source's doc
+    comments note one, so drop those notes from the rendered text only; the
+    source itself is left untouched."""
+    t = re.sub(r"\s*\(←\s*FastMCP'?s?.*?\)(?=\s*[:.;,])", "", t)
+    t = re.sub(r"\s*\(←\s*FastMCP'?s?[^)]*\)", "", t)
+    t = re.sub(r"\s*←\s*FastMCP'?s?[^)]*\)?", "", t)
+    t = t.replace("FastMCP-namespaced", "Namespaced")
+    t = re.sub(r"\bFastMCP-specific\s+", "", t)
+    t = re.sub(r"FastMCP(?!Meta)", "MCP", t)
+    t = re.sub(r"\s{2,}", " ", t).strip()
+    if t and t[0].islower():
+        t = t[0].upper() + t[1:]
+    return t
+
+
 def prose(t):
+    t = clean_doc(t)
     t = html.escape(t)
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
 
@@ -254,6 +319,18 @@ def main():
         for sc in src_candidates:
             docs.update(parse_source_comments(sc))
         items = parse_mbti(mbti)
+        declared = count_pub_decls(mbti)
+        if len(items) != declared:
+            raise SystemExit(
+                "gen_api: %s lists %d of %d public declarations; the reference would be incomplete"
+                % (pkgdir, len(items), declared))
+        # the committed mbti is target-agnostic; add native/js-only public items
+        have = {(k, n) for k, _, n in items}
+        for tf in target_files(pkgdir):
+            for kind, sig, name in parse_pub_decls(tf):
+                if (kind, name) not in have:
+                    items.append((kind, sig, name))
+                    have.add((kind, name))
         rows = []
         for kind, sig, name in items:
             d = docs.get(name)
@@ -291,6 +368,7 @@ def main():
 
     head = ('<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<script>document.documentElement.classList.add("js")</script>'
             '<title>moonmcp — API reference</title>'
             '<meta name="description" content="The complete public API of moonmcp, a Model Context Protocol server framework for MoonBit.">'
             '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">'

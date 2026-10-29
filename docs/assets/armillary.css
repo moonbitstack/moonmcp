@@ -107,6 +107,7 @@ a:hover{text-decoration:underline}
 h1,h2,h3,h4{font-family:"Fraunces","Noto Serif SC",Georgia,serif;font-weight:400;letter-spacing:-.02em;line-height:1.12}
 code,pre,kbd,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-ligatures:no-contextual}
 html,button,input,textarea,select{font-variant-ligatures:no-contextual}
+:not(pre) > code,td,th{overflow-wrap:anywhere}
 
 /* ---- scrollbars: custom everywhere, hidden thumb at top (docs.md) ---- */
 @supports selector(::-webkit-scrollbar){
@@ -114,13 +115,14 @@ html,button,input,textarea,select{font-variant-ligatures:no-contextual}
   html::-webkit-scrollbar-track{background:transparent}
   html::-webkit-scrollbar-thumb{border-radius:99px;border:3px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 24%,transparent)}
   html.at-top::-webkit-scrollbar-thumb{background-color:transparent}
-  pre::-webkit-scrollbar{width:9px;height:9px}
-  pre::-webkit-scrollbar-thumb{border-radius:99px;border:2px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 22%,transparent)}
+  pre::-webkit-scrollbar,.sig::-webkit-scrollbar,.msg .body::-webkit-scrollbar,.sidebar::-webkit-scrollbar,.exchange::-webkit-scrollbar{width:9px;height:9px}
+  pre::-webkit-scrollbar-track,.sig::-webkit-scrollbar-track,.msg .body::-webkit-scrollbar-track,.sidebar::-webkit-scrollbar-track,.exchange::-webkit-scrollbar-track{background:transparent}
+  pre::-webkit-scrollbar-thumb,.sig::-webkit-scrollbar-thumb,.msg .body::-webkit-scrollbar-thumb,.sidebar::-webkit-scrollbar-thumb,.exchange::-webkit-scrollbar-thumb{border-radius:99px;border:2px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 22%,transparent)}
 }
 @supports not selector(::-webkit-scrollbar){
   html{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 26%,transparent) transparent}
   html.at-top{scrollbar-color:transparent transparent}
-  pre{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 24%,transparent) transparent}
+  pre,.sig,.msg .body,.sidebar,.exchange{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 24%,transparent) transparent}
 }
 
 /* ---- frosted glass ---- */
@@ -182,7 +184,7 @@ html,button,input,textarea,select{font-variant-ligatures:no-contextual}
 .sidebar .side-title{font-family:"JetBrains Mono",monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.22em;color:var(--gold);margin:0 0 1rem .2rem}
 .side-nav{display:flex;flex-direction:column;gap:.08rem}
 .side-nav .group{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--faint);margin:1.1rem 0 .35rem .2rem}
-.side-nav a{color:var(--muted);font-size:.9rem;padding:.32rem .6rem;border-radius:8px;border-left:2px solid transparent}
+.side-nav a{color:var(--muted);font-size:.9rem;padding:.32rem .6rem;border-radius:0 8px 8px 0;border-left:2px solid transparent}
 .side-nav a:hover{background:var(--glass-bg);color:var(--ink);text-decoration:none}
 .side-nav a.active{color:var(--ink);background:var(--glass-bg);border-left-color:var(--gold)}
 main.doc{padding:2.6rem clamp(1.2rem,3vw,2.6rem) 6rem;min-width:0}
@@ -227,11 +229,11 @@ footer.site{margin-top:3.4rem;padding-top:1.4rem;border-top:1px solid var(--hair
 footer.site a{color:var(--muted)}
 footer.site .grow{margin-left:auto}
 
-/* reveal on scroll */
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1)}
-.reveal.in{opacity:1;transform:none}
+/* reveal on scroll — only hidden when JS is present, so content never disappears */
+html.js .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1)}
+html.js .reveal.in{opacity:1;transform:none}
 
-@media (max-width:860px){
+@media (width <= 860px){
   .shell{grid-template-columns:1fr}
   .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--hair)}
   .side-nav{flex-flow:row wrap}.side-nav a{border-left:none}

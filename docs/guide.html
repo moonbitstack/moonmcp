@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>document.documentElement.classList.add("js")</script>
 <title>moonmcp — Guide</title>
 <meta name="description" content="A progressive guide to moonmcp: register a tool, annotate one, add resources and prompts, choose a transport, and connect a client.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -54,7 +55,7 @@
   <main class="doc">
     <header>
       <div class="kicker">Guide</div>
-      <h1 class="doc-h1">From a star to a server</h1>
+      <h1 class="doc-h1">Build a server, step by step</h1>
       <p class="lead">A short walk through moonmcp. Register a tool by hand, then let the <code>#mcp</code> generator write the same registration for you. Add resources, prompts, pick a transport, and point a client at it.</p>
     </header>
 
@@ -67,7 +68,7 @@
 
     <section class="section" id="register">
       <h2>Register a tool, by hand</h2>
-      <p class="pdesc">A server is a star. A tool is a jade body placed in orbit: a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
+      <p class="pdesc">A tool has a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
       <div class="code"><pre><code>let mcp = @server.Server::new("demo", version="1.0.0",
   instructions="Arithmetic and greetings, for trying a client out.")
 mcp.tool(
@@ -127,7 +128,7 @@ mcp.run_stdio()</code></pre></div>
 
     <section class="section" id="resources">
       <h2>Resources &amp; templates</h2>
-      <p class="pdesc">A resource is an amber body: a URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
+      <p class="pdesc">A resource has a URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
       <div class="code"><pre><code>mcp.resource("config://app", () => "{\"theme\":\"dark\"}",
   name="app config", mime_type="application/json")
 
@@ -144,7 +145,7 @@ mcp.template("users://{id}/profile", params => {
 
     <section class="section" id="prompts">
       <h2>Prompts</h2>
-      <p class="pdesc">A prompt is an amethyst body: a renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments.</p>
+      <p class="pdesc">A prompt is a renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments.</p>
       <div class="code"><pre><code>#mcp.prompt(description="Ask for a code review")
 fn review(code : String, focus? : String) -> String {
   let what = match focus {
@@ -215,7 +216,7 @@ fn review(code : String, focus? : String) -> String {
 <style>
   .exchange .msg .body code{font-size:.82rem}
   .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1rem}
-  @media (max-width:680px){.grid-2{grid-template-columns:1fr}}
+  @media (width <= 680px){.grid-2{grid-template-columns:1fr}}
   .code{position:relative}
   .code .copy{position:absolute;top:.6rem;right:.6rem}
 </style>

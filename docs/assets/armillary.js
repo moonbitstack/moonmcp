@@ -3,6 +3,7 @@
 (function () {
   "use strict";
   var root = document.documentElement;
+  root.classList.add("js"); /* content stays visible if this script never runs */
 
   /* theme: night is the default celestial moment; dawn is the toggle */
   var stored = null;
@@ -13,7 +14,8 @@
     root.setAttribute("data-theme", "dark");
   }
   document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
       var cur = root.getAttribute("data-theme") === "light" ? "dark" : "light";
       root.setAttribute("data-theme", cur);
       try { localStorage.setItem("moonmcp-theme", cur); } catch (e) {}

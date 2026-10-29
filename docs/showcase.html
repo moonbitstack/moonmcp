@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>document.documentElement.classList.add("js")</script>
 <title>moonmcp — Showcase</title>
 <meta name="description" content="Recorded client/server sessions for both eras of the protocol, and the debug page that calls a moonmcp server from the browser.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -25,7 +26,7 @@
   .msg .body .gem{margin-right:.15rem}
 
   .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin-top:1.1rem}
-  @media (max-width:680px){.shots{grid-template-columns:1fr}}
+  @media (width <= 680px){.shots{grid-template-columns:1fr}}
   .shot{margin:0;overflow:hidden;padding:0}
   .shot img{width:100%;height:auto;display:block}
   .shot figcaption{padding:.7rem .9rem;color:var(--muted);font-size:.86rem;border-top:1px solid var(--hair)}
@@ -76,8 +77,8 @@
   <main class="doc">
     <header>
       <div class="kicker">Showcase</div>
-      <h1 class="doc-h1">The server, caught in motion</h1>
-      <p class="lead">Two recorded exchanges with the demo server — one per era of the protocol — and the browser debug page that calls a server by hand. Read the wire in order: each message is a body the agent draws near to, then drifts on from.</p>
+      <h1 class="doc-h1">Recorded sessions</h1>
+      <p class="lead">Two recorded exchanges with the demo server, one per era of the protocol, and the browser debug page that calls a server by hand. Each message is listed in order: the request the client sent, then the reply the server gave.</p>
       <div class="legend">
         <span><i class="gem gem-jade"></i> tool</span>
         <span><i class="gem gem-amber"></i> resource</span>
@@ -87,7 +88,7 @@
 
     <section class="section" id="era-2026">
       <h2>Revision 2026&#8209;07&#8209;28 — stateless</h2>
-      <p class="pdesc">No handshake. Every request names its version in <code>_meta</code>, and the server answers it on its own. The client and server are strangers twice over, yet each call lands.</p>
+      <p class="pdesc">No handshake. Every request names its version in <code>_meta</code>, and the server answers it on its own. Client and server keep no shared state between calls.</p>
       <div class="session glass reveal">
         <div class="era"><span class="rev">2026&#8209;07&#8209;28</span><h3>List, call, read</h3></div>
         <p class="note">Field names follow the MCP wire. The <code>resultType</code> and <code>server</code> fields are moonmcp's additions for this revision; every other result is plain MCP.</p>

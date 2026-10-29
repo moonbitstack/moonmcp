@@ -1,7 +1,16 @@
-# moonmcp
+<p align="center">
+  <strong>moonmcp</strong><br>
+  Model Context Protocol servers for MoonBit.<br>
+  Register tools, resources, resource templates and prompts; serve them over<br>
+  Streamable HTTP or stdio, in both protocol eras.
+</p>
 
-Model Context Protocol servers for MoonBit. Register tools, resources, resource
-templates and prompts; serve them over Streamable HTTP or stdio.
+<p align="center">
+  <a href="docs/index.html"><strong>Home</strong></a> &nbsp;·&nbsp;
+  <a href="docs/guide.html"><strong>Guide</strong></a> &nbsp;·&nbsp;
+  <a href="docs/api.html"><strong>API</strong></a> &nbsp;·&nbsp;
+  <a href="https://mooncakes.io/docs/moonbitstack/moonmcp"><strong>mooncakes</strong></a>
+</p>
 
 One server answers both eras of the protocol. A request that carries its
 protocol version in `_meta` is served statelessly under revision 2026-07-28; an
@@ -201,15 +210,12 @@ moon add moonbitstack/moonmcp
 
 ## Documentation
 
-The published docs site is generated from this repository:
+The site lives in [`docs/`](docs/):
 
-- [`docs/index.html`](docs/index.html) — the Armillary homepage and tour
+- [`docs/index.html`](docs/index.html) — the homepage and tour
 - [`docs/guide.html`](docs/guide.html) — a progressive guide (register, annotate, resources, prompts, transports, connect)
 - [`docs/api.html`](docs/api.html) — the full API reference, generated from the package interfaces by [`scripts/gen_api.py`](scripts/gen_api.py)
 - [`docs/showcase.html`](docs/showcase.html) — recorded sessions for both protocol eras and the debug page
-
-`docs/api.html` is reproducible: `python3 scripts/gen_api.py` must leave the
-tree unchanged, and CI checks `git diff --exit-code docs/api.html`.
 
 ## Licence
 
