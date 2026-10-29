@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -168,7 +168,7 @@ fn review(code : String, focus? : String) -> String {
       <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives a moonasgi app for mooncat over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
       <div class="grid-2">
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">Streamable HTTP</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--brass)">Streamable HTTP</div>
           <div class="code" style="margin-top:.7rem"><pre><code>@mooncat.serve(
   mcp.to_asgi(path="/mcp"),
   port=12000,
@@ -176,7 +176,7 @@ fn review(code : String, focus? : String) -> String {
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
         </div>
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">stdio</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--brass)">stdio</div>
           <div class="code" style="margin-top:.7rem"><pre><code>mcp.run_stdio()</code></pre></div>
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
         </div>

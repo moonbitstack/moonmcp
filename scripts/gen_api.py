@@ -366,7 +366,7 @@ def main():
                 '<a class="ghost" href="guide.html">Guide</a> '
                 '<a class="ghost" href="showcase.html">Showcase</a></div></aside>')
 
-    head = ('<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">'
+    head = ('<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             '<script>document.documentElement.classList.add("js")</script>'
             '<title>moonmcp — API reference</title>'
