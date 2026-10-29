@@ -14,6 +14,8 @@
 <style>
   .hero{position:relative;min-height:min(92vh,820px);display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:5rem 1rem 3rem;overflow:hidden}
+  .hero::before{content:"";position:absolute;left:50%;top:42%;width:min(78vw,640px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle,color-mix(in srgb,var(--gold) 13%,transparent),transparent 62%);filter:blur(6px);pointer-events:none;z-index:0}
   .hero .orbits{width:min(92vw,720px);height:auto;display:block;margin:0 auto}
   .hero-copy{position:relative;z-index:3;max-width:760px;margin-top:-2.5rem}
   .hero h1{font-size:clamp(2.2rem,5.4vw,4rem);font-style:italic;font-weight:400;margin:.2rem auto .6rem;max-width:18ch;
@@ -132,6 +134,14 @@
       <circle cx="360" cy="300" r="220"/>
     </g>
 
+    <!-- astrolabe limb: graduated ticks around the rim -->
+    <circle cx="360" cy="300" r="252" fill="none" stroke="var(--gold)" stroke-width=".55" stroke-dasharray="1 9" opacity=".38"/>
+    <circle cx="360" cy="300" r="244" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".22"/>
+    <g stroke="var(--gold)" stroke-width=".8" opacity=".55">
+      <line x1="360" y1="48" x2="360" y2="61"/><line x1="360" y1="552" x2="360" y2="539"/>
+      <line x1="108" y1="300" x2="121" y2="300"/><line x1="612" y1="300" x2="599" y2="300"/>
+    </g>
+
     <!-- server core -->
     <circle cx="360" cy="300" r="46" fill="url(#core)" filter="url(#soft)" opacity=".55"/>
     <circle cx="360" cy="300" r="26" fill="url(#core)"/>
@@ -180,6 +190,8 @@
   </div>
 </section>
 
+<div class="rule"><span class="node"></span></div>
+
 <section class="wrap reveal">
   <div class="cards">
     <div class="card glass">
@@ -209,6 +221,8 @@
     </div>
   </div>
 </section>
+
+<div class="rule"><span class="node"></span></div>
 
 <section class="wrap reveal">
   <div class="cta glass">

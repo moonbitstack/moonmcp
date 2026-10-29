@@ -392,6 +392,7 @@ def main():
                  'Generated from source &mdash; it cannot drift from the code.</p>']
     main_html.append(gem_legend())
     main_html.append('</header>')
+    main_html.append('<div class="rule"><span class="node"></span></div>')
 
     for pkgname, title, desc, rows in sections:
         main_html.append('<section class="section" id="pkg-%s"><h2>%s</h2><p class="pdesc">%s</p>'
