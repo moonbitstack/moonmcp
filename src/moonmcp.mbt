@@ -3,7 +3,13 @@
 // may import instead.
 
 ///|
-pub using @server {type Server, type Scope, decode, decode_option}
+pub using @server {
+  type Server,
+  type Scope,
+  decode,
+  decode_option,
+  debug_page_html,
+}
 
 ///|
 pub using @tools {type Tool, type ToolResult}

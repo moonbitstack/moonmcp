@@ -16,16 +16,27 @@
 /// A request whose `Origin` header names another site is refused with `403`, as
 /// the transport requires against DNS rebinding. An origin passes when its host
 /// is the request's own `Host`, a loopback address, or one listed in `origins`.
+///
+/// `debug_page` names a path the debug page is served at, beside the endpoint:
+/// a browser opened on it lists what the server offers and calls it, in both
+/// eras of the protocol. Nothing is served there unless you name the path, and
+/// the path must differ from the endpoint's; the page is off by default and
+/// never carries credentials of its own, so it is for development servers.
 pub fn Server::to_asgi(
   self : Server,
   path~ : String = "/mcp",
   origins~ : Array[String] = [],
+  debug_page? : String,
 ) -> @moonasgi.AsgiApp {
   (scope, receive, send) => {
     match scope {
       Http(hs) => {
         let body = read_body(receive)
-        let (status, headers, payload) = self.over_http(hs, body, path, origins)
+        let (status, headers, payload) = match debug_page {
+          Some(page) if page != path && at_page(hs.path, page) =>
+            debug_reply(hs.http_method, debug_page_html(endpoint=path))
+          _ => self.over_http(hs, body, path, origins)
+        }
         send(HttpResponseStart(status~, headers~, trailers=false))
         send(HttpResponseBody(body=payload, more_body=false))
       }
@@ -42,6 +53,37 @@ pub fn Server::to_asgi(
           }
         }
     }
+  }
+}
+
+///|
+/// Whether `got` names `want`: the path as given, or with a trailing slash, as
+/// a browser asks for a directory.
+fn at_page(got : String, want : String) -> Bool {
+  got == want || got == want + "/"
+}
+
+///|
+/// The debug page for `GET`, its headers alone for `HEAD`, and `405` for
+/// anything else. It goes out with `no-store`, so that a browser never shows a
+/// listing from before the server's registrations changed.
+fn debug_reply(
+  http_method : String,
+  page : String,
+) -> (Int32, Array[(String, String)], Bytes) {
+  let headers = [
+    ("content-type", "text/html; charset=utf-8"),
+    ("cache-control", "no-store"),
+  ]
+  match http_method {
+    "GET" => (200, headers, @utf8.encode(page))
+    "HEAD" => (200, headers, b"")
+    _ =>
+      (
+        405,
+        [("allow", "GET, HEAD"), ("content-type", "text/plain; charset=utf-8")],
+        b"Method Not Allowed",
+      )
   }
 }
 

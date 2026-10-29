@@ -12,6 +12,8 @@ import {
 }
 
 // Values
+pub fn debug_page_html(endpoint? : String) -> String
+
 pub fn[T : @json.FromJson] decode(Map[String, Json], String) -> T raise @json.JsonDecodeError
 
 pub fn[T : @json.FromJson] decode_option(Map[String, Json], String) -> T? raise @json.JsonDecodeError
@@ -44,7 +46,7 @@ pub fn Server::prompt(Self, String, async (Map[String, Json]) -> String, title? 
 pub fn Server::resource(Self, String, async () -> String, name? : String, title? : String, description? : String, mime_type? : String) -> Unit
 pub async fn Server::serve_lines(Self, async () -> String?, async (String) -> Unit) -> Unit
 pub fn Server::template(Self, String, async (Map[String, Json]) -> String, name? : String, title? : String, description? : String, mime_type? : String) -> Unit
-pub fn Server::to_asgi(Self, path? : String, origins? : Array[String]) -> async (@spec.Scope, async () -> @spec.Event, async (@spec.Event) -> Unit) -> Unit
+pub fn Server::to_asgi(Self, path? : String, origins? : Array[String], debug_page? : String) -> async (@spec.Scope, async () -> @spec.Event, async (@spec.Event) -> Unit) -> Unit
 pub fn Server::tool(Self, String, async (Map[String, Json]) -> Json, input_schema? : Json, title? : String, description? : String, output_schema? : Json, annotations? : @types.ToolAnnotations) -> Unit
 
 // Type aliases

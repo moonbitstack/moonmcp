@@ -60,6 +60,23 @@ jobs:
           printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"greet","arguments":{"name":"leo","language":"zh"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' \
             | moon run src/examples/annotations --target native | grep -q 'leo'
 
+      - name: debug page is served beside the endpoint
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          moon run src/examples/http --target native & server=$!
+          curl -sS --retry 60 --retry-connrefused --retry-delay 1 \
+            -o "$RUNNER_TEMP/debug-page.html" http://127.0.0.1:12000/debug
+          grep -q 'moonmcp' "$RUNNER_TEMP/debug-page.html"
+          grep -q '{"endpoint":"/mcp"}' "$RUNNER_TEMP/debug-page.html"
+          curl -sS -o "$RUNNER_TEMP/debug-reply.json" -X POST http://127.0.0.1:12000/mcp \
+            -H 'content-type: application/json' \
+            -H 'mcp-protocol-version: 2026-07-28' \
+            -H 'mcp-method: tools/list' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28"}}}'
+          grep -q '"name":"add"' "$RUNNER_TEMP/debug-reply.json"
+          kill $server
+
       - name: documentation blocks compile
         if: runner.os == 'Linux'
         run: python3 scripts/check_docs.py

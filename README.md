@@ -110,7 +110,7 @@ before serving.
 
 | Transport | Call | Notes |
 |:--|:--|:--|
-| Streamable HTTP | `to_asgi(path="/mcp", origins=[])` | An ASGI application. One POST per message, answered with one JSON object or `202`. Version, method and name headers are checked against the body; a foreign `Origin` is refused with `403`. |
+| Streamable HTTP | `to_asgi(path="/mcp", origins=[])` | An ASGI application. One POST per message, answered with one JSON object or `202`. Version, method and name headers are checked against the body; a foreign `Origin` is refused with `403`. `debug_page?` names a path the debug page is served at. |
 | stdio | `run_stdio()` | One message per line on standard input and output. Native. |
 | Any line stream | `serve_lines(read, write)` | The stdio loop over streams of your own. |
 | In process | `handle(message)` | One JSON-RPC message in, the reply out; `None` for a notification. |
@@ -119,12 +119,65 @@ Under revision 2026-07-28 every result carries `resultType` and the server's
 identity; list results also carry `ttlMs` and `cacheScope`, set with
 `Server::new(ttl_ms=, scope=)`.
 
+## Debug page
+
+While a server is being written, give `to_asgi` a path and it serves a page
+that lists what the server offers and calls it from the browser:
+
+```moonbit nocheck
+@mooncat.serve(mcp.to_asgi(debug_page="/debug"), port=12000)
+```
+
+Open `http://127.0.0.1:12000/debug`. The page asks the endpoint for the tools,
+resources, resource templates and prompts, fills an argument form in from each
+tool's input schema, and shows the JSON-RPC request it built beside the reply
+it got back, in either era of the protocol. Nothing is served there until a
+path is named, and the path cannot be the endpoint's, so a server that is not
+being debugged answers exactly as before. `debug_page_html(endpoint=...)` gives
+the same page to a router of your own.
+
+## Connect a client
+
+A client that starts the server as a subprocess is given the command:
+
+<!-- nocheck -->
+```json
+{
+  "mcpServers": {
+    "demo": {
+      "command": "moon",
+      "args": ["run", "src/examples/stdio", "--target", "native"]
+    }
+  }
+}
+```
+
+One that reaches the server over HTTP is given the URL, with `streamable-http`
+as the transport:
+
+<!-- nocheck -->
+```json
+{
+  "mcpServers": {
+    "demo": {
+      "url": "http://127.0.0.1:12000/mcp",
+      "transport": "streamable-http"
+    }
+  }
+}
+```
+
+Clients of both eras connect without configuration: the handshake revisions
+open with `initialize`, and a client that speaks 2026-07-28 names its version in
+`_meta` and needs no handshake at all. `moonbitstack/moonmcp/config` reads and
+writes the configuration above.
+
 ## Examples
 
 | Example | Shows |
 |:--|:--|
 | [`demo`](src/examples/demo/) | One server with two tools, a resource, a resource template and a prompt |
-| [`http`](src/examples/http/) | That server over Streamable HTTP: `moon run src/examples/http --target native` |
+| [`http`](src/examples/http/) | That server over Streamable HTTP, with the debug page at `/debug`: `moon run src/examples/http --target native` |
 | [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
 | [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
 
@@ -133,7 +186,7 @@ identity; list results also carry `ttlMs` and `cacheScope`, set with
 | Package | What it holds |
 |:--|:--|
 | `moonmcp` | The names a server is written with: `Server`, `Tool`, `Resource`, `Prompt` and the rest |
-| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio; `decode`, which reads an argument as a parameter's type |
+| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio, the debug page; `decode`, which reads an argument as a parameter's type |
 | `cmd/mcp` | The generator behind `#mcp.tool`, `#mcp.resource` and `#mcp.prompt` |
 | `types` | The wire model: content blocks, tools, prompts, resources, capabilities, results |
 | `tools`, `resources`, `prompts` | The components a server offers |
