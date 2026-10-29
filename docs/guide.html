@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>moonmcp — Guide</title>
+<meta name="description" content="A progressive guide to moonmcp: register a tool, annotate one, add resources and prompts, choose a transport, and connect a client.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/armillary.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="index.html">
+    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="#D4B87A" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.4"/><ellipse cx="16" cy="16" rx="4.4" ry="11"/></g><circle cx="16" cy="16" r="3.4" fill="#FFF8E8"/></svg>
+    moonmcp
+  </a>
+  <div class="links">
+    <a href="index.html">Home</a>
+    <a href="guide.html" class="active">Guide</a>
+    <a href="api.html">API</a>
+    <a href="showcase.html">Showcase</a>
+    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme">&#9688; theme</a>
+    <a class="ghost" href="https://github.com/moonbitstack/moonmcp">GitHub &#8599;</a>
+  </div>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <p class="side-title">Armillary · moonmcp</p>
+    <nav class="side-nav">
+      <div class="group">Start</div>
+      <a href="#install">Install</a>
+      <a href="#register">Register a tool</a>
+      <a href="#annotate">Annotate instead</a>
+      <div class="group">Capabilities</div>
+      <a href="#resources">Resources &amp; templates</a>
+      <a href="#prompts">Prompts</a>
+      <div class="group">Run it</div>
+      <a href="#transports">Transports</a>
+      <a href="#debug">Debug page</a>
+      <a href="#client">Connect a client</a>
+    </nav>
+    <div class="side-foot" style="margin-top:1.4rem">
+      <a class="ghost" href="index.html">Home</a>
+      <a class="ghost" href="api.html">API</a>
+      <a class="ghost" href="showcase.html">Showcase</a>
+    </div>
+  </aside>
+
+  <main class="doc">
+    <header>
+      <div class="kicker">Guide</div>
+      <h1 class="doc-h1">From a star to a server</h1>
+      <p class="lead">A short walk through moonmcp. Register a tool by hand, then let the <code>#mcp</code> generator write the same registration for you. Add resources, prompts, pick a transport, and point a client at it.</p>
+    </header>
+
+    <section class="section" id="install">
+      <h2>Install</h2>
+      <p class="pdesc">moonmcp is a MoonBit package. Add it to a project, then build a server in the same language your tools are written in.</p>
+      <div class="code"><pre><code>moon add moonbitstack/moonmcp</code></pre><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
+      <p>The examples below all compile against this one dependency. Nothing else is needed to follow along.</p>
+    </section>
+
+    <section class="section" id="register">
+      <h2>Register a tool, by hand</h2>
+      <p class="pdesc">A server is a star. A tool is a jade body placed in orbit: a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
+      <div class="code"><pre><code>let mcp = @server.Server::new("demo", version="1.0.0",
+  instructions="Arithmetic and greetings, for trying a client out.")
+mcp.tool(
+  "add",
+  args => {
+    guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
+      args.get("b") is Some(Number(b, ..)) else {
+      raise @exceptions.Tool("a and b must be numbers")
+    }
+    { "sum": Json(a + b) }
+  },
+  description="Add two numbers",
+  input_schema={
+    "type": "object",
+    "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+    "required": ["a", "b"],
+  },
+)</code></pre><button class="copy" data-copy='let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.tool("add", args => {
+  guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
+    args.get("b") is Some(Number(b, ..)) else {
+    raise @exceptions.Tool("a and b must be numbers")
+  }
+  { "sum": Json(a + b) }
+}, description="Add two numbers",
+   input_schema={"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}},"required":["a","b"]})'>copy</button></div>
+      <p>The handler receives the call's arguments as a <code>Map[String, Json]</code>. Reading a number, then re-reading a string as JSON, is what <code>decode</code> and <code>decode_option</code> do for you when you annotate instead. Raise <code>@exceptions.Tool</code> and the error returns as an <code>isError</code> result.</p>
+      <p>A call the client makes lands back as exactly the JSON you returned:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">call</div><div class="body">tools/call &middot; <code>{ "a": 2, "b": 3 }</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "sum": 5 }</code></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="annotate">
+      <h2>Annotate, instead</h2>
+      <p class="pdesc">The same tool can be written as a plain function. <code>#mcp.tool</code> reads the argument types and builds the input schema; the generator, wired into <code>moonx dev_build</code>, writes the registration <code>moon run</code> would otherwise call by hand.</p>
+      <div class="code"><pre><code>#mcp.tool(description="Add two numbers")
+fn add(a : Double, b : Double) -> Double {
+  a + b
+}
+
+#mcp.tool(name="word_count", description="Count the words of a text")
+fn count(text : String, unique~ : Bool = false) -> Int32 {
+  let words = text.split(" ").filter(w => !w.is_empty()).collect()
+  if unique {
+    let seen : Map[String, Bool] = Map([])
+    for w in words { seen[w] = true }
+    seen.length()
+  } else { words.length() }
+}</code></pre></div>
+      <p>Each parameter becomes a property of the schema, typed from its MoonBit type. An optional parameter (<code>language? : String</code> or a labelled default <code>unique~ : Bool = false</code>) is left out of <code>required</code>, and a missing argument arrives as <code>None</code>. A generated <code>register(server)</code> then attaches every annotated capability:</p>
+      <div class="code"><pre><code>let mcp = @moonmcp.Server::new("annotated", version="1.0.0")
+register(mcp)
+mcp.run_stdio()</code></pre></div>
+    </section>
+
+    <section class="section" id="resources">
+      <h2>Resources &amp; templates</h2>
+      <p class="pdesc">A resource is an amber body: a URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
+      <div class="code"><pre><code>mcp.resource("config://app", () => "{\"theme\":\"dark\"}",
+  name="app config", mime_type="application/json")
+
+mcp.template("users://{id}/profile", params => {
+  guard params.get("id") is Some(String(id)) else { "unknown" }
+  "profile of user " + id
+})</code></pre></div>
+      <p>Reading either one returns the body, with the URI and mime type wrapped for the wire:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">read</div><div class="body">resources/read &middot; <code>config://app</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "contents": [ { "uri": "config://app", "mimeType": "application/json", "text": "{\"theme\":\"dark\"}" } ] }</code></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="prompts">
+      <h2>Prompts</h2>
+      <p class="pdesc">A prompt is an amethyst body: a renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments.</p>
+      <div class="code"><pre><code>#mcp.prompt(description="Ask for a code review")
+fn review(code : String, focus? : String) -> String {
+  let what = match focus {
+    Some(f) => " Focus on " + f + "."
+    None => ""
+  }
+  "Review this code." + what + "\n\n" + code
+}</code></pre></div>
+      <p>Calling it returns the rendered messages:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">get</div><div class="body">prompts/get &middot; <code>{ "code": "fn f() { 1 }" }</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "messages": [ { "role": "user", "content": { "type": "text", "text": "Review this code.\n\nfn f() { 1 }" } } ] }</code></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="transports">
+      <h2>Choose a transport</h2>
+      <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives a moonasgi app for mooncat over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
+      <div class="grid-2">
+        <div class="glass" style="padding:1.2rem 1.3rem">
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">Streamable HTTP</div>
+          <div class="code" style="margin-top:.7rem"><pre><code>@mooncat.serve(
+  mcp.to_asgi(path="/mcp"),
+  port=12000,
+)</code></pre></div>
+          <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
+        </div>
+        <div class="glass" style="padding:1.2rem 1.3rem">
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">stdio</div>
+          <div class="code" style="margin-top:.7rem"><pre><code>mcp.run_stdio()</code></pre></div>
+          <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="debug">
+      <h2>The debug page</h2>
+      <p class="pdesc">While you build, hand the endpoint a path and a browser page appears beside it: it lists every tool, resource, template and prompt, fills a form from each input schema, and shows the raw JSON-RPC request next to the reply &mdash; in either protocol era.</p>
+      <div class="code"><pre><code>mcp.to_asgi(path="/mcp", debug_page="/debug")</code></pre></div>
+      <p>Off by default. Naming a path that is not the endpoint's keeps <code>GET /mcp</code> a <code>405</code>, so a server that is not being debugged answers exactly as before.</p>
+    </section>
+
+    <section class="section" id="client">
+      <h2>Connect a client</h2>
+      <p class="pdesc">Build the server for native stdio and point any MCP client at the binary. Claude Desktop, and most others, take a config like this:</p>
+      <div class="code"><pre><code>{
+  "mcpServers": {
+    "moonmcp-demo": {
+      "command": "./demo",
+      "args": []
+    }
+  }
+}</code></pre></div>
+      <p>Point <code>command</code> at the binary produced by <code>moon build --target native</code> for an example that calls <code>run_stdio()</code>. The server speaks the 2025&#8209;11&#8209;25 handshake on stdio; over HTTP it also answers the 2026&#8209;07&#8209;28 stateless era when the client names it in <code>_meta</code>.</p>
+      <p style="color:var(--muted)">Every snippet on this page is a fragment of the two example servers in <code>src/examples/</code>; each compiles and runs against the published package.</p>
+    </section>
+
+    <footer class="site">
+      <span>moonmcp &middot; Guide</span>
+      <span class="grow"></span>
+      <a href="https://github.com/moonbitstack/moonmcp">GitHub</a>
+      <a href="https://mooncakes.io/docs/moonbitstack/moonmcp">mooncakes</a>
+      <span>Apache-2.0</span>
+    </footer>
+  </main>
+</div>
+
+<style>
+  .exchange .msg .body code{font-size:.82rem}
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1rem}
+  @media (max-width:680px){.grid-2{grid-template-columns:1fr}}
+  .code{position:relative}
+  .code .copy{position:absolute;top:.6rem;right:.6rem}
+</style>
+<script src="assets/armillary.js"></script>
+</body>
+</html>

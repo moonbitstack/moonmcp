@@ -1,0 +1,58 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - 'scripts/gen_api.py'
+      - 'src/**/*.mbti'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moonbit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: refresh interfaces
+        run: moon info --target all
+
+      - name: generate API reference
+        run: python3 scripts/gen_api.py
+
+      - name: API reference is reproducible
+        run: |
+          git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/api.html
+          git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/assets/numbers.js
+
+      - name: setup pages
+        uses: actions/configure-pages@v6
+
+      - name: upload
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+      - name: deploy
+        uses: actions/deploy-pages@v4

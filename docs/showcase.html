@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>moonmcp — Showcase</title>
+<meta name="description" content="Recorded client/server sessions for both eras of the protocol, and the debug page that calls a moonmcp server from the browser.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/armillary.css">
+<style>
+  /* showcase-specific layout */
+  .session{margin-top:1.2rem;padding:1.4rem 1.5rem 1.6rem}
+  .session .era{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-bottom:.3rem}
+  .session .era .rev{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:var(--gold);border:1px solid var(--glass-edge);border-radius:99px;padding:.18rem .6rem}
+  .session .era h3{font-size:1.25rem;margin:0}
+  .session .note{color:var(--muted);font-size:.9rem;max-width:70ch;margin:.2rem 0 1.1rem}
+  .msg{padding:.15rem 0}
+  .msg .body{padding:.6rem .85rem}
+  .msg .body .method{display:flex;align-items:center;gap:.45rem;font-family:"JetBrains Mono",monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.5rem}
+  .msg .body .method .verb{color:var(--ink);font-weight:500;letter-spacing:.04em}
+  .msg .body pre{margin:0;font-size:.82rem;line-height:1.65}
+  .msg .body .gem{margin-right:.15rem}
+
+  .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin-top:1.1rem}
+  @media (max-width:680px){.shots{grid-template-columns:1fr}}
+  .shot{margin:0;overflow:hidden;padding:0}
+  .shot img{width:100%;height:auto;display:block}
+  .shot figcaption{padding:.7rem .9rem;color:var(--muted);font-size:.86rem;border-top:1px solid var(--hair)}
+  .shot figcaption b{color:var(--ink);font-weight:500}
+
+  .legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.4rem 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;color:var(--muted)}
+  .runline{display:flex;align-items:center;gap:.6rem;background:var(--code-bg);border:1px solid var(--hair);border-radius:11px;padding:.7rem 1rem;margin-top:.8rem;flex-wrap:wrap}
+  .runline .prompt{color:var(--jade);font-weight:500;user-select:none;font-family:"JetBrains Mono",monospace}
+  .runline code{flex:1;font-size:.9rem;min-width:200px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="index.html">
+    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="#D4B87A" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.4"/><ellipse cx="16" cy="16" rx="4.4" ry="11"/></g><circle cx="16" cy="16" r="3.4" fill="#FFF8E8"/></svg>
+    moonmcp
+  </a>
+  <div class="links">
+    <a href="index.html">Home</a>
+    <a href="guide.html">Guide</a>
+    <a href="api.html">API</a>
+    <a href="showcase.html" class="active">Showcase</a>
+    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme">&#9688; theme</a>
+    <a class="ghost" href="https://github.com/moonbitstack/moonmcp">GitHub &#8599;</a>
+  </div>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <p class="side-title">Armillary · moonmcp</p>
+    <nav class="side-nav">
+      <div class="group">Sessions</div>
+      <a href="#era-2026">2026&#8209;07&#8209;28 · stateless</a>
+      <a href="#era-2025">2025&#8209;11&#8209;25 · handshake</a>
+      <div class="group">Debug page</div>
+      <a href="#gallery">Gallery</a>
+      <a href="#how">Run it yourself</a>
+    </nav>
+    <div class="side-foot" style="margin-top:1.4rem">
+      <a class="ghost" href="index.html">Home</a>
+      <a class="ghost" href="guide.html">Guide</a>
+      <a class="ghost" href="api.html">API</a>
+    </div>
+  </aside>
+
+  <main class="doc">
+    <header>
+      <div class="kicker">Showcase</div>
+      <h1 class="doc-h1">The server, caught in motion</h1>
+      <p class="lead">Two recorded exchanges with the demo server — one per era of the protocol — and the browser debug page that calls a server by hand. Read the wire in order: each message is a body the agent draws near to, then drifts on from.</p>
+      <div class="legend">
+        <span><i class="gem gem-jade"></i> tool</span>
+        <span><i class="gem gem-amber"></i> resource</span>
+        <span><i class="gem gem-amethyst"></i> prompt</span>
+      </div>
+    </header>
+
+    <section class="section" id="era-2026">
+      <h2>Revision 2026&#8209;07&#8209;28 — stateless</h2>
+      <p class="pdesc">No handshake. Every request names its version in <code>_meta</code>, and the server answers it on its own. The client and server are strangers twice over, yet each call lands.</p>
+      <div class="session glass reveal">
+        <div class="era"><span class="rev">2026&#8209;07&#8209;28</span><h3>List, call, read</h3></div>
+        <p class="note">Field names follow the MCP wire. The <code>resultType</code> and <code>server</code> fields are moonmcp's additions for this revision; every other result is plain MCP.</p>
+        <div class="thread-col">
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><i class="gem gem-jade"></i><span class="verb">tools/list</span> &middot; POST /mcp</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; tools/list</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      { "name": "add", "description": "Add two numbers",
+        "inputSchema": { "type": "object",
+          "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+          "required": ["a", "b"] } },
+      { "name": "greet", "description": "Greet someone by name",
+        "inputSchema": { "type": "object",
+          "properties": { "name": { "type": "string" } }, "required": ["name"] } }
+    ],
+    "resultType": "tool/list",
+    "server": { "name": "demo", "version": "1.0.0" }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><i class="gem gem-jade"></i><span class="verb">tools/call</span> &middot; add</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "add",
+    "arguments": { "a": 2, "b": 3 },
+    "_meta": { "io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {} }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; tools/call</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [ { "type": "text", "text": "{\"sum\":5}" } ],
+    "isError": false,
+    "resultType": "tool",
+    "server": { "name": "demo", "version": "1.0.0" }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><i class="gem gem-amber"></i><span class="verb">resources/read</span> &middot; config://app</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "resources/read",
+  "params": {
+    "uri": "config://app",
+    "_meta": { "io.modelcontextprotocol/protocolVersion": "2026-07-28", "io.modelcontextprotocol/clientCapabilities": {} }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; resources/read</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "contents": [ { "uri": "config://app", "mimeType": "application/json", "text": "{\"theme\":\"dark\"}" } ],
+    "resultType": "resource",
+    "server": { "name": "demo", "version": "1.0.0" }
+  }
+}</code></pre>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="era-2025">
+      <h2>Revision 2025&#8209;11&#8209;25 — the handshake</h2>
+      <p class="pdesc">The older shape. A client opens with <code>initialize</code>, reads the server's capabilities, and only then lists, calls and renders. moonmcp answers every revision back to 2024&#8209;11&#8209;05 without a config change.</p>
+      <div class="session glass reveal">
+        <div class="era"><span class="rev">2025&#8209;11&#8209;25</span><h3>initialize, then work</h3></div>
+        <p class="note">A request that does not name a version falls back to this handshake. The same server, the same tools — only the opening moves differ.</p>
+        <div class="thread-col">
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><span class="verb">initialize</span></div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {},
+    "clientInfo": { "name": "claude-desktop", "version": "1.0.0" }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; initialize</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": { "tools": {}, "resources": {}, "prompts": {} },
+    "serverInfo": { "name": "demo", "version": "1.0.0" }
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><span class="verb">notifications/initialized</span></div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}</code></pre>
+          </div></div>
+
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><i class="gem gem-jade"></i><span class="verb">tools/call</span> &middot; greet</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": { "name": "greet", "arguments": { "name": "leo" } }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; tools/call</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [ { "type": "text", "text": "hello, leo" } ],
+    "isError": false
+  }
+}</code></pre>
+          </div></div>
+
+          <div class="msg agent"><div class="who">Client</div><div class="body">
+            <div class="method"><i class="gem gem-amethyst"></i><span class="verb">prompts/get</span> &middot; review</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "prompts/get",
+  "params": { "name": "review", "arguments": { "code": "fn f() { 1 }" } }
+}</code></pre>
+          </div></div>
+
+          <div class="msg"><div class="who">Server</div><div class="body">
+            <div class="method"><span class="verb">result</span> &middot; prompts/get</div>
+            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "messages": [
+      { "role": "user", "content": { "type": "text", "text": "Review this code:\nfn f() { 1 }" } }
+    ]
+  }
+}</code></pre>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="gallery">
+      <h2>The debug page</h2>
+      <p class="pdesc">Give <code>to_asgi</code> a path and a browser page appears beside the endpoint: it lists every capability, fills an argument form from each input schema, and shows the JSON-RPC request next to the reply it got back — in either era. The five frames below are real captures of that page.</p>
+      <div class="shots">
+        <figure class="shot glass">
+          <img src="assets/shots/debug-dark.png" alt="The debug page in the night theme, listing the demo server's tools." loading="lazy">
+          <figcaption><b>Night</b> — the page lists tools, resources, templates and prompts, each with a form.</figcaption>
+        </figure>
+        <figure class="shot glass">
+          <img src="assets/shots/debug-light-tools.png" alt="The debug page in the dawn theme." loading="lazy">
+          <figcaption><b>Dawn</b> — the same page in the light celestial moment.</figcaption>
+        </figure>
+        <figure class="shot glass">
+          <img src="assets/shots/debug-call.png" alt="The debug page after a tool call, showing request and reply." loading="lazy">
+          <figcaption><b>A call</b> — the JSON-RPC request it built sits beside the reply.</figcaption>
+        </figure>
+        <figure class="shot glass">
+          <img src="assets/shots/debug-legacy.png" alt="The debug page speaking the legacy 2025-11-25 era." loading="lazy">
+          <figcaption><b>Legacy era</b> — switch the protocol version and it speaks the handshake revisions.</figcaption>
+        </figure>
+        <figure class="shot glass">
+          <img src="assets/shots/debug-mobile.png" alt="The debug page on a narrow viewport." loading="lazy">
+          <figcaption><b>Mobile</b> — the layout reflows; nothing overflows at a phone width.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <h2>Run it yourself</h2>
+      <p class="pdesc">The frames above are the demo server over Streamable HTTP. Build it for native and the debug page is served at <code>/debug</code> next to the endpoint:</p>
+      <div class="runline"><span class="prompt">$</span><code>moon run src/examples/http --target native</code><button class="copy" data-copy="moon run src/examples/http --target native">copy</button></div>
+      <p style="color:var(--muted);font-size:.9rem;margin-top:.9rem">Then open <code>http://127.0.0.1:12000/debug</code>. Off by default — the page appears only because the server was built with <code>to_asgi(debug_page="/debug")</code>; a server that is not being debugged answers exactly as before.</p>
+    </section>
+
+    <footer class="site">
+      <span>moonmcp &middot; Showcase</span>
+      <span class="grow"></span>
+      <a href="https://github.com/moonbitstack/moonmcp">GitHub</a>
+      <a href="https://mooncakes.io/docs/moonbitstack/moonmcp">mooncakes</a>
+      <span>Apache-2.0</span>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/armillary.js"></script>
+</body>
+</html>

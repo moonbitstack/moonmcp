@@ -199,6 +199,18 @@ writes the configuration above.
 moon add moonbitstack/moonmcp
 ```
 
+## Documentation
+
+The published docs site is generated from this repository:
+
+- [`docs/index.html`](docs/index.html) — the Armillary homepage and tour
+- [`docs/guide.html`](docs/guide.html) — a progressive guide (register, annotate, resources, prompts, transports, connect)
+- [`docs/api.html`](docs/api.html) — the full API reference, generated from the package interfaces by [`scripts/gen_api.py`](scripts/gen_api.py)
+- [`docs/showcase.html`](docs/showcase.html) — recorded sessions for both protocol eras and the debug page
+
+`docs/api.html` is reproducible: `python3 scripts/gen_api.py` must leave the
+tree unchanged, and CI checks `git diff --exit-code docs/api.html`.
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).
