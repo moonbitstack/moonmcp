@@ -468,6 +468,22 @@ footer.site .grow{margin-left:auto}
 :root[data-theme="light"] .board{box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 18px 34px -18px rgba(86,62,36,.5),inset 0 0 0 2px #2a1d12}
 
 /* ---- responsive ---- */
+/* ---- decoration is not a document -------------------------------------
+   The scene is scenery: stone, fire, plaques and captions are not text to be
+   copied, so they cannot be selected, dragged or long-pressed out of the page.
+   Where the page is meant to be read — the guide, the reference, the showcase,
+   and the slips of code on the table — selection is left exactly as it was. */
+.nav,
+.scene,
+.arches,
+.board,
+.hooks,
+.corner{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* a drawing is not a file to drag away */
+.scene img,
+.arches img{-webkit-user-drag:none;pointer-events:none}
+
 @media (width <= 980px){
   .scene-grid{grid-template-columns:minmax(0,1fr);align-items:stretch}
   .oven{order:-1}
