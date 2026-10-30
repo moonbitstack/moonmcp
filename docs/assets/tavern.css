@@ -30,6 +30,14 @@
   --sheet-hair:rgba(36,26,18,.2);
   --bg-tex:url("tex-wood.svg");
   --bg-tex-size:320px;
+  --wall-op:.92;
+  --stone-tex:url("tex-stone.svg");
+  --stone-size:300px;
+  --shadow-ink:0,0,0;
+  --relief:0 26px 40px -24px rgba(0,0,0,.9);
+  --stage-shadow:drop-shadow(0 30px 44px rgba(0,0,0,.6));
+  --fire-glow:1;
+  --scene-light:none;
   --vignette:radial-gradient(130% 100% at 64% 30%,transparent 0,rgba(0,0,0,.42) 58%,rgba(0,0,0,.8) 100%);
   --ease:cubic-bezier(.2,.7,.2,1);
 }
@@ -54,7 +62,16 @@
   --sheet-muted:#5B4A38;
   --sheet-hair:rgba(36,26,18,.18);
   --bg-tex:url("tex-plaster.svg");
-  --bg-tex-size:300px;
+  --bg-tex-size:420px;
+  --wall-op:.9;
+  --stone-tex:url("tex-stone-day.svg");
+  --stone-size:340px;
+  --shadow-ink:86,62,36;
+  --relief:0 20px 28px -18px rgba(86,62,36,.42);
+  --stage-shadow:drop-shadow(0 26px 30px rgba(86,62,36,.34));
+  --fire-glow:.5;
+  --floor-lit:.94;
+  --scene-light:linear-gradient(118deg,rgba(255,253,246,.6),rgba(255,250,240,0) 44%,rgba(86,62,36,.12));
   --vignette:radial-gradient(130% 100% at 64% 30%,transparent 0,rgba(90,70,40,.08) 62%,rgba(60,45,25,.26) 100%);
 }
 
@@ -76,7 +93,7 @@ body{
 body::before{
   content:"";position:fixed;inset:0;z-index:-3;
   background-image:var(--bg-tex);background-size:var(--bg-tex-size);background-repeat:repeat;
-  opacity:.92;
+  opacity:var(--wall-op);
 }
 body::after{
   content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
@@ -172,13 +189,15 @@ p{max-width:72ch}
 .scene{position:relative;z-index:2;min-height:94vh;display:flex;align-items:flex-end;justify-content:center;padding:120px 0 2rem;overflow:hidden}
 /* warm pools of light on the floor and wall, and a stone floor */
 .scene::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(48% 42% at 66% 74%,rgba(217,122,43,.26),transparent 62%),radial-gradient(38% 34% at 30% 80%,rgba(255,180,100,.14),transparent 64%)}
+  background:var(--scene-light),radial-gradient(48% 42% at 66% 74%,rgba(217,122,43,.26),transparent 62%),radial-gradient(38% 34% at 30% 80%,rgba(255,180,100,.14),transparent 64%)}
 .scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30vh;z-index:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(0,0,0,.55)),url("tex-stone.svg");background-size:300px;
+  background:linear-gradient(180deg,transparent,rgba(var(--shadow-ink),.5)),var(--stone-tex);background-size:var(--stone-size);filter:brightness(var(--floor-lit,1));
   -webkit-mask:linear-gradient(180deg,transparent,#000 55%);mask:linear-gradient(180deg,transparent,#000 55%);opacity:.95}
 .scene-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:clamp(2rem,5vw,4.2rem);align-items:end;width:min(1240px,95vw)}
 
 .bar{position:relative}
+.bar::after{content:"";position:absolute;left:-5%;right:-5%;bottom:-22px;height:30px;z-index:0;pointer-events:none;
+  background:radial-gradient(50% 62% at 50% 32%,rgba(var(--shadow-ink),.42),transparent 74%);filter:blur(7px)}
 .bar::before{content:"";position:absolute;left:-8%;right:-4%;top:-40%;bottom:10%;z-index:0;pointer-events:none;
   background:radial-gradient(60% 55% at 40% 70%,rgba(217,122,43,.16),transparent 66%)}
 .backbar{position:absolute;left:0;right:0;bottom:calc(100% + 12px);height:210px;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;opacity:.92;pointer-events:none}
@@ -193,6 +212,11 @@ p{max-width:72ch}
 .backbar .shelf:nth-child(2) i:nth-child(2){left:34%;height:40px;background:linear-gradient(180deg,#8a5a3a,#3e2a18)}
 .backbar .shelf:nth-child(2) i:nth-child(3){left:55%;height:32px}
 .backbar .shelf:nth-child(2) i:nth-child(4){left:74%;height:42px;background:linear-gradient(180deg,#6b2e2e,#351413)}
+/* a standing bottle catches a line of light, and has a cork on top */
+.backbar .shelf i::before{content:"";position:absolute;left:2px;top:3px;bottom:4px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.12) 60%,rgba(255,255,255,0))}
+.backbar .shelf i::after{content:"";position:absolute;left:50%;top:-4px;width:5px;height:4px;transform:translateX(-50%);
+  border-radius:1px 1px 0 0;background:linear-gradient(180deg,#c9b79a,#8a7358)}
 .bar .seats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;align-items:end;margin-bottom:-10px;position:relative;z-index:3}
 .seat{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.2rem .2rem 0;transition:transform .3s var(--ease)}
 .seat:hover{transform:translateY(-4px)}
@@ -206,15 +230,26 @@ p{max-width:72ch}
 .seat .candle[data-state="patina"] .flame{background:radial-gradient(circle at 50% 70%,#bfe6cf,var(--patina) 60%,transparent 74%);box-shadow:0 0 16px 3px var(--patina),0 0 36px 7px rgba(92,138,114,.3)}
 .seat .candle[data-state="idle"] .flame{background:radial-gradient(circle at 50% 70%,#b9b3aa,#6b655c 60%,transparent 74%);box-shadow:0 0 10px 1px rgba(120,115,105,.4);animation:none}
 .counter-top{height:32px;border-radius:4px 4px 3px 3px;background:url("tex-wood.svg");background-size:260px;border-top:2px solid #6b4c33;box-shadow:0 -2px 0 rgba(255,255,255,.06),0 6px 14px rgba(0,0,0,.55),inset 0 -6px 10px rgba(0,0,0,.35);position:relative;z-index:2}
-.counter-base{height:132px;background:url("tex-stone.svg");background-size:300px;border-radius:0 0 6px 6px;box-shadow:inset 0 8px 20px rgba(0,0,0,.6),inset 0 -10px 26px rgba(0,0,0,.7),0 18px 40px -18px rgba(0,0,0,.8)}
+.counter-base{height:132px;background:var(--stone-tex);background-size:var(--stone-size);border-radius:0 0 6px 6px;
+  box-shadow:inset 0 10px 22px rgba(var(--shadow-ink),.5),inset 0 -12px 28px rgba(var(--shadow-ink),.45),var(--relief)}
 .counter-base::after{content:"";display:block;height:8px;margin:0 -2px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.6))}
 .bar .hint{text-align:center;color:var(--faint);font-family:"Caveat",cursive;font-size:1.15rem;margin:.9rem 0 0}
 
 .oven{position:relative;display:flex;flex-direction:column;align-items:center;padding-bottom:10px;padding-top:56px}
-.oven .label{font-family:"Caveat",cursive;font-size:1.25rem;color:var(--fire-hi);margin-top:.4rem;text-shadow:0 0 18px rgba(217,122,43,.6)}
+.oven .label{position:relative;display:inline-block;margin:.75rem 0 0;padding:.34rem .9rem;
+  font-family:"JetBrains Mono",monospace;font-size:.6rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  color:#2e1a09;background:linear-gradient(180deg,#EFD0A4,#CF9354 52%,#A86C30);
+  border:1px solid #6F4520;border-radius:3px;
+  box-shadow:inset 0 1px 0 rgba(255,247,230,.55),inset 0 -1px 0 rgba(60,30,8,.35),
+             0 2px 5px rgba(var(--shadow-ink),.4),0 0 0 3px rgba(var(--shadow-ink),.14),0 0 24px -10px var(--fire);
+  text-shadow:0 1px 0 rgba(255,246,226,.6),0 -1px 0 rgba(60,30,8,.25)}
+.oven .label::before,.oven .label::after{content:"";position:absolute;top:50%;width:3px;height:3px;border-radius:50%;
+  background:#3a2412;box-shadow:inset 0 1px 0 rgba(255,220,170,.35);transform:translateY(-50%)}
+.oven .label::before{left:5px}
+.oven .label::after{right:5px}
 
 /* the masonry oven and its fire */
-.oven-stage{position:relative;width:min(520px,54vw);filter:drop-shadow(0 30px 44px rgba(0,0,0,.6))}
+.oven-stage{position:relative;width:min(520px,54vw);filter:var(--stage-shadow)}
 .oven-img{display:block;width:100%;height:auto}
 .firebox{position:absolute;left:28.4%;top:59.6%;width:43.2%;height:17%;border-radius:50% 50% 0 0/100% 100% 0 0;overflow:hidden}
 .coal{position:absolute;left:4%;right:4%;bottom:1%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 72%,#ffd79a,#ef8a2f 34%,#b8551b 58%,#5a260c 78%,#1a0d05 100%);filter:blur(1.6px);opacity:.98;animation:breathe 3.6s ease-in-out infinite}
@@ -227,7 +262,7 @@ p{max-width:72ch}
 .log{position:absolute;bottom:6%;height:13%;border-radius:7px;background:linear-gradient(180deg,#4a2e1a,#1a0d06 70%,#0d0703);box-shadow:0 0 14px 3px rgba(255,120,40,.5),inset 0 -3px 4px rgba(255,150,60,.55),inset 0 1px 0 rgba(255,190,120,.25)}
 .log.l1{left:14%;width:46%;transform:rotate(7deg)}
 .log.l2{right:12%;width:44%;transform:rotate(-8deg)}
-.flame{position:absolute;bottom:22%;left:50%;transform-origin:50% 100%;border-radius:50% 50% 46% 46%/64% 64% 40% 40%;mix-blend-mode:screen;filter:blur(.4px);animation:firewave 2.4s ease-in-out infinite}
+.flame{position:absolute;bottom:22%;left:50%;transform-origin:50% 100%;mix-blend-mode:screen;filter:blur(1.1px);animation:firewave 2.4s ease-in-out infinite;clip-path:polygon(50% 1%,62% 19%,57% 33%,71% 47%,79% 65%,67% 84%,50% 97%,33% 85%,21% 64%,29% 45%,43% 31%,38% 16%)}
 .flame.f1{width:40%;height:74%;margin-left:-20%;background:radial-gradient(ellipse at 50% 90%,#fff7df,#ffcb7d 38%,#e8842f 64%,transparent 80%);opacity:.98}
 .flame.f2{width:28%;height:62%;margin-left:-26%;background:radial-gradient(ellipse at 50% 90%,#fffdf4,#ffe6b0 38%,#ffb347 64%,transparent 82%);animation-delay:-.6s}
 .flame.f3{width:20%;height:50%;margin-left:6%;background:radial-gradient(ellipse at 50% 90%,#ffffff,#ffefc8 38%,#ffc978 64%,transparent 84%);animation-delay:-1.2s}
@@ -238,7 +273,7 @@ p{max-width:72ch}
 .ember.e2{left:56%;animation-delay:-1.2s}
 .ember.e3{left:47%;animation-delay:-2.4s}
 .smoke{position:absolute;left:30%;right:30%;top:-10%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 100%,rgba(120,110,100,.3),transparent 70%);filter:blur(6px);animation:smoke 5s ease-in-out infinite;opacity:.5}
-.oven-glow{position:absolute;left:50%;top:62%;width:120%;height:70%;transform:translate(-50%,-20%);pointer-events:none;background:radial-gradient(ellipse at 50% 60%,rgba(255,170,80,.5),rgba(217,122,43,.18) 42%,transparent 68%);filter:blur(14px);mix-blend-mode:screen;animation:breathe 4.6s ease-in-out infinite}
+.oven-glow{position:absolute;left:50%;top:62%;width:120%;height:70%;transform:translate(-50%,-20%);pointer-events:none;background:radial-gradient(ellipse at 50% 60%,rgba(255,170,80,.5),rgba(217,122,43,.18) 42%,transparent 68%);filter:blur(14px);mix-blend-mode:screen;opacity:var(--fire-glow);animation:breathe 4.6s ease-in-out infinite}
 @keyframes firewave{0%,100%{transform:scaleY(1) scaleX(1)}30%{transform:scaleY(1.12) scaleX(.94)}60%{transform:scaleY(.92) scaleX(1.05)}}
 @keyframes spark{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-62px) scale(.3);opacity:0}}
 @keyframes smoke{0%,100%{transform:translateY(0) scale(1);opacity:.4}50%{transform:translateY(-14px) scale(1.15);opacity:.6}}
@@ -258,7 +293,7 @@ p{max-width:72ch}
 .board .tally-sub{margin:.15rem 0 0;font-family:"JetBrains Mono",monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:#B3A78A}
 
 .arches{position:relative;z-index:2;width:min(1180px,94vw);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1rem,3vw,2.6rem);padding:1rem 0 2.4rem;align-items:end}
-.arch{position:relative;display:block;width:100%;max-width:520px;margin:0 auto;transition:transform .3s var(--ease);filter:drop-shadow(0 20px 28px rgba(0,0,0,.55))}
+.arch{position:relative;display:block;width:100%;max-width:520px;margin:0 auto;transition:transform .3s var(--ease);filter:var(--stage-shadow)}
 .arch:hover{transform:translateY(-3px)}
 .arch img{display:block;width:100%;height:auto}
 .arch .sign{position:absolute;left:50%;bottom:26%;transform:translateX(-50%);white-space:nowrap;font-family:"Caveat",cursive;font-size:1.5rem;color:#F2E1C4;text-shadow:0 2px 8px #000,0 0 20px rgba(217,122,43,.3)}
@@ -354,6 +389,24 @@ footer.site a{color:var(--sheet-muted)}
 footer.site .grow{margin-left:auto}
 .ledger footer.site{color:var(--sheet-muted)}
 .ledger footer.site a{color:var(--wine)}
+
+/* ---- daylight ----------------------------------------------------------
+   The same drawings serve both moments, but noon is not night turned up: the
+   wall lifts to limewash, the stone washes toward pale limestone, and the fire
+   stops being a screen-blended glow on a dark room and becomes a small warm
+   flame in a lit one. Relief comes from cast shadow instead of from light pools. */
+:root[data-theme="light"] .oven-img{filter:sepia(.22) saturate(.72) brightness(1.16) contrast(.92)}
+:root[data-theme="light"] .arch img{filter:sepia(.26) saturate(.8) brightness(1.1) contrast(.94)}
+:root[data-theme="light"] .firebox{background:radial-gradient(ellipse at 50% 74%,#2e1709,#140b05 72%)}
+:root[data-theme="light"] .firebox .flame{mix-blend-mode:normal;opacity:.96;filter:saturate(1.8) brightness(.74) contrast(1.08)}
+:root[data-theme="light"] .coal{filter:blur(1.6px) saturate(1.15) brightness(.88)}
+:root[data-theme="light"] .oven-glow{mix-blend-mode:normal}
+:root[data-theme="light"] .seat .candle .flame{box-shadow:0 0 12px 2px rgba(194,90,34,.45)}
+:root[data-theme="light"] .chandelier .bulb::after{box-shadow:0 0 14px 3px rgba(194,90,34,.4)}
+/* the top of the counter catches the daylight, the foot falls into shade */
+:root[data-theme="light"] .counter-base{background-image:linear-gradient(180deg,rgba(255,252,244,.04),rgba(86,62,36,.2) 82%),var(--stone-tex);box-shadow:inset 0 6px 14px rgba(86,62,36,.22),inset 0 -8px 20px rgba(86,62,36,.26),var(--relief)}
+:root[data-theme="light"] .bar .hint{color:#6f5b41}
+:root[data-theme="light"] .board{box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 18px 34px -18px rgba(86,62,36,.5),inset 0 0 0 2px #2a1d12}
 
 /* ---- responsive ---- */
 @media (width <= 980px){
