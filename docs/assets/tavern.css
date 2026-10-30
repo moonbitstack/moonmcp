@@ -10,8 +10,8 @@
 
 :root{
   --wall:#191309;
-  --ink:#DFD1B6;
-  --muted:#B2A288;
+  --ink:#DCCDB2;
+  --muted:#AC9C82;
   --faint:#89775F;
   --copper:#C98A4B;
   --copper-hi:#EFC08A;
@@ -320,7 +320,7 @@ main.doc{padding:2rem clamp(1rem,2.4vw,2.2rem) 5rem;min-width:0}
 .ledger .spec-line b{color:var(--copper)}
 .ledger a{color:var(--wine)}
 .ledger p code,.ledger li code{background:rgba(36,26,18,.1);color:#5a2d18;padding:.03rem .3rem;border-radius:3px}
-.ledger .runline code{background:none;color:#E7D9BC;padding:0}
+.ledger .runline code{background:none;color:#E6D6B4;padding:0}
 .section{scroll-margin-top:80px;padding-top:2.2rem;margin-top:2.2rem;border-top:1px solid var(--sheet-hair)}
 .section:first-of-type{border-top:none;margin-top:0}
 .section>h2{font-size:1.7rem;margin:0 0 .3rem}
@@ -333,14 +333,14 @@ main.doc{padding:2rem clamp(1rem,2.4vw,2.2rem) 5rem;min-width:0}
 .item .doc{margin:.2rem 0 0;color:var(--sheet-muted);max-width:78ch;font-size:.94rem}
 .item .doc code{background:rgba(36,26,18,.08);color:#5a2d18;padding:.03rem .3rem;border-radius:3px}
 pre{margin:0;font-size:.84rem;line-height:1.7;overflow-x:auto;white-space:pre}
-.code{position:relative;background:#271c14;color:#E7D9BC;border:1px solid #42342a;border-radius:5px;padding:.95rem 1.05rem;box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
+.code{position:relative;background:#2b1f16;color:#E6D6B4;border:1px solid #42342a;border-radius:5px;padding:.95rem 1.05rem;box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
 .code .copy{position:absolute;top:.5rem;right:.5rem}
 .copy{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:4px;color:#C9BBA4;cursor:pointer;font:inherit;font-family:"JetBrains Mono",monospace;font-size:.68rem;padding:.18rem .45rem}
 .copy:hover{border-color:var(--copper-hi);color:#fff}
 .copy.ok{color:var(--patina);border-color:var(--patina)}
 .msg{display:grid;grid-template-columns:62px minmax(0,1fr);gap:.8rem;align-items:start;margin:.5rem 0}
 .msg .who{font-family:"JetBrains Mono",monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:#8a7358;padding-top:.55rem;text-align:right}
-.msg .body{background:#271c14;color:#E7D9BC;border:1px solid #42342a;border-radius:5px;padding:.65rem .85rem;overflow-x:auto}
+.msg .body{background:#2b1f16;color:#E6D6B4;border:1px solid #42342a;border-radius:5px;padding:.65rem .85rem;overflow-x:auto}
 .msg .body code{background:none;color:inherit;padding:0}
 .msg.agent .who{color:#8B3A1E}
 .thread-col{position:relative;padding-left:20px}
