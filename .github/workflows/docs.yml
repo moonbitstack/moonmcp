@@ -30,14 +30,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: install moonbit
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
-
-      - name: refresh interfaces
-        run: moon info --target all
-
+      # The API reference is generated from the committed pkg.generated.mbti
+      # files and the /// comments in source, so the docs build needs no MoonBit
+      # toolchain and never touches the module registry.
       - name: generate API reference
         run: python3 scripts/gen_api.py
 
