@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>document.documentElement.classList.add("js")</script>
 <title>moonmcp — Showcase</title>
 <meta name="description" content="Recorded client/server sessions for both eras of the protocol, and the debug page that calls a moonmcp server from the browser.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/armillary.css">
+<link rel="stylesheet" href="assets/tavern.css">
 <style>
   /* showcase-specific layout — all colours are parchment-safe (the ledger is
      light in both themes), so they never come from the flipping theme tokens */
@@ -22,12 +21,12 @@
   .msg{padding:.15rem 0}
   .msg .body{padding:.6rem .85rem}
   .msg .body .method{display:flex;align-items:center;gap:.45rem;font-family:"JetBrains Mono",monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:#c9b79a;margin-bottom:.5rem}
-  .msg .body .method .verb{color:#F8EFDC;font-weight:500;letter-spacing:.04em}
+  .msg .body .method .verb{color:#EDDFC2;font-weight:500;letter-spacing:.04em}
   .msg .body pre{margin:0;font-size:.82rem;line-height:1.65}
   .msg .body .gem{margin-right:.15rem}
 
-  .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem;margin-top:1.1rem}
-  @media (width <= 680px){.shots{grid-template-columns:1fr}}
+  /* one frame per row: a browser capture at half width is unreadable */
+  .shots{display:grid;grid-template-columns:minmax(0,1fr);gap:1.1rem;margin-top:1.1rem}
   .shot{margin:0;overflow:hidden;padding:0}
   .shot img{width:100%;height:auto;display:block}
   .shot figcaption{padding:.7rem .9rem;color:var(--sheet-muted);font-size:.86rem;border-top:1px solid var(--sheet-hair)}
@@ -52,8 +51,8 @@
     <a href="guide.html">Guide</a>
     <a href="api.html">API</a>
     <a href="showcase.html" class="active">Showcase</a>
-    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.9a6.1 6.1 0 0 1 0 12.2z" fill="currentColor" opacity=".9"/></svg> theme</a>
-    <a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.9v2.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> GitHub</a>
+    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g transform="translate(0 .9)" fill="none" stroke="rgba(255,236,203,.5)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><path d="M8 2.1a5.9 5.9 0 0 1 0 11.8z" fill="rgba(255,236,203,.5)" stroke="none"/></g><g fill="none" stroke="rgba(72,36,12,.7)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><path d="M8 2.1a5.9 5.9 0 0 1 0 11.8z" fill="rgba(72,36,12,.7)" stroke="none"/></g></svg> theme</a>
+    <a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g transform="translate(0 .9)" fill="none" stroke="rgba(255,236,203,.5)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/></g><g fill="none" stroke="rgba(72,36,12,.7)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/><path d="M8 1.7v2.2" stroke-linecap="round"/></g></svg> GitHub</a>
   </div>
 </nav>
 
@@ -93,9 +92,9 @@
     <section class="section" id="era-2026">
       <h2>Revision 2026&#8209;07&#8209;28 — stateless</h2>
       <p class="pdesc">No handshake. Every request names its version in <code>_meta</code>, and the server answers it on its own. Client and server keep no shared state between calls.</p>
-      <div class="session glass reveal">
+      <div class="session glass">
         <div class="era"><span class="rev">2026&#8209;07&#8209;28</span><h3>List, call, read</h3></div>
-        <p class="note">Field names follow the MCP wire. The <code>resultType</code> and <code>server</code> fields are moonmcp's additions for this revision; every other result is plain MCP.</p>
+        <p class="note">Field names are the ones on the wire. <code>resultType</code> and the <code>_meta</code> server info are this revision's additions; the tools array is cut to two entries to fit the page.</p>
         <div class="thread-col">
           <div class="msg agent"><div class="who">Client</div><div class="body">
             <div class="method"><i class="gem gem-jade"></i><span class="verb">tools/list</span> &middot; POST /mcp</div>
@@ -119,16 +118,18 @@
   "id": 1,
   "result": {
     "tools": [
-      { "name": "add", "description": "Add two numbers",
+      { "name": "add", "title": "Add", "description": "Add two numbers",
         "inputSchema": { "type": "object",
           "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
           "required": ["a", "b"] } },
-      { "name": "greet", "description": "Greet someone by name",
+      { "name": "greet", "title": "Greet", "description": "Greet someone by name",
         "inputSchema": { "type": "object",
           "properties": { "name": { "type": "string" } }, "required": ["name"] } }
     ],
-    "resultType": "tool/list",
-    "server": { "name": "demo", "version": "1.0.0" }
+    "resultType": "complete",
+    "_meta": { "io.modelcontextprotocol/serverInfo": { "name": "demo", "version": "1.0.0" } },
+    "ttlMs": 0,
+    "cacheScope": "private"
   }
 }</code></pre>
           </div></div>
@@ -154,9 +155,10 @@
   "id": 2,
   "result": {
     "content": [ { "type": "text", "text": "{\"sum\":5}" } ],
+    "structuredContent": { "sum": 5 },
     "isError": false,
-    "resultType": "tool",
-    "server": { "name": "demo", "version": "1.0.0" }
+    "resultType": "complete",
+    "_meta": { "io.modelcontextprotocol/serverInfo": { "name": "demo", "version": "1.0.0" } }
   }
 }</code></pre>
           </div></div>
@@ -181,8 +183,10 @@
   "id": 3,
   "result": {
     "contents": [ { "uri": "config://app", "mimeType": "application/json", "text": "{\"theme\":\"dark\"}" } ],
-    "resultType": "resource",
-    "server": { "name": "demo", "version": "1.0.0" }
+    "resultType": "complete",
+    "_meta": { "io.modelcontextprotocol/serverInfo": { "name": "demo", "version": "1.0.0" } },
+    "ttlMs": 0,
+    "cacheScope": "private"
   }
 }</code></pre>
           </div></div>
@@ -193,7 +197,7 @@
     <section class="section" id="era-2025">
       <h2>Revision 2025&#8209;11&#8209;25 — the handshake</h2>
       <p class="pdesc">The older shape. A client opens with <code>initialize</code>, reads the server's capabilities, and only then lists, calls and renders. moonmcp answers every revision back to 2024&#8209;11&#8209;05 without a config change.</p>
-      <div class="session glass reveal">
+      <div class="session glass">
         <div class="era"><span class="rev">2025&#8209;11&#8209;25</span><h3>initialize, then work</h3></div>
         <p class="note">A request that does not name a version falls back to this handshake. The same server, the same tools — only the opening moves differ.</p>
         <div class="thread-col">
@@ -218,8 +222,13 @@
   "id": 1,
   "result": {
     "protocolVersion": "2025-11-25",
-    "capabilities": { "tools": {}, "resources": {}, "prompts": {} },
-    "serverInfo": { "name": "demo", "version": "1.0.0" }
+    "capabilities": {
+      "tools": { "listChanged": false },
+      "resources": { "subscribe": false, "listChanged": false },
+      "prompts": { "listChanged": false }
+    },
+    "serverInfo": { "name": "demo", "version": "1.0.0" },
+    "instructions": "Arithmetic and greetings, for trying a client out."
   }
 }</code></pre>
           </div></div>
@@ -270,6 +279,7 @@
   "jsonrpc": "2.0",
   "id": 3,
   "result": {
+    "description": "Ask for a code review",
     "messages": [
       { "role": "user", "content": { "type": "text", "text": "Review this code:\nfn f() { 1 }" } }
     ]
@@ -302,7 +312,7 @@
     <section class="section" id="how">
       <h2>Run it yourself</h2>
       <p class="pdesc">The captures above are the demo server over Streamable HTTP. Build it for native and the debug page is served at <code>/debug</code> next to the endpoint:</p>
-      <div class="runline"><span class="prompt">$</span><code>moon run src/examples/http --target native</code><button class="copy" data-copy="moon run src/examples/http --target native">copy</button></div>
+      <div class="runline"><span class="prompt">$</span><code>moon run src/examples/http --target native</code><button class="copy" type="button">copy</button></div>
       <p style="color:var(--sheet-muted);font-size:.9rem;margin-top:.9rem">Then open <code>http://127.0.0.1:12000/debug</code>. Off by default — the page appears only because the server was built with <code>to_asgi(debug_page="/debug")</code>; a server that is not being debugged answers exactly as before.</p>
     </section>
 
@@ -316,6 +326,6 @@
   </main>
 </div>
 
-<script src="assets/armillary.js"></script>
+<script src="assets/tavern.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate the moonmcp API reference (docs/api.html) and the site numbers
-(docs/assets/numbers.js) from the package interfaces.
+"""Generate the moonmcp API reference (docs/api.html) and the site's running
+numbers (in docs/index.html) from the package interfaces.
 
 Every public item in each package's `pkg.generated.mbti` is listed, so the page
 can never drift from the code; descriptions come from `///` doc-comments in the
@@ -14,6 +14,9 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "src"
+
+# The one line of docs/index.html the generator owns: the counts on the board.
+RUNNING_NUMBERS_PATTERN = re.compile(r"(<!--numbers-->)(.*?)(<!--/numbers-->)", re.S)
 
 # Packages that form the public, runtime API (no build-time tooling, no examples).
 PACKAGES = [
@@ -34,13 +37,11 @@ PACKAGES = [
 KIND_WORDS = re.compile(
     r"\b(pub|async|struct|enum|let|type|using|suberror|derive|impl|trait|alias|all|open)\b")
 
-
 def read(p):
     try:
         return p.read_text(encoding="utf-8")
     except FileNotFoundError:
         return ""
-
 
 def parse_mbti(path):
     """Return [(kind, signature, name)] in source order."""
@@ -73,7 +74,6 @@ def parse_mbti(path):
         items.append((kind, sig, name))
     return items
 
-
 def count_pub_decls(path):
     """Number of public declarations in an mbti — each begins a line with `pub`."""
     n = 0
@@ -83,7 +83,6 @@ def count_pub_decls(path):
             n += 1
     return n
 
-
 def target_files(pkgdir):
     """Target-specific sources whose public items the target-agnostic mbti omits."""
     d = SRC / pkgdir
@@ -91,7 +90,6 @@ def target_files(pkgdir):
     for pat in ("*.native.mbt", "*.js.mbt", "*.wasm.mbt", "*.wasm-gc.mbt"):
         files.extend(sorted(d.glob(pat)))
     return files
-
 
 def parse_pub_decls(path):
     """Public declarations in a source file, signature only (cut at `{` or `=`)."""
@@ -121,7 +119,6 @@ def parse_pub_decls(path):
         i = j + 1
     return items
 
-
 def classify(buf):
     if "suberror" in buf:
         kind = "error"
@@ -148,7 +145,6 @@ def classify(buf):
         m = re.search(r"\b([A-Za-z_]\w*)\s*\(", b)
     name = m.group(1) if m else (buf.split()[1] if len(buf.split()) > 1 else buf)
     return kind, name
-
 
 def parse_source_comments(path):
     """Map a declaration name -> its preceding /// doc text."""
@@ -196,7 +192,6 @@ def parse_source_comments(path):
         doc = []
         i += 1
     return docs
-
 
 AUTO = {
     "equal": "Equality with another value of the same type.",
@@ -250,7 +245,6 @@ AUTO = {
     "default_title": "A title derived from a tool name.",
 }
 
-
 def auto_desc(kind, name, sig):
     if name in AUTO:
         return AUTO[name]
@@ -266,7 +260,6 @@ def auto_desc(kind, name, sig):
         return "A re-exported name, defined in another package."
     return "A public item of this server framework."
 
-
 def tint(sig):
     s = html.escape(sig)
     s = re.sub(r"\b(pub|async|struct|enum|let|type|using|suberror|derive|impl|trait|alias|all|open)\b",
@@ -275,7 +268,6 @@ def tint(sig):
     s = s.replace("-&gt;", '<span class="op">-&gt;</span>').replace("?", '<span class="op">?</span>')
     s = s.replace("::", '<span class="op">::</span>')
     return s
-
 
 def clean_doc(t):
     """The site must not name other libraries (docs.md). The source's doc
@@ -292,12 +284,10 @@ def clean_doc(t):
         t = t[0].upper() + t[1:]
     return t
 
-
 def prose(t):
     t = clean_doc(t)
     t = html.escape(t)
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
-
 
 def gem_legend():
     return ('<p class="pdesc">Three capability kinds give the reference its colours: '
@@ -305,7 +295,6 @@ def gem_legend():
             '<span class="gem gem-amber"></span> <b class="t-amber">resources</b>, '
             '<span class="gem gem-amethyst"></span> <b class="t-amethyst">prompts</b>. '
             'Everything else is the server, the wire, or the errors in between.</p>')
-
 
 def main():
     # gather items per package and count coverage
@@ -344,18 +333,18 @@ def main():
         total += len(items)
         sections.append((pkgname, title, desc, rows))
 
-    # numbers.js
-    numbers = {
-        "public_items": total,
-        "tests": count_tests(),
-        "packages": len(PACKAGES),
-        "eras": 3,
-        "transports": 2,
-        "capability_kinds": 3,
-    }
-    (ROOT / "docs" / "assets").mkdir(parents=True, exist_ok=True)
-    (ROOT / "docs" / "assets" / "numbers.js").write_text(
-        "window.MOONMCP_NUMBERS = " + __import__("json").dumps(numbers) + ";\n", encoding="utf-8", newline="\n")
+    # The homepage states two counts that change with the code: how many public
+    # items the reference lists, and how many packages it covers. They are
+    # written into the page here rather than by hand, so the page cannot claim
+    # an old number; the markers keep the rewrite to one short line.
+    numbers = RUNNING_NUMBERS_PATTERN
+    tally = "%d public items from %d packages" % (total, len(PACKAGES))
+    index = ROOT / "docs" / "index.html"
+    page = index.read_text(encoding="utf-8")
+    page, n = numbers.subn(lambda m: m.group(1) + tally + m.group(3), page)
+    if n != 1:
+        raise SystemExit("gen_api: docs/index.html needs exactly one running-numbers marker, found %d" % n)
+    index.write_text(page, encoding="utf-8", newline="\n")
 
     # api.html
     side = ['<aside class="sidebar"><p class="side-title">The tavern · moonmcp</p><nav class="side-nav">']
@@ -368,22 +357,21 @@ def main():
 
     head = ('<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<script>document.documentElement.classList.add("js")</script>'
             '<title>moonmcp — API reference</title>'
             '<meta name="description" content="The complete public API of moonmcp, a Model Context Protocol server framework for MoonBit.">'
             '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">'
             '<link rel="preconnect" href="https://fonts.googleapis.com">'
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">'
-            '<link rel="stylesheet" href="assets/armillary.css"></head><body>')
+            '<link rel="stylesheet" href="assets/tavern.css"></head><body>')
 
     nav = ('<nav class="nav"><a class="brand" href="index.html">'
            '<svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="#D4B87A" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.4"/><ellipse cx="16" cy="16" rx="4.4" ry="11"/></g><circle cx="16" cy="16" r="3.4" fill="#FFF8E8"/></svg>'
            'moonmcp</a><div class="links">'
            '<a href="index.html">Home</a><a href="guide.html">Guide</a>'
            '<a href="api.html" class="active">API</a><a href="showcase.html">Showcase</a>'
-           '<a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.9a6.1 6.1 0 0 1 0 12.2z" fill="currentColor" opacity=".9"/></svg> theme</a>'
-           '<a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.9v2.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> GitHub</a></div></nav>')
+           '<a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g transform="translate(0 .9)" fill="none" stroke="rgba(255,236,203,.5)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><path d="M8 2.1a5.9 5.9 0 0 1 0 11.8z" fill="rgba(255,236,203,.5)" stroke="none"/></g><g fill="none" stroke="rgba(72,36,12,.7)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><path d="M8 2.1a5.9 5.9 0 0 1 0 11.8z" fill="rgba(72,36,12,.7)" stroke="none"/></g></svg> theme</a>'
+           '<a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g transform="translate(0 .9)" fill="none" stroke="rgba(255,236,203,.5)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/></g><g fill="none" stroke="rgba(72,36,12,.7)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/><path d="M8 1.7v2.2" stroke-linecap="round"/></g></svg> GitHub</a></div></nav>')
 
     main_html = ['<main class="doc ledger"><header>'
                  '<div class="kicker">Reference</div>'
@@ -412,23 +400,14 @@ def main():
     main_html.append('</main>')
 
     doc = "\n".join([head, nav, '<div class="shell">'] + side + main_html + ['</div>',
-                 '<script src="assets/armillary.js"></script>', '</body></html>'])
+                 '<script src="assets/tavern.js"></script>', '</body></html>'])
 
     out = ROOT / "docs" / "api.html"
     out.write_text(doc + "\n", encoding="utf-8", newline="\n")
 
     print("api.html: %d public items across %d packages (%d had a source doc, %d auto-described)"
           % (total, len(sections), covered, total - covered))
-    print("numbers.js:", numbers)
-
-
-def count_tests():
-    n = 0
-    for p in SRC.rglob("*_test.mbt"):
-        for line in p.read_text(encoding="utf-8").splitlines():
-            if re.match(r"\s*test\s+\"", line):
-                n += 1
-    return n
+    print("index.html:", tally)
 
 
 if __name__ == "__main__":

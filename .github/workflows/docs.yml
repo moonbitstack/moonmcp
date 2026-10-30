@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/gen_api.py'
+      - 'src/**/*.mbt'
       - 'src/**/*.mbti'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
@@ -36,10 +37,10 @@ jobs:
       - name: generate API reference
         run: python3 scripts/gen_api.py
 
-      - name: API reference is reproducible
+      - name: generated pages are reproducible
         run: |
           git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/api.html
-          git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/assets/numbers.js
+          git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/index.html
 
       - name: setup pages
         uses: actions/configure-pages@v6

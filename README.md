@@ -208,15 +208,6 @@ writes the configuration above.
 moon add moonbitstack/moonmcp
 ```
 
-## Documentation
-
-The site lives in [`docs/`](docs/):
-
-- [`docs/index.html`](docs/index.html) — the homepage and tour
-- [`docs/guide.html`](docs/guide.html) — a progressive guide (register, annotate, resources, prompts, transports, connect)
-- [`docs/api.html`](docs/api.html) — the full API reference, generated from the package interfaces by [`scripts/gen_api.py`](scripts/gen_api.py)
-- [`docs/showcase.html`](docs/showcase.html) — recorded sessions for both protocol eras and the debug page
-
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).

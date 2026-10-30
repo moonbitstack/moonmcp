@@ -1,11 +1,10 @@
-/* moonmcp · Armillary — shared page behaviour.
+/* moonmcp · The Stone & Fire Tavern — shared page behaviour.
    No libraries. Plain ES, guarded for reduced motion. */
 (function () {
   "use strict";
   var root = document.documentElement;
-  root.classList.add("js"); /* content stays visible if this script never runs */
 
-  /* theme: night is the default celestial moment; dawn is the toggle */
+  /* theme: night is the default; noon is the toggle */
   var stored = null;
   try { stored = localStorage.getItem("moonmcp-theme"); } catch (e) {}
   if (stored === "light" || stored === "dark") {
@@ -27,21 +26,13 @@
   window.addEventListener("scroll", sync, { passive: true });
   sync();
 
-  /* scroll reveal — the page "breathes" in */
-  var reveals = document.querySelectorAll(".reveal");
-  if (reveals.length && "IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -8% 0px" });
-    reveals.forEach(function (r) { io.observe(r); });
-  } else {
-    reveals.forEach(function (r) { r.classList.add("in"); });
-  }
-
-  /* copy buttons */
-  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+  /* copy buttons — the text is read from the block they sit in, so a snippet is
+     never written twice in the page */
+  document.querySelectorAll("button.copy").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var text = btn.getAttribute("data-copy");
+      var src = btn.parentNode.querySelector("pre, code");
+      if (!src) return;
+      var text = src.innerText;
       var done = function () {
         var t = btn.textContent; btn.textContent = "copied"; btn.classList.add("ok");
         setTimeout(function () { btn.textContent = t; btn.classList.remove("ok"); }, 1100);
