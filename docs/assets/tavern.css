@@ -335,11 +335,14 @@ p{max-width:72ch}
 .arch .sign{position:absolute;left:50%;bottom:26%;transform:translateX(-50%);white-space:nowrap;font-family:"Caveat",cursive;font-size:1.5rem;color:#F2E1C4;text-shadow:0 2px 8px #000,0 0 20px rgba(217,122,43,.3)}
 
 .longtable{position:relative;z-index:2;width:min(1180px,94vw);margin:0 auto;padding:1rem 0 2rem}
-.tabletop{position:relative;padding:2rem 1.6rem 2.2rem;border-radius:8px;background:url("tex-wood.svg");background-size:300px;box-shadow:0 24px 50px -24px rgba(0,0,0,.85),inset 0 2px 0 rgba(255,255,255,.08),inset 0 -10px 30px rgba(0,0,0,.5);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.2rem;align-items:stretch}
+.tabletop{position:relative;padding:calc(2rem + 5px) 1.6rem 2.2rem;border-radius:8px;background:url("tex-wood.svg");background-size:300px;box-shadow:0 24px 50px -24px rgba(0,0,0,.85),inset 0 2px 0 rgba(255,255,255,.08),inset 0 -10px 30px rgba(0,0,0,.5);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.2rem;align-items:stretch}
 /* the slips are one column of paper, centred against the recipe beside them,
    with air between them the way two dockets lie on a table */
 .tabletop > div:first-of-type{display:flex;flex-direction:column;justify-content:center;gap:1.5rem;min-width:0}
-.tabletop h2{position:absolute;top:-.9rem;left:1.4rem;font-family:"Caveat",cursive;font-size:1.5rem;color:#EDE6D2;background:var(--oak-2);padding:0 .5rem;border-radius:4px}
+.tabletop h2,
+.slip .t,
+.recipe .t{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.tabletop h2{position:absolute;top:calc(-.9rem + 5px);left:1.4rem;font-family:"Caveat",cursive;font-size:1.5rem;color:#EDE6D2;background:var(--oak-2);padding:0 .5rem;border-radius:4px}
 .slip{position:relative;background:#efe4cc;color:#2a1d12;border-radius:3px;padding:.8rem .9rem;font-family:"JetBrains Mono",monospace;font-size:.72rem;line-height:1.55;box-shadow:0 8px 18px rgba(0,0,0,.4);transform:rotate(-.7deg)}
 .slip .t{font-family:"Caveat",cursive;font-size:1.15rem;color:#6B2E2E;display:block;margin-bottom:.3rem}
 /* These are paper slips lying on a table, so nothing holds them down: no nail.
@@ -393,6 +396,10 @@ p{max-width:72ch}
 .side-nav a.active{color:var(--ink);border-left-color:var(--fire);background:rgba(201,138,75,.12)}
 .side-foot{display:flex;gap:.35rem;flex-wrap:wrap}
 .side-foot a{font-family:"JetBrains Mono",monospace;font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border:1px solid var(--hair);border-radius:3px;padding:.24rem .4rem}
+/* the plate does not move or fill: only the lettering answers, thickened by a
+   shadow so the chip keeps its width */
+:root[data-theme="dark"] .side-foot a:hover{color:var(--copper-hi);
+  text-shadow:0 0 .45px currentColor,0 0 .45px currentColor}
 main.doc{padding:2rem clamp(1rem,2.4vw,2.2rem) 5rem;min-width:0}
 .ledger{background:var(--sheet);color:var(--sheet-ink);border-radius:5px;padding:clamp(1.4rem,3vw,2.6rem);box-shadow:0 3px 0 rgba(0,0,0,.2),0 30px 60px -30px rgba(0,0,0,.8),inset 0 0 0 1px rgba(120,90,50,.18);background-image:url("tex-plaster.svg");background-size:320px;background-blend-mode:multiply}
 .ledger h1.doc-h1,.ledger h2,.ledger h3{color:var(--sheet-ink)}
@@ -444,10 +451,12 @@ footer.site .grow{margin-left:auto}
    stops being a screen-blended glow on a dark room and becomes a small warm
    flame in a lit one. Relief comes from cast shadow instead of from light pools. */
 /* daylight has no firelight to separate the stone from the wall, so the oven
-   casts a short shadow off both flanks: the chimney keeps an edge against the
-   limewash without being drawn with a pen */
+   carries a hairline of its own along both flanks: the chimney keeps an edge
+   against the limewash the way the arch stones do, and the night needs none of
+   it — the fire already draws that edge there. */
 :root[data-theme="light"] .oven-img{filter:sepia(.22) saturate(.72) brightness(1.16) contrast(.92)
-  drop-shadow(3px 1px 1.5px rgba(86,62,36,.5)) drop-shadow(-3px 1px 1.5px rgba(86,62,36,.42))}
+  drop-shadow(1px 0 0 rgba(74,52,28,.62)) drop-shadow(-1px 0 0 rgba(74,52,28,.52))
+  drop-shadow(0 1px 0 rgba(74,52,28,.4))}
 /* the opening is drawn twice: at night the door is a silhouette lit by the room,
    by day it is oak with daylight on it. Neither is the other turned up. */
 .arch img.arch-day{display:none}
