@@ -38,8 +38,8 @@
     <a href="guide.html">Guide</a>
     <a href="api.html">API</a>
     <a href="showcase.html">Showcase</a>
-    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme">&#9688; theme</a>
-    <a class="ghost" href="https://github.com/moonbitstack/moonmcp">GitHub &#8599;</a>
+    <a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.9a6.1 6.1 0 0 1 0 12.2z" fill="currentColor" opacity=".9"/></svg> theme</a>
+    <a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.9v2.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> GitHub</a>
   </div>
 </nav>
 
@@ -82,14 +82,17 @@
       </div>
 
       <div class="oven" aria-label="The server core: a wood-fired oven">
-        <div class="pots" aria-hidden="true"><span class="rail"></span><span class="pot"></span><span class="pot"></span><span class="pot"></span></div>
-        <div class="chimney"></div>
-        <div class="dome">
-          <div class="mouth" aria-hidden="true">
-            <div class="fire"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="ember"></i><i class="ember" style="animation-delay:-1.8s;left:42%"></i></div>
+        <div class="oven-stage">
+          <img class="oven-img" src="assets/oven.svg" alt="A masonry wood-fired oven: a stone arch over a brick firebox, with a chimney and a stone hearth.">
+          <div class="firebox" aria-hidden="true">
+            <span class="coal"></span>
+            <span class="log l1"></span><span class="log l2"></span>
+            <span class="flame f1"></span><span class="flame f2"></span><span class="flame f3"></span><span class="flame f4"></span><span class="flame f5"></span>
+            <span class="ember e1"></span><span class="ember e2"></span><span class="ember e3"></span>
+            <span class="smoke"></span>
           </div>
+          <span class="oven-glow" aria-hidden="true"></span>
         </div>
-        <div class="glow" aria-hidden="true"></div>
         <p class="label">the core, always lit</p>
       </div>
     </div>

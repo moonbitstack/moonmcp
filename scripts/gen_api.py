@@ -382,8 +382,8 @@ def main():
            'moonmcp</a><div class="links">'
            '<a href="index.html">Home</a><a href="guide.html">Guide</a>'
            '<a href="api.html" class="active">API</a><a href="showcase.html">Showcase</a>'
-           '<a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme">&#9688; theme</a>'
-           '<a class="ghost" href="https://github.com/moonbitstack/moonmcp">GitHub &#8599;</a></div></nav>')
+           '<a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.9a6.1 6.1 0 0 1 0 12.2z" fill="currentColor" opacity=".9"/></svg> theme</a>'
+           '<a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.1" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="3.3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.9v2.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> GitHub</a></div></nav>')
 
     main_html = ['<main class="doc ledger"><header>'
                  '<div class="kicker">Reference</div>'

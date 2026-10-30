@@ -152,6 +152,8 @@ img{max-width:100%;height:auto}
 .nav .links a:hover,.nav .ghost:hover{color:#fff;filter:brightness(1.08);text-decoration:none}
 .nav .links a.active{filter:brightness(1.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 16px -2px var(--copper-hi),0 1px 2px rgba(0,0,0,.5)}
 .nav .theme-btn{cursor:pointer;background:none}
+.mark{width:14px;height:14px;display:inline-block;flex:none;opacity:.95}
+.nav .ghost .mark,.nav .links a .mark{opacity:.9}
 
 /* ---- shared content ---- */
 h1.doc-h1{font-size:clamp(2.4rem,4.6vw,3.4rem);margin:.4rem 0 .2rem;line-height:1.02}
@@ -236,6 +238,36 @@ p{max-width:72ch}
 .oven .fire .ember{width:4px;height:4px;border-radius:50%;background:var(--fire-hi);opacity:.9;animation:ember 3.6s linear infinite}
 .oven .glow{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:150%;height:120%;pointer-events:none;background:radial-gradient(ellipse at 50% 70%,rgba(217,122,43,.38),rgba(217,122,43,.12) 40%,transparent 66%);filter:blur(10px);animation:breathe 5s ease-in-out infinite}
 .oven .label{font-family:"Caveat",cursive;font-size:1.25rem;color:var(--fire-hi);margin-top:.4rem;text-shadow:0 0 18px rgba(217,122,43,.6)}
+
+/* the masonry oven and its fire */
+.oven-stage{position:relative;width:min(520px,54vw);filter:drop-shadow(0 30px 44px rgba(0,0,0,.6))}
+.oven-img{display:block;width:100%;height:auto}
+.firebox{position:absolute;left:28.4%;top:59.6%;width:43.2%;height:17%;border-radius:50% 50% 0 0/100% 100% 0 0;overflow:hidden}
+.coal{position:absolute;left:4%;right:4%;bottom:1%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 72%,#ffd79a,#ef8a2f 34%,#b8551b 58%,#5a260c 78%,#1a0d05 100%);filter:blur(1.6px);opacity:.98;animation:breathe 3.6s ease-in-out infinite}
+.coal::after{content:"";position:absolute;inset:0;filter:blur(.6px);background:
+  radial-gradient(circle at 18% 72%,#ffe9c0 0 1.6px,transparent 3px),
+  radial-gradient(circle at 34% 64%,#ffd89a 0 1.4px,transparent 3px),
+  radial-gradient(circle at 48% 76%,#fff3d0 0 1.8px,transparent 3px),
+  radial-gradient(circle at 63% 66%,#ffc978 0 1.5px,transparent 3px),
+  radial-gradient(circle at 79% 74%,#ffe0a8 0 1.6px,transparent 3px)}
+.log{position:absolute;bottom:6%;height:13%;border-radius:7px;background:linear-gradient(180deg,#4a2e1a,#1a0d06 70%,#0d0703);box-shadow:0 0 14px 3px rgba(255,120,40,.5),inset 0 -3px 4px rgba(255,150,60,.55),inset 0 1px 0 rgba(255,190,120,.25)}
+.log.l1{left:14%;width:46%;transform:rotate(7deg)}
+.log.l2{right:12%;width:44%;transform:rotate(-8deg)}
+.flame{position:absolute;bottom:22%;left:50%;transform-origin:50% 100%;border-radius:50% 50% 46% 46%/64% 64% 40% 40%;mix-blend-mode:screen;filter:blur(.4px);animation:firewave 2.4s ease-in-out infinite}
+.flame.f1{width:40%;height:74%;margin-left:-20%;background:radial-gradient(ellipse at 50% 90%,#fff7df,#ffcb7d 38%,#e8842f 64%,transparent 80%);opacity:.98}
+.flame.f2{width:28%;height:62%;margin-left:-26%;background:radial-gradient(ellipse at 50% 90%,#fffdf4,#ffe6b0 38%,#ffb347 64%,transparent 82%);animation-delay:-.6s}
+.flame.f3{width:20%;height:50%;margin-left:6%;background:radial-gradient(ellipse at 50% 90%,#ffffff,#ffefc8 38%,#ffc978 64%,transparent 84%);animation-delay:-1.2s}
+.flame.f4{width:14%;height:38%;margin-left:-32%;background:radial-gradient(ellipse at 50% 90%,#fff,#ffd89a 45%,#e8842f 70%,transparent 86%);animation-delay:-1.8s}
+.flame.f5{width:10%;height:30%;margin-left:16%;background:radial-gradient(ellipse at 50% 90%,#fff,#ffe9c0 50%,#ffb347 74%,transparent 88%);animation-delay:-2.2s}
+.ember{position:absolute;bottom:18%;width:3px;height:3px;border-radius:50%;background:#ffd89a;box-shadow:0 0 6px 1px #ff9a3c;animation:spark 3.4s linear infinite}
+.ember.e1{left:38%}
+.ember.e2{left:56%;animation-delay:-1.2s}
+.ember.e3{left:47%;animation-delay:-2.4s}
+.smoke{position:absolute;left:30%;right:30%;top:-10%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 100%,rgba(120,110,100,.3),transparent 70%);filter:blur(6px);animation:smoke 5s ease-in-out infinite;opacity:.5}
+.oven-glow{position:absolute;left:50%;top:62%;width:120%;height:70%;transform:translate(-50%,-20%);pointer-events:none;background:radial-gradient(ellipse at 50% 60%,rgba(255,170,80,.5),rgba(217,122,43,.18) 42%,transparent 68%);filter:blur(14px);mix-blend-mode:screen;animation:breathe 4.6s ease-in-out infinite}
+@keyframes firewave{0%,100%{transform:scaleY(1) scaleX(1)}30%{transform:scaleY(1.12) scaleX(.94)}60%{transform:scaleY(.92) scaleX(1.05)}}
+@keyframes spark{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-62px) scale(.3);opacity:0}}
+@keyframes smoke{0%,100%{transform:translateY(0) scale(1);opacity:.4}50%{transform:translateY(-14px) scale(1.15);opacity:.6}}
 
 @keyframes flicker{0%,100%{opacity:.85;transform:translateX(-50%) scaleY(1)}25%{opacity:1;transform:translateX(-50%) scaleY(1.08)}50%{opacity:.7;transform:translateX(-50%) scaleY(.94)}75%{opacity:.95;transform:translateX(-50%) scaleY(1.04)}}
 @keyframes flame{0%,100%{transform:translateX(-50%) scaleY(1) scaleX(1)}30%{transform:translateX(-52%) scaleY(1.1) scaleX(.96)}60%{transform:translateX(-48%) scaleY(.94) scaleX(1.04)}}
@@ -355,7 +387,7 @@ footer.site .grow{margin-left:auto}
 @media (width <= 980px){
   .scene-grid{grid-template-columns:1fr;align-items:stretch}
   .oven{order:-1}
-  .oven .dome{width:min(300px,74vw)}
+  .oven-stage{width:min(390px,86vw)}
   .tabletop{grid-template-columns:1fr}
 }
 @media (width <= 860px){
