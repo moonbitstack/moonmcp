@@ -26,6 +26,9 @@
   <filter id="grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="4" stitchTiles="stitch"/>
     <feColorMatrix type="saturate" values="0"/>
+    <!-- keep the noise inside the shape: without this the filter paints a
+         rectangle over its bounding box and shows as a hard edge on the wall -->
+    <feComposite in2="SourceGraphic" operator="in"/>
   </filter>
   <filter id="mossy" x="-40%" y="-40%" width="180%" height="180%">
     <feTurbulence type="fractalNoise" baseFrequency=".1" numOctaves="3" seed="11" result="n"/>

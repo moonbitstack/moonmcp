@@ -1,0 +1,365 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 336">
+<defs>
+  <linearGradient id="bevel" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".24"/>
+    <stop offset=".16" stop-color="#fff" stop-opacity=".08"/>
+    <stop offset=".6" stop-color="#000" stop-opacity=".04"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".34"/>
+  </linearGradient>
+  <linearGradient id="sideShade" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity=".07"/>
+    <stop offset=".55" stop-color="#000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".16"/>
+  </linearGradient>
+  <linearGradient id="void" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#241708"/><stop offset="55%" stop-color="#3d2716"/><stop offset="100%" stop-color="#54381f"/>
+  </linearGradient>
+  <linearGradient id="door" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#684828"/><stop offset="55%" stop-color="#513520"/><stop offset="100%" stop-color="#3c2614"/>
+  </linearGradient>
+  <radialGradient id="spill" cx="50%" cy="104%" r="66%">
+    <stop offset="0" stop-color="#C08A4E" stop-opacity=".14"/><stop offset="60%" stop-color="#C08A4E" stop-opacity=".04"/><stop offset="100%" stop-color="#C08A4E" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="inner" cx="50%" cy="0%" r="88%">
+    <stop offset="0" stop-color="#1a0f06" stop-opacity=".46"/><stop offset="45%" stop-color="#1a0f06" stop-opacity=".2"/><stop offset="100%" stop-color="#1a0f06" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="grain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="4" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <!-- keep the noise inside the shape: without this the filter paints a
+         rectangle over its bounding box and shows as a hard edge on the wall -->
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+  <filter id="mossy" x="-40%" y="-40%" width="180%" height="180%">
+    <feTurbulence type="fractalNoise" baseFrequency=".1" numOctaves="3" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+    <feGaussianBlur stdDeviation=".8"/>
+  </filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="1.6"/></filter>
+  <filter id="soot"><feGaussianBlur stdDeviation="9"/></filter>
+  <linearGradient id="doorShade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1a0f06" stop-opacity=".38"/>
+    <stop offset="40%" stop-color="#1a0f06" stop-opacity=".1"/>
+    <stop offset="100%" stop-color="#1a0f06" stop-opacity=".26"/>
+  </linearGradient>
+</defs>
+<path d="M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill="url(#void)"/>
+<path d="M119.0 336 L119.0 232.0 A 101.0 101.0 0 0 1 321.0 232.0 L321.0 336 Z" fill="url(#door)"/>
+<line x1="119.0" y1="236.0" x2="119.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="120.7" y1="236.0" x2="120.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="142.0" y1="236.0" x2="142.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="143.7" y1="236.0" x2="143.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="165.0" y1="236.0" x2="165.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="166.7" y1="236.0" x2="166.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="188.0" y1="236.0" x2="188.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="189.7" y1="236.0" x2="189.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="211.0" y1="236.0" x2="211.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="212.7" y1="236.0" x2="212.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="234.0" y1="236.0" x2="234.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="235.7" y1="236.0" x2="235.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="257.0" y1="236.0" x2="257.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="258.7" y1="236.0" x2="258.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="280.0" y1="236.0" x2="280.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="281.7" y1="236.0" x2="281.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<line x1="303.0" y1="236.0" x2="303.0" y2="336" stroke="#4a3220" stroke-width="1.4" opacity=".5"/>
+<line x1="304.7" y1="236.0" x2="304.7" y2="336" stroke="#8a5f34" stroke-width=".8" opacity=".34"/>
+<path d="M119.0 336 L119.0 232.0 A 101.0 101.0 0 0 1 321.0 232.0 L321.0 336 Z" filter="url(#grain)" opacity=".34" style="mix-blend-mode:multiply"/>
+<path d="M119.0 336 L119.0 232.0 A 101.0 101.0 0 0 1 321.0 232.0 L321.0 336 Z" fill="url(#doorShade)"/>
+<rect x="121.0" y="260.0" width="198.0" height="13" rx="1.5" fill="#3d3730" opacity=".96"/>
+<rect x="121.0" y="260.0" width="198.0" height="3" fill="#6a6157" opacity=".45"/>
+<circle cx="135" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="135" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="168" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="168" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="201" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="201" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="234" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="234" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="267" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="267" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="300" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="300" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<rect x="121.0" y="260" width="198.0" height="13" rx="1.5" fill="#3d3730" opacity=".96"/>
+<rect x="121.0" y="260" width="198.0" height="3" fill="#6a6157" opacity=".45"/>
+<circle cx="135" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="135" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="168" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="168" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="201" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="201" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="234" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="234" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="267" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="267" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="300" cy="266.5" r="2.2" fill="#0c0a08"/>
+<circle cx="300" cy="265.5" r="1.5" fill="#948a7b" opacity=".5"/>
+<circle cx="220.0" cy="306.0" r="7.6" fill="none" stroke="#20160e" stroke-width="2.6" opacity=".9"/>
+<circle cx="220.0" cy="306.0" r="7.6" fill="none" stroke="#a3957f" stroke-width=".8" opacity=".4"/>
+<path d="M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill="url(#spill)"/>
+<path d="M108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 272.0 L108.0 272.0 Z" fill="url(#inner)" opacity=".9"/>
+<path d="M66.0 336 L66.0 198.0 A 152.0 152.0 0 0 1 374.0 198.0 L374.0 336 Z M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill="#8d7f68" fill-rule="evenodd"/>
+<path d="M66.0 336 L66.0 198.0 A 152.0 152.0 0 0 1 374.0 198.0 L374.0 336 Z M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill-rule="evenodd" filter="url(#grain)" opacity=".35" style="mix-blend-mode:overlay"/>
+<polygon points="106.0,196.6 108.0,176.9 73.1,170.3 70.5,196.2" fill="#8d847b"/>
+<polygon points="106.0,196.6 108.0,176.9 73.1,170.3 70.5,196.2" fill="url(#bevel)"/>
+<polygon points="106.0,196.6 108.0,176.9 73.1,170.3 70.5,196.2" fill="url(#sideShade)"/>
+<ellipse cx="93.0" cy="178.3" rx="6.2" ry="3.3" fill="#7a6b52" opacity="0.09" transform="rotate(153 93.0 178.3)" filter="url(#soft)"/>
+<ellipse cx="76.6" cy="175.7" rx="6.1" ry="3.2" fill="#7a6b52" opacity="0.11" transform="rotate(265 76.6 175.7)" filter="url(#soft)"/>
+<ellipse cx="79.7" cy="190.0" rx="4.1" ry="2.3" fill="#7a6b52" opacity="0.09" transform="rotate(198 79.7 190.0)" filter="url(#soft)"/>
+<line x1="70.5" y1="196.2" x2="73.1" y2="170.3" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="106.0" y1="196.6" x2="108.0" y2="176.9" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="108.9,174.2 113.2,159.2 79.4,146.9 73.8,166.7" fill="#a19175"/>
+<polygon points="108.9,174.2 113.2,159.2 79.4,146.9 73.8,166.7" fill="url(#bevel)"/>
+<polygon points="108.9,174.2 113.2,159.2 79.4,146.9 73.8,166.7" fill="url(#sideShade)"/>
+<ellipse cx="94.4" cy="169.7" rx="2.9" ry="2.2" fill="#7a6b52" opacity="0.06" transform="rotate(189 94.4 169.7)" filter="url(#soft)"/>
+<ellipse cx="99.7" cy="163.3" rx="4.6" ry="3.4" fill="#7a6b52" opacity="0.07" transform="rotate(152 99.7 163.3)" filter="url(#soft)"/>
+<ellipse cx="95.0" cy="156.8" rx="3.7" ry="3.2" fill="#cdc4b5" opacity="0.08" transform="rotate(356 95.0 156.8)" filter="url(#soft)"/>
+<ellipse cx="85.9" cy="162.7" rx="5.0" ry="3.3" fill="#7a6b52" opacity="0.13" transform="rotate(85 85.9 162.7)" filter="url(#soft)"/>
+<line x1="73.8" y1="166.7" x2="79.4" y2="146.9" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="108.9" y1="174.2" x2="113.2" y2="159.2" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="91.2" cy="157.1" r="0.8" fill="#150f0a" opacity="0.22"/>
+<polygon points="114.2,156.6 122.8,139.0 91.7,120.1 80.2,143.3" fill="#988b7c"/>
+<polygon points="114.2,156.6 122.8,139.0 91.7,120.1 80.2,143.3" fill="url(#bevel)"/>
+<polygon points="114.2,156.6 122.8,139.0 91.7,120.1 80.2,143.3" fill="url(#sideShade)"/>
+<ellipse cx="94.3" cy="138.2" rx="4.6" ry="3.6" fill="#7a6b52" opacity="0.16" transform="rotate(169 94.3 138.2)" filter="url(#soft)"/>
+<ellipse cx="91.2" cy="140.3" rx="5.0" ry="4.0" fill="#cdc4b5" opacity="0.07" transform="rotate(183 91.2 140.3)" filter="url(#soft)"/>
+<line x1="80.2" y1="143.3" x2="91.7" y2="120.1" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="114.2" y1="156.6" x2="122.8" y2="139.0" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="123.9,136.4 134.0,123.0 106.5,99.0 93.2,116.7" fill="#9c9387"/>
+<polygon points="123.9,136.4 134.0,123.0 106.5,99.0 93.2,116.7" fill="url(#bevel)"/>
+<polygon points="123.9,136.4 134.0,123.0 106.5,99.0 93.2,116.7" fill="url(#sideShade)"/>
+<ellipse cx="125.7" cy="131.7" rx="4.5" ry="3.8" fill="#cdc4b5" opacity="0.07" transform="rotate(36 125.7 131.7)" filter="url(#soft)"/>
+<ellipse cx="128.3" cy="130.5" rx="4.5" ry="2.3" fill="#7a6b52" opacity="0.10" transform="rotate(43 128.3 130.5)" filter="url(#soft)"/>
+<line x1="93.2" y1="116.7" x2="106.5" y2="99.0" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="123.9" y1="136.4" x2="134.0" y2="123.0" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="116.7" cy="119.3" r="0.8" fill="#150f0a" opacity="0.38"/>
+<polygon points="135.9,120.9 146.8,110.4 124.1,83.2 109.8,96.9" fill="#8a8178"/>
+<polygon points="135.9,120.9 146.8,110.4 124.1,83.2 109.8,96.9" fill="url(#bevel)"/>
+<polygon points="135.9,120.9 146.8,110.4 124.1,83.2 109.8,96.9" fill="url(#sideShade)"/>
+<ellipse cx="125.7" cy="102.2" rx="4.2" ry="2.6" fill="#cdc4b5" opacity="0.10" transform="rotate(249 125.7 102.2)" filter="url(#soft)"/>
+<ellipse cx="137.6" cy="114.9" rx="2.9" ry="2.5" fill="#7a6b52" opacity="0.15" transform="rotate(251 137.6 114.9)" filter="url(#soft)"/>
+<ellipse cx="120.6" cy="106.3" rx="2.8" ry="2.4" fill="#7a6b52" opacity="0.07" transform="rotate(105 120.6 106.3)" filter="url(#soft)"/>
+<ellipse cx="126.1" cy="95.5" rx="3.6" ry="2.3" fill="#7a6b52" opacity="0.16" transform="rotate(296 126.1 95.5)" filter="url(#soft)"/>
+<line x1="109.8" y1="96.9" x2="124.1" y2="83.2" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="135.9" y1="120.9" x2="146.8" y2="110.4" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="149.0,108.6 163.1,99.0 145.0,67.4 126.3,80.1" fill="#7f776d"/>
+<polygon points="149.0,108.6 163.1,99.0 145.0,67.4 126.3,80.1" fill="url(#bevel)"/>
+<polygon points="149.0,108.6 163.1,99.0 145.0,67.4 126.3,80.1" fill="url(#sideShade)"/>
+<ellipse cx="147.2" cy="79.8" rx="4.9" ry="4.1" fill="#cdc4b5" opacity="0.12" transform="rotate(102 147.2 79.8)" filter="url(#soft)"/>
+<ellipse cx="154.3" cy="77.7" rx="6.2" ry="4.2" fill="#cdc4b5" opacity="0.14" transform="rotate(131 154.3 77.7)" filter="url(#soft)"/>
+<ellipse cx="151.0" cy="95.1" rx="5.4" ry="3.8" fill="#7a6b52" opacity="0.14" transform="rotate(77 151.0 95.1)" filter="url(#soft)"/>
+<line x1="126.3" y1="80.1" x2="145.0" y2="67.4" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="149.0" y1="108.6" x2="163.1" y2="99.0" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="149.1" cy="84.0" r="0.7" fill="#150f0a" opacity="0.29"/>
+<polygon points="165.9,98.3 183.8,90.5 172.0,55.3 148.2,65.6" fill="#767874"/>
+<polygon points="165.9,98.3 183.8,90.5 172.0,55.3 148.2,65.6" fill="url(#bevel)"/>
+<polygon points="165.9,98.3 183.8,90.5 172.0,55.3 148.2,65.6" fill="url(#sideShade)"/>
+<ellipse cx="170.2" cy="69.9" rx="4.6" ry="3.5" fill="#7a6b52" opacity="0.12" transform="rotate(86 170.2 69.9)" filter="url(#soft)"/>
+<ellipse cx="170.6" cy="63.4" rx="2.5" ry="2.1" fill="#7a6b52" opacity="0.11" transform="rotate(310 170.6 63.4)" filter="url(#soft)"/>
+<line x1="148.2" y1="65.6" x2="172.0" y2="55.3" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="165.9" y1="98.3" x2="183.8" y2="90.5" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="186.4,89.5 205.3,85.4 200.6,49.6 175.8,55.1" fill="#6d6f6b"/>
+<polygon points="186.4,89.5 205.3,85.4 200.6,49.6 175.8,55.1" fill="url(#bevel)"/>
+<polygon points="186.4,89.5 205.3,85.4 200.6,49.6 175.8,55.1" fill="url(#sideShade)"/>
+<ellipse cx="192.2" cy="82.5" rx="5.4" ry="2.8" fill="#7a6b52" opacity="0.14" transform="rotate(344 192.2 82.5)" filter="url(#soft)"/>
+<ellipse cx="181.8" cy="81.9" rx="6.7" ry="4.4" fill="#7a6b52" opacity="0.11" transform="rotate(193 181.8 81.9)" filter="url(#soft)"/>
+<ellipse cx="190.9" cy="84.1" rx="5.5" ry="4.4" fill="#cdc4b5" opacity="0.11" transform="rotate(285 190.9 84.1)" filter="url(#soft)"/>
+<line x1="175.8" y1="55.1" x2="200.6" y2="49.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="186.4" y1="89.5" x2="205.3" y2="85.4" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="208.0,84.8 223.2,84.2 224.2,47.9 204.2,48.7" fill="#988b7c"/>
+<polygon points="208.0,84.8 223.2,84.2 224.2,47.9 204.2,48.7" fill="url(#bevel)"/>
+<polygon points="208.0,84.8 223.2,84.2 224.2,47.9 204.2,48.7" fill="url(#sideShade)"/>
+<ellipse cx="208.6" cy="74.1" rx="5.2" ry="3.4" fill="#7a6b52" opacity="0.08" transform="rotate(37 208.6 74.1)" filter="url(#soft)"/>
+<ellipse cx="211.8" cy="55.8" rx="6.0" ry="3.7" fill="#cdc4b5" opacity="0.08" transform="rotate(182 211.8 55.8)" filter="url(#soft)"/>
+<line x1="204.2" y1="48.7" x2="224.2" y2="47.9" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="208.0" y1="84.8" x2="223.2" y2="84.2" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="226.0,84.6 240.9,86.4 247.6,50.4 227.9,48.0" fill="#999084"/>
+<polygon points="226.0,84.6 240.9,86.4 247.6,50.4 227.9,48.0" fill="url(#bevel)"/>
+<polygon points="226.0,84.6 240.9,86.4 247.6,50.4 227.9,48.0" fill="url(#sideShade)"/>
+<ellipse cx="241.1" cy="75.4" rx="6.3" ry="3.5" fill="#cdc4b5" opacity="0.12" transform="rotate(265 241.1 75.4)" filter="url(#soft)"/>
+<ellipse cx="240.9" cy="68.4" rx="3.1" ry="2.0" fill="#7a6b52" opacity="0.14" transform="rotate(155 240.9 68.4)" filter="url(#soft)"/>
+<line x1="227.9" y1="48.0" x2="247.6" y2="50.4" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="226.0" y1="84.6" x2="240.9" y2="86.4" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="236.6" cy="67.5" r="0.9" fill="#150f0a" opacity="0.35"/>
+<polygon points="243.6,86.8 257.3,90.7 269.2,56.6 251.1,51.6" fill="#948b7f"/>
+<polygon points="243.6,86.8 257.3,90.7 269.2,56.6 251.1,51.6" fill="url(#bevel)"/>
+<polygon points="243.6,86.8 257.3,90.7 269.2,56.6 251.1,51.6" fill="url(#sideShade)"/>
+<ellipse cx="261.5" cy="57.8" rx="6.4" ry="3.6" fill="#7a6b52" opacity="0.10" transform="rotate(324 261.5 57.8)" filter="url(#soft)"/>
+<ellipse cx="264.3" cy="82.7" rx="4.2" ry="2.7" fill="#cdc4b5" opacity="0.10" transform="rotate(72 264.3 82.7)" filter="url(#soft)"/>
+<line x1="251.1" y1="51.6" x2="269.2" y2="56.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="243.6" y1="86.8" x2="257.3" y2="90.7" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="260.1,91.3 273.4,97.3 290.0,66.0 272.5,58.1" fill="#a2998d"/>
+<polygon points="260.1,91.3 273.4,97.3 290.0,66.0 272.5,58.1" fill="url(#bevel)"/>
+<polygon points="260.1,91.3 273.4,97.3 290.0,66.0 272.5,58.1" fill="url(#sideShade)"/>
+<ellipse cx="277.4" cy="81.1" rx="2.8" ry="1.9" fill="#7a6b52" opacity="0.08" transform="rotate(139 277.4 81.1)" filter="url(#soft)"/>
+<ellipse cx="278.1" cy="78.6" rx="7.0" ry="5.9" fill="#7a6b52" opacity="0.06" transform="rotate(286 278.1 78.6)" filter="url(#soft)"/>
+<ellipse cx="285.6" cy="63.7" rx="4.9" ry="2.7" fill="#7a6b52" opacity="0.06" transform="rotate(60 285.6 63.7)" filter="url(#soft)"/>
+<line x1="272.5" y1="58.1" x2="290.0" y2="66.0" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="260.1" y1="91.3" x2="273.4" y2="97.3" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="274.8" cy="80.7" r="0.7" fill="#150f0a" opacity="0.31"/>
+<polygon points="275.8,98.7 289.2,107.5 311.3,78.6 293.6,67.0" fill="#958c7f"/>
+<polygon points="275.8,98.7 289.2,107.5 311.3,78.6 293.6,67.0" fill="url(#bevel)"/>
+<polygon points="275.8,98.7 289.2,107.5 311.3,78.6 293.6,67.0" fill="url(#sideShade)"/>
+<ellipse cx="297.0" cy="82.6" rx="2.6" ry="1.9" fill="#7a6b52" opacity="0.08" transform="rotate(298 297.0 82.6)" filter="url(#soft)"/>
+<ellipse cx="294.3" cy="78.8" rx="3.2" ry="2.7" fill="#7a6b52" opacity="0.15" transform="rotate(311 294.3 78.8)" filter="url(#soft)"/>
+<ellipse cx="297.6" cy="87.3" rx="6.5" ry="4.2" fill="#7a6b52" opacity="0.15" transform="rotate(334 297.6 87.3)" filter="url(#soft)"/>
+<ellipse cx="301.4" cy="79.7" rx="4.7" ry="3.2" fill="#7a6b52" opacity="0.08" transform="rotate(313 301.4 79.7)" filter="url(#soft)"/>
+<line x1="293.6" y1="67.0" x2="311.3" y2="78.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="275.8" y1="98.7" x2="289.2" y2="107.5" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="291.5,109.1 303.9,120.7 330.0,96.6 313.7,81.4" fill="#a1988c"/>
+<polygon points="291.5,109.1 303.9,120.7 330.0,96.6 313.7,81.4" fill="url(#bevel)"/>
+<polygon points="291.5,109.1 303.9,120.7 330.0,96.6 313.7,81.4" fill="url(#sideShade)"/>
+<ellipse cx="321.7" cy="93.1" rx="2.8" ry="1.4" fill="#cdc4b5" opacity="0.10" transform="rotate(288 321.7 93.1)" filter="url(#soft)"/>
+<ellipse cx="301.7" cy="93.1" rx="6.2" ry="5.0" fill="#cdc4b5" opacity="0.14" transform="rotate(192 301.7 93.1)" filter="url(#soft)"/>
+<ellipse cx="300.2" cy="98.6" rx="5.7" ry="4.1" fill="#cdc4b5" opacity="0.07" transform="rotate(358 300.2 98.6)" filter="url(#soft)"/>
+<ellipse cx="321.2" cy="89.9" rx="3.4" ry="2.8" fill="#7a6b52" opacity="0.13" transform="rotate(325 321.2 89.9)" filter="url(#soft)"/>
+<line x1="313.7" y1="81.4" x2="330.0" y2="96.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="291.5" y1="109.1" x2="303.9" y2="120.7" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="305.5,123.0 314.6,134.7 344.6,114.6 332.7,99.1" fill="#998c7d"/>
+<polygon points="305.5,123.0 314.6,134.7 344.6,114.6 332.7,99.1" fill="url(#bevel)"/>
+<polygon points="305.5,123.0 314.6,134.7 344.6,114.6 332.7,99.1" fill="url(#sideShade)"/>
+<ellipse cx="329.9" cy="127.4" rx="5.0" ry="4.1" fill="#cdc4b5" opacity="0.12" transform="rotate(70 329.9 127.4)" filter="url(#soft)"/>
+<ellipse cx="317.7" cy="116.6" rx="6.7" ry="3.9" fill="#cdc4b5" opacity="0.08" transform="rotate(71 317.7 116.6)" filter="url(#soft)"/>
+<ellipse cx="315.9" cy="119.5" rx="3.2" ry="2.2" fill="#7a6b52" opacity="0.13" transform="rotate(233 315.9 119.5)" filter="url(#soft)"/>
+<ellipse cx="334.6" cy="114.6" rx="2.5" ry="1.7" fill="#7a6b52" opacity="0.11" transform="rotate(291 334.6 114.6)" filter="url(#soft)"/>
+<line x1="332.7" y1="99.1" x2="344.6" y2="114.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="305.5" y1="123.0" x2="314.6" y2="134.7" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="315.9,137.1 324.9,154.4 358.4,140.6 346.5,117.7" fill="#7d7469"/>
+<polygon points="315.9,137.1 324.9,154.4 358.4,140.6 346.5,117.7" fill="url(#bevel)"/>
+<polygon points="315.9,137.1 324.9,154.4 358.4,140.6 346.5,117.7" fill="url(#sideShade)"/>
+<ellipse cx="342.0" cy="123.9" rx="5.5" ry="4.7" fill="#7a6b52" opacity="0.15" transform="rotate(186 342.0 123.9)" filter="url(#soft)"/>
+<ellipse cx="346.1" cy="135.1" rx="2.8" ry="1.5" fill="#cdc4b5" opacity="0.13" transform="rotate(236 346.1 135.1)" filter="url(#soft)"/>
+<line x1="346.5" y1="117.7" x2="358.4" y2="140.6" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="315.9" y1="137.1" x2="324.9" y2="154.4" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<circle cx="341.7" cy="136.6" r="0.7" fill="#150f0a" opacity="0.37"/>
+<polygon points="326.0,157.0 330.8,173.0 366.9,164.9 360.4,143.7" fill="#999083"/>
+<polygon points="326.0,157.0 330.8,173.0 366.9,164.9 360.4,143.7" fill="url(#bevel)"/>
+<polygon points="326.0,157.0 330.8,173.0 366.9,164.9 360.4,143.7" fill="url(#sideShade)"/>
+<ellipse cx="341.0" cy="165.0" rx="4.1" ry="3.3" fill="#7a6b52" opacity="0.10" transform="rotate(66 341.0 165.0)" filter="url(#soft)"/>
+<ellipse cx="341.3" cy="148.7" rx="6.7" ry="5.0" fill="#cdc4b5" opacity="0.10" transform="rotate(93 341.3 148.7)" filter="url(#soft)"/>
+<line x1="360.4" y1="143.7" x2="366.9" y2="164.9" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="326.0" y1="157.0" x2="330.8" y2="173.0" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="331.6,175.7 333.5,189.5 369.2,186.8 366.7,168.6" fill="#8c837a"/>
+<polygon points="331.6,175.7 333.5,189.5 369.2,186.8 366.7,168.6" fill="url(#bevel)"/>
+<polygon points="331.6,175.7 333.5,189.5 369.2,186.8 366.7,168.6" fill="url(#sideShade)"/>
+<ellipse cx="339.9" cy="177.4" rx="5.6" ry="3.5" fill="#cdc4b5" opacity="0.14" transform="rotate(317 339.9 177.4)" filter="url(#soft)"/>
+<ellipse cx="345.1" cy="180.5" rx="3.9" ry="3.1" fill="#7a6b52" opacity="0.13" transform="rotate(103 345.1 180.5)" filter="url(#soft)"/>
+<ellipse cx="353.7" cy="179.4" rx="2.7" ry="1.6" fill="#cdc4b5" opacity="0.10" transform="rotate(121 353.7 179.4)" filter="url(#soft)"/>
+<line x1="366.7" y1="168.6" x2="369.2" y2="186.8" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="331.6" y1="175.7" x2="333.5" y2="189.5" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="333.6,192.2 333.7,196.6 370.3,196.2 370.1,190.4" fill="#867d71"/>
+<polygon points="333.6,192.2 333.7,196.6 370.3,196.2 370.1,190.4" fill="url(#bevel)"/>
+<polygon points="333.6,192.2 333.7,196.6 370.3,196.2 370.1,190.4" fill="url(#sideShade)"/>
+<ellipse cx="340.5" cy="195.3" rx="6.1" ry="3.1" fill="#cdc4b5" opacity="0.09" transform="rotate(52 340.5 195.3)" filter="url(#soft)"/>
+<ellipse cx="340.6" cy="194.9" rx="3.0" ry="2.5" fill="#cdc4b5" opacity="0.15" transform="rotate(287 340.6 194.9)" filter="url(#soft)"/>
+<ellipse cx="365.0" cy="195.1" rx="2.8" ry="1.6" fill="#7a6b52" opacity="0.14" transform="rotate(164 365.0 195.1)" filter="url(#soft)"/>
+<line x1="370.1" y1="190.4" x2="370.3" y2="196.2" stroke="#c6bcab" stroke-width="1.1" opacity=".34"/>
+<line x1="333.6" y1="192.2" x2="333.7" y2="196.6" stroke="#4a3f30" stroke-width="1.6" opacity=".55"/>
+<polygon points="210.2,85.4 229.8,85.4 229.9,41.3 210.1,41.3" fill="#8e8579"/>
+<polygon points="210.2,85.4 229.8,85.4 229.9,41.3 210.1,41.3" fill="url(#bevel)"/>
+<polygon points="210.2,85.4 229.8,85.4 229.9,41.3 210.1,41.3" fill="url(#sideShade)"/>
+<ellipse cx="218.2" cy="69.6" rx="3.3" ry="1.9" fill="#7a6b52" opacity="0.08" transform="rotate(197 218.2 69.6)" filter="url(#soft)"/>
+<ellipse cx="223.6" cy="79.7" rx="2.7" ry="1.8" fill="#cdc4b5" opacity="0.12" transform="rotate(327 223.6 79.7)" filter="url(#soft)"/>
+<ellipse cx="218.5" cy="53.2" rx="3.3" ry="1.8" fill="#cdc4b5" opacity="0.13" transform="rotate(43 218.5 53.2)" filter="url(#soft)"/>
+<polygon points="210.2,85.4 229.8,85.4 229.9,41.3 210.1,41.3" fill="none" stroke="#4a3f30" stroke-width="1.1"/>
+<line x1="210.1" y1="41.3" x2="229.9" y2="41.3" stroke="#d2c8b6" stroke-width="1.2" opacity=".45"/>
+<polygon points="66.6,198.4 107.7,199.8 107.5,222.0 67.9,221.8" fill="#767874"/>
+<polygon points="66.6,198.4 107.7,199.8 107.5,222.0 67.9,221.8" fill="url(#bevel)"/>
+<polygon points="66.6,198.4 107.7,199.8 107.5,222.0 67.9,221.8" fill="url(#sideShade)"/>
+<ellipse cx="99.4" cy="206.5" rx="5.6" ry="3.3" fill="#7a6b52" opacity="0.14" transform="rotate(242 99.4 206.5)" filter="url(#soft)"/>
+<ellipse cx="79.4" cy="208.3" rx="4.4" ry="3.6" fill="#cdc4b5" opacity="0.08" transform="rotate(211 79.4 208.3)" filter="url(#soft)"/>
+<line x1="67.9" y1="221.8" x2="107.5" y2="222.0" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="67.7,223.6 106.0,225.9 105.7,250.2 66.2,248.5" fill="#71695f"/>
+<polygon points="67.7,223.6 106.0,225.9 105.7,250.2 66.2,248.5" fill="url(#bevel)"/>
+<polygon points="67.7,223.6 106.0,225.9 105.7,250.2 66.2,248.5" fill="url(#sideShade)"/>
+<ellipse cx="94.6" cy="238.3" rx="3.9" ry="3.4" fill="#7a6b52" opacity="0.12" transform="rotate(292 94.6 238.3)" filter="url(#soft)"/>
+<ellipse cx="82.6" cy="241.6" rx="6.8" ry="5.8" fill="#cdc4b5" opacity="0.06" transform="rotate(36 82.6 241.6)" filter="url(#soft)"/>
+<line x1="66.2" y1="248.5" x2="105.7" y2="250.2" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="67.1,250.7 107.6,251.6 107.5,281.8 68.0,282.6" fill="#98886c"/>
+<polygon points="67.1,250.7 107.6,251.6 107.5,281.8 68.0,282.6" fill="url(#bevel)"/>
+<polygon points="67.1,250.7 107.6,251.6 107.5,281.8 68.0,282.6" fill="url(#sideShade)"/>
+<ellipse cx="94.3" cy="271.9" rx="3.4" ry="2.3" fill="#7a6b52" opacity="0.08" transform="rotate(7 94.3 271.9)" filter="url(#soft)"/>
+<ellipse cx="98.4" cy="255.7" rx="5.8" ry="3.7" fill="#7a6b52" opacity="0.15" transform="rotate(64 98.4 255.7)" filter="url(#soft)"/>
+<line x1="68.0" y1="282.6" x2="107.5" y2="281.8" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="66.4,284.5 107.3,285.2 107.7,310.1 68.2,310.6" fill="#928576"/>
+<polygon points="66.4,284.5 107.3,285.2 107.7,310.1 68.2,310.6" fill="url(#bevel)"/>
+<polygon points="66.4,284.5 107.3,285.2 107.7,310.1 68.2,310.6" fill="url(#sideShade)"/>
+<ellipse cx="73.6" cy="298.3" rx="2.9" ry="1.5" fill="#7a6b52" opacity="0.14" transform="rotate(147 73.6 298.3)" filter="url(#soft)"/>
+<ellipse cx="71.0" cy="301.2" rx="4.0" ry="3.5" fill="#7a6b52" opacity="0.09" transform="rotate(62 71.0 301.2)" filter="url(#soft)"/>
+<line x1="68.2" y1="310.6" x2="107.7" y2="310.1" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="67.4,312.6 107.7,312.8 105.7,335.8 67.0,333.9" fill="#898074"/>
+<polygon points="67.4,312.6 107.7,312.8 105.7,335.8 67.0,333.9" fill="url(#bevel)"/>
+<polygon points="67.4,312.6 107.7,312.8 105.7,335.8 67.0,333.9" fill="url(#sideShade)"/>
+<ellipse cx="79.7" cy="318.7" rx="2.6" ry="1.6" fill="#cdc4b5" opacity="0.08" transform="rotate(161 79.7 318.7)" filter="url(#soft)"/>
+<ellipse cx="85.8" cy="317.7" rx="5.1" ry="3.2" fill="#7a6b52" opacity="0.07" transform="rotate(123 85.8 317.7)" filter="url(#soft)"/>
+<line x1="67.0" y1="333.9" x2="105.7" y2="335.8" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="332.5,198.2 373.1,198.9 372.7,222.3 334.0,222.4" fill="#7c7e7a"/>
+<polygon points="332.5,198.2 373.1,198.9 372.7,222.3 334.0,222.4" fill="url(#bevel)"/>
+<polygon points="332.5,198.2 373.1,198.9 372.7,222.3 334.0,222.4" fill="url(#sideShade)"/>
+<ellipse cx="362.8" cy="217.7" rx="5.8" ry="4.6" fill="#cdc4b5" opacity="0.15" transform="rotate(85 362.8 217.7)" filter="url(#soft)"/>
+<ellipse cx="353.4" cy="203.8" rx="3.9" ry="2.4" fill="#7a6b52" opacity="0.15" transform="rotate(205 353.4 203.8)" filter="url(#soft)"/>
+<line x1="334.0" y1="222.4" x2="372.7" y2="222.3" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="333.5,223.8 373.7,224.2 372.8,255.1 333.3,254.6" fill="#91887f"/>
+<polygon points="333.5,223.8 373.7,224.2 372.8,255.1 333.3,254.6" fill="url(#bevel)"/>
+<polygon points="333.5,223.8 373.7,224.2 372.8,255.1 333.3,254.6" fill="url(#sideShade)"/>
+<ellipse cx="347.2" cy="237.1" rx="4.9" ry="3.9" fill="#cdc4b5" opacity="0.11" transform="rotate(299 347.2 237.1)" filter="url(#soft)"/>
+<ellipse cx="352.9" cy="229.9" rx="3.6" ry="2.5" fill="#7a6b52" opacity="0.12" transform="rotate(173 352.9 229.9)" filter="url(#soft)"/>
+<line x1="333.3" y1="254.6" x2="372.8" y2="255.1" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="334.4,257.8 371.6,256.9 371.6,284.4 332.5,283.3" fill="#8d8477"/>
+<polygon points="334.4,257.8 371.6,256.9 371.6,284.4 332.5,283.3" fill="url(#bevel)"/>
+<polygon points="334.4,257.8 371.6,256.9 371.6,284.4 332.5,283.3" fill="url(#sideShade)"/>
+<ellipse cx="345.4" cy="277.8" rx="6.8" ry="4.2" fill="#cdc4b5" opacity="0.11" transform="rotate(140 345.4 277.8)" filter="url(#soft)"/>
+<ellipse cx="339.0" cy="277.4" rx="6.8" ry="4.5" fill="#7a6b52" opacity="0.11" transform="rotate(270 339.0 277.4)" filter="url(#soft)"/>
+<line x1="332.5" y1="283.3" x2="371.6" y2="284.4" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="333.4,285.9 352.1,285.5 350.6,309.6 333.1,310.0" fill="#675f54"/>
+<polygon points="333.4,285.9 352.1,285.5 350.6,309.6 333.1,310.0" fill="url(#bevel)"/>
+<polygon points="333.4,285.9 352.1,285.5 350.6,309.6 333.1,310.0" fill="url(#sideShade)"/>
+<ellipse cx="338.2" cy="303.4" rx="5.2" ry="3.6" fill="#cdc4b5" opacity="0.07" transform="rotate(266 338.2 303.4)" filter="url(#soft)"/>
+<ellipse cx="340.3" cy="303.8" rx="3.5" ry="2.1" fill="#cdc4b5" opacity="0.15" transform="rotate(167 340.3 303.8)" filter="url(#soft)"/>
+<line x1="333.1" y1="310.0" x2="350.6" y2="309.6" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="353.6,285.7 372.8,285.9 372.0,311.2 353.2,310.9" fill="#998c7d"/>
+<polygon points="353.6,285.7 372.8,285.9 372.0,311.2 353.2,310.9" fill="url(#bevel)"/>
+<polygon points="353.6,285.7 372.8,285.9 372.0,311.2 353.2,310.9" fill="url(#sideShade)"/>
+<ellipse cx="360.2" cy="298.0" rx="3.7" ry="2.7" fill="#cdc4b5" opacity="0.09" transform="rotate(213 360.2 298.0)" filter="url(#soft)"/>
+<ellipse cx="359.5" cy="294.2" rx="2.8" ry="2.2" fill="#cdc4b5" opacity="0.12" transform="rotate(29 359.5 294.2)" filter="url(#soft)"/>
+<line x1="353.2" y1="310.9" x2="372.0" y2="311.2" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<polygon points="333.5,313.2 372.3,313.8 371.6,334.2 333.9,335.5" fill="#766e64"/>
+<polygon points="333.5,313.2 372.3,313.8 371.6,334.2 333.9,335.5" fill="url(#bevel)"/>
+<polygon points="333.5,313.2 372.3,313.8 371.6,334.2 333.9,335.5" fill="url(#sideShade)"/>
+<ellipse cx="359.2" cy="320.3" rx="6.8" ry="4.6" fill="#7a6b52" opacity="0.09" transform="rotate(8 359.2 320.3)" filter="url(#soft)"/>
+<ellipse cx="339.6" cy="318.5" rx="6.9" ry="4.2" fill="#cdc4b5" opacity="0.08" transform="rotate(225 339.6 318.5)" filter="url(#soft)"/>
+<line x1="333.9" y1="335.5" x2="371.6" y2="334.2" stroke="#4a3f30" stroke-width="2" opacity=".45"/>
+<rect x="60.0" y="186.0" width="52.0" height="13" fill="#8d8478"/>
+<rect x="60.0" y="186.0" width="52.0" height="13" fill="url(#bevel)"/>
+<rect x="60.0" y="186.0" width="52.0" height="13" fill="none" stroke="#4a3f30" stroke-width="1.1"/>
+<rect x="60.0" y="186.0" width="52.0" height="3" fill="#cfc5b3" opacity=".35"/>
+<rect x="328.0" y="186.0" width="52.0" height="13" fill="#8d8478"/>
+<rect x="328.0" y="186.0" width="52.0" height="13" fill="url(#bevel)"/>
+<rect x="328.0" y="186.0" width="52.0" height="13" fill="none" stroke="#4a3f30" stroke-width="1.1"/>
+<rect x="328.0" y="186.0" width="52.0" height="3" fill="#cfc5b3" opacity=".35"/>
+<path d="M72.0 192.0 A 146.0 146.0 0 0 1 368.0 192.0" fill="none" stroke="#000" stroke-width="30" opacity=".16" filter="url(#soot)"/>
+<ellipse cx="356" cy="300" rx="5.9" ry="5.4" fill="#3f4d2b" opacity="0.27" filter="url(#mossy)"/>
+<ellipse cx="80" cy="230" rx="8.4" ry="3.9" fill="#5b6b3c" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="91" cy="265" rx="8.1" ry="5.1" fill="#3f4d2b" opacity="0.27" filter="url(#mossy)"/>
+<ellipse cx="366" cy="255" rx="4.7" ry="5.9" fill="#5b6b3c" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="370" cy="292" rx="3.6" ry="5.9" fill="#3f4d2b" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="103" cy="329" rx="3.1" ry="3.0" fill="#3f4d2b" opacity="0.22" filter="url(#mossy)"/>
+<ellipse cx="84" cy="296" rx="3.2" ry="3.5" fill="#5b6b3c" opacity="0.30" filter="url(#mossy)"/>
+<ellipse cx="109" cy="319" rx="3.7" ry="4.9" fill="#3f4d2b" opacity="0.32" filter="url(#mossy)"/>
+<ellipse cx="75" cy="229" rx="5.2" ry="4.0" fill="#5b6b3c" opacity="0.30" filter="url(#mossy)"/>
+<ellipse cx="373" cy="234" rx="7.6" ry="5.8" fill="#3f4d2b" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="358" cy="315" rx="6.8" ry="2.6" fill="#5b6b3c" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="72" cy="277" rx="7.4" ry="2.9" fill="#5b6b3c" opacity="0.19" filter="url(#mossy)"/>
+<ellipse cx="340" cy="325" rx="5.9" ry="4.1" fill="#5b6b3c" opacity="0.27" filter="url(#mossy)"/>
+<ellipse cx="109" cy="321" rx="7.9" ry="3.7" fill="#4d5c33" opacity="0.23" filter="url(#mossy)"/>
+<ellipse cx="89" cy="292" rx="5.6" ry="2.8" fill="#5b6b3c" opacity="0.24" filter="url(#mossy)"/>
+<ellipse cx="360" cy="234" rx="3.9" ry="6.0" fill="#3f4d2b" opacity="0.20" filter="url(#mossy)"/>
+<ellipse cx="141" cy="256" rx="5.9" ry="15.3" fill="#1b140c" opacity="0.16" filter="url(#soft)"/>
+<ellipse cx="195" cy="232" rx="4.5" ry="13.5" fill="#1b140c" opacity="0.13" filter="url(#soft)"/>
+<ellipse cx="276" cy="239" rx="9.8" ry="23.2" fill="#1b140c" opacity="0.12" filter="url(#soft)"/>
+<ellipse cx="302" cy="335" rx="8.1" ry="17.6" fill="#1b140c" opacity="0.11" filter="url(#soft)"/>
+<ellipse cx="174" cy="237" rx="4.5" ry="23.2" fill="#1b140c" opacity="0.12" filter="url(#soft)"/>
+<ellipse cx="247" cy="227" rx="6.8" ry="18.2" fill="#1b140c" opacity="0.15" filter="url(#soft)"/>
+<ellipse cx="311" cy="209" rx="7.7" ry="17.3" fill="#1b140c" opacity="0.13" filter="url(#soft)"/>
+<path d="M66.0 336 L66.0 198.0 A 152.0 152.0 0 0 1 374.0 198.0 L374.0 336 Z M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill-rule="evenodd" filter="url(#grain)" opacity=".16" style="mix-blend-mode:multiply"/>
+<path d="M66.0 336 L66.0 198.0 A 152.0 152.0 0 0 1 374.0 198.0 L374.0 336 Z M108.0 336 L108.0 198.0 A 112.0 112.0 0 0 1 332.0 198.0 L332.0 336 Z" fill-rule="evenodd" filter="url(#grain)" opacity=".07" style="mix-blend-mode:screen"/>
+</svg>

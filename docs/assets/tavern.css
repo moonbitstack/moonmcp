@@ -245,6 +245,16 @@ p{max-width:72ch}
 .counter-base{height:132px;background:var(--stone-tex);background-size:var(--stone-size);border-radius:0 0 6px 6px;
   box-shadow:inset 0 10px 22px rgba(var(--shadow-ink),.5),inset 0 -12px 28px rgba(var(--shadow-ink),.45),var(--relief)}
 .counter-base::after{content:"";display:block;height:8px;margin:0 -2px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.6))}
+/* noon: the lip of the counter drops a real shadow, so the slab reads as a slab
+   and not as a band of stone printed on the wall */
+:root[data-theme="light"] .counter-top{
+  box-shadow:0 -2px 0 rgba(255,252,244,.45),
+             0 3px 0 rgba(58,40,20,.34),
+             0 14px 24px -6px rgba(74,50,28,.55),
+             inset 0 -6px 10px rgba(60,42,22,.3)}
+:root[data-theme="light"] .counter-base::after{background:linear-gradient(180deg,rgba(214,205,176,0),rgba(40,26,12,.5))}
+:root[data-theme="light"] .bar::after{
+  background:radial-gradient(52% 66% at 50% 30%,rgba(58,38,16,.5),rgba(58,38,16,.16) 58%,transparent 78%)}
 .bar .hint{text-align:center;color:var(--faint);font-family:"Caveat",cursive;font-size:1.15rem;margin:.9rem 0 0}
 
 .oven{position:relative;display:flex;flex-direction:column;align-items:center;padding-bottom:10px;padding-top:56px}
@@ -259,9 +269,23 @@ p{max-width:72ch}
   background:#3a2412;box-shadow:inset 0 1px 0 rgba(255,220,170,.35);transform:translateY(-50%)}
 .oven .label::before{left:5px}
 .oven .label::after{right:5px}
+/* In the firelight the plate is not there: the caption is written on the stone,
+   the way it was before the brass. Daylight keeps the plate, which is what
+   makes it readable against pale limestone. */
+:root[data-theme="dark"] .oven .label{padding:0;margin:.8rem 0 0;border:0;border-radius:0;background:none;
+  box-shadow:none;font-family:"Caveat",cursive;font-size:1.3rem;font-weight:400;letter-spacing:.01em;
+  text-transform:none;color:#F2B56B;text-shadow:0 0 18px rgba(217,122,43,.6)}
+:root[data-theme="dark"] .oven .label::before,
+:root[data-theme="dark"] .oven .label::after{display:none}
 
 /* the masonry oven and its fire */
 .oven-stage{position:relative;width:min(520px,54vw);filter:var(--stage-shadow)}
+/* The mantel overhangs the base, so the stone under its lip is the one place
+   the fire cannot reach. Only the night needs it: by day the sun gets under
+   the slab and the shadow is already there in the drawing. */
+:root[data-theme="dark"] .oven-stage::after{content:"";position:absolute;left:6.6%;right:6.6%;
+  top:80.6%;height:8.4%;pointer-events:none;mix-blend-mode:multiply;
+  background:radial-gradient(118% 104% at 50% 0,rgba(0,0,0,.6),rgba(0,0,0,.17) 56%,transparent 78%)}
 .oven-img{display:block;width:100%;height:auto}
 .firebox{position:absolute;left:28.4%;top:59.6%;width:43.2%;height:17%;border-radius:50% 50% 0 0/100% 100% 0 0;overflow:hidden}
 .coal{position:absolute;left:4%;right:4%;bottom:1%;height:40%;border-radius:50%;background:radial-gradient(ellipse at 50% 72%,#ffd79a,#ef8a2f 34%,#b8551b 58%,#5a260c 78%,#1a0d05 100%);filter:blur(1.6px);opacity:.98;animation:breathe 3.6s ease-in-out infinite}
@@ -311,11 +335,23 @@ p{max-width:72ch}
 .arch .sign{position:absolute;left:50%;bottom:26%;transform:translateX(-50%);white-space:nowrap;font-family:"Caveat",cursive;font-size:1.5rem;color:#F2E1C4;text-shadow:0 2px 8px #000,0 0 20px rgba(217,122,43,.3)}
 
 .longtable{position:relative;z-index:2;width:min(1180px,94vw);margin:0 auto;padding:1rem 0 2rem}
-.tabletop{position:relative;padding:2rem 1.6rem 2.2rem;border-radius:8px;background:url("tex-wood.svg");background-size:300px;box-shadow:0 24px 50px -24px rgba(0,0,0,.85),inset 0 2px 0 rgba(255,255,255,.08),inset 0 -10px 30px rgba(0,0,0,.5);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+.tabletop{position:relative;padding:2rem 1.6rem 2.2rem;border-radius:8px;background:url("tex-wood.svg");background-size:300px;box-shadow:0 24px 50px -24px rgba(0,0,0,.85),inset 0 2px 0 rgba(255,255,255,.08),inset 0 -10px 30px rgba(0,0,0,.5);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.2rem;align-items:stretch}
+/* the slips are one column of paper, centred against the recipe beside them,
+   with air between them the way two dockets lie on a table */
+.tabletop > div:first-of-type{display:flex;flex-direction:column;justify-content:center;gap:1.5rem;min-width:0}
 .tabletop h2{position:absolute;top:-.9rem;left:1.4rem;font-family:"Caveat",cursive;font-size:1.5rem;color:#EDE6D2;background:var(--oak-2);padding:0 .5rem;border-radius:4px}
-.slip{background:#efe4cc;color:#2a1d12;border-radius:3px;padding:.8rem .9rem;font-family:"JetBrains Mono",monospace;font-size:.72rem;line-height:1.55;box-shadow:0 8px 18px rgba(0,0,0,.4);transform:rotate(-.7deg)}
+.slip{position:relative;background:#efe4cc;color:#2a1d12;border-radius:3px;padding:.8rem .9rem;font-family:"JetBrains Mono",monospace;font-size:.72rem;line-height:1.55;box-shadow:0 8px 18px rgba(0,0,0,.4);transform:rotate(-.7deg)}
 .slip .t{font-family:"Caveat",cursive;font-size:1.15rem;color:#6B2E2E;display:block;margin-bottom:.3rem}
-.slip + .slip{margin-top:.9rem;transform:rotate(.5deg)}
+/* These are paper slips lying on a table, so nothing holds them down: no nail.
+   If the tabletop is ever read as a wall of boards and the slips as plaques, the
+   docket wants a nail head in its top right corner — uncomment the rule and give
+   .slip the extra right padding (.8rem 1.7rem .8rem .9rem) to keep the text clear
+   of it.
+.slip::before{content:"";position:absolute;top:.44rem;right:.46rem;width:7px;height:7px;
+  border-radius:50%;background:#7a5636;
+  box-shadow:inset 0 1px 0 rgba(255,236,206,.4),0 0 0 1px rgba(84,56,30,.38),0 1px 2px rgba(0,0,0,.32)}
+*/
+.slip + .slip{transform:rotate(.5deg)}
 .recipe{background:#f4ecdb;color:#241A12;border-radius:4px;padding:.9rem 1rem;box-shadow:0 10px 22px rgba(0,0,0,.45)}
 .recipe .t{font-family:"Caveat",cursive;font-size:1.2rem;color:#3F6B54;display:block;margin-bottom:.4rem}
 .recipe pre{font-size:.74rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#241A12}
@@ -407,8 +443,16 @@ footer.site .grow{margin-left:auto}
    wall lifts to limewash, the stone washes toward pale limestone, and the fire
    stops being a screen-blended glow on a dark room and becomes a small warm
    flame in a lit one. Relief comes from cast shadow instead of from light pools. */
-:root[data-theme="light"] .oven-img{filter:sepia(.22) saturate(.72) brightness(1.16) contrast(.92)}
-:root[data-theme="light"] .arch img{filter:sepia(.26) saturate(.8) brightness(1.1) contrast(.94)}
+/* daylight has no firelight to separate the stone from the wall, so the oven
+   casts a short shadow off both flanks: the chimney keeps an edge against the
+   limewash without being drawn with a pen */
+:root[data-theme="light"] .oven-img{filter:sepia(.22) saturate(.72) brightness(1.16) contrast(.92)
+  drop-shadow(3px 1px 1.5px rgba(86,62,36,.5)) drop-shadow(-3px 1px 1.5px rgba(86,62,36,.42))}
+/* the opening is drawn twice: at night the door is a silhouette lit by the room,
+   by day it is oak with daylight on it. Neither is the other turned up. */
+.arch img.arch-day{display:none}
+:root[data-theme="light"] .arch img.arch-night{display:none}
+:root[data-theme="light"] .arch img.arch-day{display:block;filter:sepia(.26) saturate(.78) brightness(1.04) contrast(.98)}
 :root[data-theme="light"] .firebox{background:radial-gradient(ellipse at 50% 74%,#2e1709,#140b05 72%)}
 :root[data-theme="light"] .firebox .flame{mix-blend-mode:normal;opacity:.96;filter:saturate(1.8) brightness(.74) contrast(1.08)}
 :root[data-theme="light"] .coal{filter:blur(1.6px) saturate(1.15) brightness(.88)}
@@ -416,7 +460,10 @@ footer.site .grow{margin-left:auto}
 :root[data-theme="light"] .seat .candle .flame{box-shadow:0 0 12px 2px rgba(194,90,34,.45)}
 :root[data-theme="light"] .chandelier .bulb::after{box-shadow:0 0 14px 3px rgba(194,90,34,.4)}
 /* the top of the counter catches the daylight, the foot falls into shade */
-:root[data-theme="light"] .counter-base{background-image:linear-gradient(180deg,rgba(255,252,244,.04),rgba(86,62,36,.2) 82%),var(--stone-tex);box-shadow:inset 0 6px 14px rgba(86,62,36,.22),inset 0 -8px 20px rgba(86,62,36,.26),var(--relief)}
+:root[data-theme="light"] .counter-base{/* the stone only needs to sit a shade darker
+   where the top overhangs it; the rest of the shadow is the top's own, which has a real
+   falloff instead of a step */
+  background-image:linear-gradient(180deg,rgba(44,29,14,.18),rgba(44,29,14,0) 34%),var(--stone-tex);box-shadow:inset 0 6px 14px rgba(86,62,36,.22),inset 0 -8px 20px rgba(86,62,36,.26),var(--relief)}
 :root[data-theme="light"] .bar .hint{color:#6f5b41}
 :root[data-theme="light"] .board{box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 18px 34px -18px rgba(86,62,36,.5),inset 0 0 0 2px #2a1d12}
 
@@ -425,6 +472,9 @@ footer.site .grow{margin-left:auto}
   .scene-grid{grid-template-columns:minmax(0,1fr);align-items:stretch}
   .oven{order:-1}
   .oven-stage{width:min(390px,86vw)}
+  /* the back bar hangs off the counter on a wide screen; in one column it goes
+     back into the flow, or it lands on top of the oven's caption */
+  .backbar{position:static;margin-bottom:.4rem}
   .tabletop{grid-template-columns:minmax(0,1fr)}
 }
 @media (width <= 860px){
