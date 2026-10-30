@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -32,6 +32,23 @@
 <div class="shell">
   <aside class="sidebar">
     <p class="side-title">Armillary · moonmcp</p>
+    <svg class="mini-orb" viewBox="0 0 220 110" role="img" aria-label="A miniature armillary: a server at the centre, three capability bodies in orbit.">
+      <g fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".5">
+        <ellipse cx="110" cy="55" rx="86" ry="30"/>
+        <ellipse cx="110" cy="55" rx="86" ry="30" transform="rotate(60 110 55)"/>
+        <circle cx="110" cy="55" r="52" stroke-dasharray="3 6" opacity=".5"/>
+      </g>
+      <g class="thread" stroke-width=".6">
+        <path d="M110 55 C 140 45 158 38 176 34"/>
+        <path d="M110 55 C 88 62 64 68 44 70"/>
+        <path d="M110 55 C 116 78 122 92 126 98"/>
+      </g>
+      <circle cx="110" cy="55" r="10" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".6"/>
+      <circle cx="110" cy="55" r="5.5" fill="var(--ember)"/>
+      <circle cx="176" cy="34" r="4.2" fill="var(--jade)"/>
+      <circle cx="44" cy="70" r="4.2" fill="var(--amber)"/>
+      <circle cx="126" cy="98" r="4.2" fill="var(--amethyst)"/>
+    </svg>
     <nav class="side-nav">
       <div class="group">Start</div>
       <a href="#install">Install</a>
@@ -57,6 +74,7 @@
       <div class="kicker">Guide</div>
       <h1 class="doc-h1">Build a server, step by step</h1>
       <p class="lead">A short walk through moonmcp. Register a tool by hand, then let the <code>#mcp</code> generator write the same registration for you. Add resources, prompts, pick a transport, and point a client at it.</p>
+      <p class="spec-line"><b>MCP</b> 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05 &middot; Streamable HTTP &middot; stdio</p>
     </header>
 
     <div class="rule"><span class="node"></span></div>
@@ -168,7 +186,7 @@ fn review(code : String, focus? : String) -> String {
       <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives a moonasgi app for mooncat over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
       <div class="grid-2">
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--brass)">Streamable HTTP</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">Streamable HTTP</div>
           <div class="code" style="margin-top:.7rem"><pre><code>@mooncat.serve(
   mcp.to_asgi(path="/mcp"),
   port=12000,
@@ -176,7 +194,7 @@ fn review(code : String, focus? : String) -> String {
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
         </div>
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--brass)">stdio</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">stdio</div>
           <div class="code" style="margin-top:.7rem"><pre><code>mcp.run_stdio()</code></pre></div>
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
         </div>

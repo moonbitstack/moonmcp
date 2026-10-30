@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -15,7 +15,7 @@
   /* showcase-specific layout */
   .session{margin-top:1.2rem;padding:1.4rem 1.5rem 1.6rem}
   .session .era{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-bottom:.3rem}
-  .session .era .rev{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:var(--brass);border:1px solid var(--rule-2);border-radius:99px;padding:.18rem .6rem}
+  .session .era .rev{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:var(--gold);border:1px solid var(--glass-edge);border-radius:99px;padding:.18rem .6rem}
   .session .era h3{font-size:1.25rem;margin:0}
   .session .note{color:var(--muted);font-size:.9rem;max-width:70ch;margin:.2rem 0 1.1rem}
   .msg{padding:.15rem 0}
@@ -29,12 +29,12 @@
   @media (width <= 680px){.shots{grid-template-columns:1fr}}
   .shot{margin:0;overflow:hidden;padding:0}
   .shot img{width:100%;height:auto;display:block}
-  .shot figcaption{padding:.7rem .9rem;color:var(--muted);font-size:.86rem;border-top:1px solid var(--rule)}
+  .shot figcaption{padding:.7rem .9rem;color:var(--muted);font-size:.86rem;border-top:1px solid var(--hair)}
   .shot figcaption b{color:var(--ink);font-weight:500}
 
   .legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.4rem 0 0}
   .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;color:var(--muted)}
-  .runline{display:flex;align-items:center;gap:.6rem;background:var(--code-bg);border:1px solid var(--rule);border-radius:11px;padding:.7rem 1rem;margin-top:.8rem;flex-wrap:wrap}
+  .runline{display:flex;align-items:center;gap:.6rem;background:var(--code-bg);border:1px solid var(--hair);border-radius:11px;padding:.7rem 1rem;margin-top:.8rem;flex-wrap:wrap}
   .runline .prompt{color:var(--jade);font-weight:500;user-select:none;font-family:"JetBrains Mono",monospace}
   .runline code{flex:1;font-size:.9rem;min-width:200px}
 </style>
@@ -59,6 +59,23 @@
 <div class="shell">
   <aside class="sidebar">
     <p class="side-title">Armillary · moonmcp</p>
+    <svg class="mini-orb" viewBox="0 0 220 110" role="img" aria-label="A miniature armillary: a server at the centre, three capability bodies in orbit.">
+      <g fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".5">
+        <ellipse cx="110" cy="55" rx="86" ry="30"/>
+        <ellipse cx="110" cy="55" rx="86" ry="30" transform="rotate(60 110 55)"/>
+        <circle cx="110" cy="55" r="52" stroke-dasharray="3 6" opacity=".5"/>
+      </g>
+      <g class="thread" stroke-width=".6">
+        <path d="M110 55 C 140 45 158 38 176 34"/>
+        <path d="M110 55 C 88 62 64 68 44 70"/>
+        <path d="M110 55 C 116 78 122 92 126 98"/>
+      </g>
+      <circle cx="110" cy="55" r="10" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".6"/>
+      <circle cx="110" cy="55" r="5.5" fill="var(--ember)"/>
+      <circle cx="176" cy="34" r="4.2" fill="var(--jade)"/>
+      <circle cx="44" cy="70" r="4.2" fill="var(--amber)"/>
+      <circle cx="126" cy="98" r="4.2" fill="var(--amethyst)"/>
+    </svg>
     <nav class="side-nav">
       <div class="group">Sessions</div>
       <a href="#era-2026">2026&#8209;07&#8209;28 · stateless</a>
@@ -84,6 +101,7 @@
         <span><i class="gem gem-amber"></i> resource</span>
         <span><i class="gem gem-amethyst"></i> prompt</span>
       </div>
+      <p class="spec-line"><b>MCP</b> 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05 &middot; Streamable HTTP &middot; stdio</p>
     </header>
 
     <div class="rule"><span class="node"></span></div>

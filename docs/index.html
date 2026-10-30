@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,14 +9,14 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/armillary.css">
 </head>
 <body>
 
 <nav class="nav">
   <a class="brand" href="index.html">
-    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.2"/><ellipse cx="16" cy="16" rx="4.2" ry="11"/></g><circle cx="16" cy="16" r="2.6" fill="var(--brass)"/></svg>
+    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="var(--gold)" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.4"/><ellipse cx="16" cy="16" rx="4.4" ry="11"/></g><circle cx="16" cy="16" r="3.2" fill="var(--ember)"/></svg>
     moonmcp
   </a>
   <div class="links">
@@ -29,131 +29,170 @@
   </div>
 </nav>
 
-<header class="hero wrap">
-  <div class="hero-grid">
-    <div class="hero-copy">
-      <p class="kicker">MoonBit &middot; Model Context Protocol</p>
-      <h1>Model Context Protocol <em>servers for MoonBit.</em></h1>
-      <p class="lede">Register tools, resources and prompts, then serve them over Streamable HTTP or stdio. One server answers both protocol eras, so a client of either connects without configuration.</p>
+<header class="hero">
+  <svg class="armillary" viewBox="0 0 700 640" role="img" aria-label="An armillary sphere: a server star at the centre, tools, resources and prompts as jade, amber and amethyst bodies on gold orbits, and an ember agent roaming the rim.">
+    <defs>
+      <radialGradient id="coreG" cx="50%" cy="42%" r="62%"><stop offset="0%" stop-color="#FFF8E8"/><stop offset="52%" stop-color="#FFE4B5"/><stop offset="100%" stop-color="#E8A94D"/></radialGradient>
+      <radialGradient id="jadeG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#8CF0CE"/><stop offset="58%" stop-color="#3DBF94"/><stop offset="100%" stop-color="#12785B"/></radialGradient>
+      <radialGradient id="amberG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#FFD89A"/><stop offset="58%" stop-color="#E8A94D"/><stop offset="100%" stop-color="#9A6318"/></radialGradient>
+      <radialGradient id="amethystG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#D9C2FF"/><stop offset="58%" stop-color="#A97DE8"/><stop offset="100%" stop-color="#5B3A93"/></radialGradient>
+      <radialGradient id="emberG" cx="50%" cy="50%" r="55%"><stop offset="0%" stop-color="#FFF8E8"/><stop offset="100%" stop-color="#FFE4B5"/></radialGradient>
+      <filter id="b9" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="9"/></filter>
+      <filter id="b5" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="5"/></filter>
+      <filter id="b3" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+
+    <!-- faint star field -->
+    <g fill="var(--muted)" opacity=".35">
+      <circle cx="70" cy="120" r="1.2"/><circle cx="150" cy="60" r="1"/><circle cx="620" cy="90" r="1.1"/>
+      <circle cx="640" cy="240" r="1"/><circle cx="90" cy="330" r="1.2"/><circle cx="660" cy="470" r="1"/>
+      <circle cx="120" cy="500" r="1.1"/><circle cx="560" cy="560" r="1"/><circle cx="250" cy="560" r="1"/>
+    </g>
+
+    <!-- armillary skeleton -->
+    <g class="skeleton" fill="none" stroke="var(--gold)" stroke-width=".7" opacity=".3">
+      <ellipse cx="350" cy="300" rx="230" ry="80"/>
+      <ellipse cx="350" cy="300" rx="230" ry="80" transform="rotate(60 350 300)"/>
+      <ellipse cx="350" cy="300" rx="230" ry="80" transform="rotate(120 350 300)"/>
+    </g>
+
+    <!-- gold-thread orbits -->
+    <g fill="none" stroke="var(--gold)" stroke-width=".75" stroke-dasharray="4 7" opacity=".5">
+      <circle cx="350" cy="300" r="122"/>
+      <circle cx="350" cy="300" r="178"/>
+      <circle cx="350" cy="300" r="230"/>
+    </g>
+    <circle cx="350" cy="300" r="238" fill="none" stroke="var(--gold)" stroke-width=".55" stroke-dasharray="1 9" opacity=".3"/>
+
+    <!-- gold threads from the core to each body -->
+    <g class="threading" fill="none" stroke="var(--gold)" stroke-width=".75" opacity=".42">
+      <path d="M350 300 C 420 250, 440 210, 458 178"/>
+      <path d="M350 300 C 280 340, 230 352, 198 358"/>
+      <path d="M350 300 C 372 380, 402 460, 424 500"/>
+    </g>
+
+    <!-- the server star -->
+    <circle cx="350" cy="300" r="44" fill="url(#coreG)" filter="url(#b9)" opacity=".55" class="breathe"/>
+    <circle cx="350" cy="300" r="24" fill="url(#coreG)"/>
+    <circle cx="350" cy="300" r="33" fill="none" stroke="var(--gold)" stroke-width=".9" opacity=".55"/>
+    <circle cx="350" cy="300" r="5" fill="#FFF8E8"/>
+
+    <!-- jade body (tools) on an inner orbit -->
+    <g class="orbit-a"><g class="body">
+      <circle cx="462" cy="166" r="26" fill="url(#jadeG)" filter="url(#b5)" opacity=".55" class="breathe"/>
+      <circle cx="462" cy="166" r="17" fill="url(#jadeG)"/>
+      <circle cx="455" cy="159" r="4.4" fill="#FFFFFF" opacity=".8"/>
+      <circle cx="462" cy="166" r="17" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
+    </g></g>
+    <!-- amber body (resources) -->
+    <g class="orbit-b"><g class="body">
+      <circle cx="186" cy="360" r="26" fill="url(#amberG)" filter="url(#b5)" opacity=".55" class="breathe"/>
+      <circle cx="186" cy="360" r="17" fill="url(#amberG)"/>
+      <circle cx="179" cy="353" r="4.4" fill="#FFFFFF" opacity=".8"/>
+      <circle cx="186" cy="360" r="17" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
+    </g></g>
+    <!-- amethyst body (prompts) -->
+    <g class="orbit-c"><g class="body">
+      <circle cx="429" cy="514" r="24" fill="url(#amethystG)" filter="url(#b5)" opacity=".55" class="breathe"/>
+      <circle cx="429" cy="514" r="15" fill="url(#amethystG)"/>
+      <circle cx="423" cy="508" r="4" fill="#FFFFFF" opacity=".8"/>
+      <circle cx="429" cy="514" r="15" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
+    </g></g>
+
+    <!-- the ember agent, roaming the rim with a trailing light -->
+    <g class="ember"><circle r="7" fill="url(#emberG)" filter="url(#b5)"/><circle r="3.6" fill="url(#emberG)"/></g>
+    <g class="ember t2"><circle r="4.4" fill="url(#emberG)"/></g>
+    <g class="ember t3"><circle r="3" fill="url(#emberG)"/></g>
+  </svg>
+
+  <div class="hero-copy">
+    <p class="eyebrow">Armillary &middot; MCP framework</p>
+    <h1>Model Context Protocol <em>servers for MoonBit.</em></h1>
+    <p class="sub">Register tools, resources and prompts, then serve them over Streamable HTTP or stdio. One server answers both protocol eras, so a client of either connects without configuration.</p>
+    <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
+    <div class="hint"><span class="dot"></span> scroll &middot; the armillary</div>
+  </div>
+</header>
+
+<main>
+  <section class="wrap">
+    <p class="eyebrow">Capabilities</p>
+    <h2 style="font-size:clamp(1.7rem,3.4vw,2.4rem);margin:.4rem 0 0">Three kinds, three colours.</h2>
+    <p class="lead" style="margin-top:.5rem">Every capability is one component with the same lifecycle: register it, list it, call it, get a typed result back.</p>
+    <div class="bodies reveal">
+      <div class="body-card glass">
+        <div class="cap"><span class="orb orb-jade"></span><span><span class="name">Tools</span><br><span class="tag">jade &middot; #mcp.tool</span></span></div>
+        <p>A handler, an input schema, and a typed result. A wrong argument or an error the handler raises comes back as an <code>isError</code> result the model can correct from.</p>
+      </div>
+      <div class="body-card glass">
+        <div class="cap"><span class="orb orb-amber"></span><span><span class="name">Resources</span><br><span class="tag">amber &middot; #mcp.resource</span></span></div>
+        <p>A URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
+      </div>
+      <div class="body-card glass">
+        <div class="cap"><span class="orb orb-amethyst"></span><span><span class="name">Prompts</span><br><span class="tag">amethyst &middot; #mcp.prompt</span></span></div>
+        <p>A renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" style="margin-top:clamp(3rem,6vw,5rem)">
+    <p class="eyebrow">A call</p>
+    <h2 style="font-size:clamp(1.7rem,3.4vw,2.4rem);margin:.4rem 0 1.4rem">One call, four moves.</h2>
+    <div class="flow reveal">
+      <div class="step"><span class="n">01</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Discover</h4><p>The client lists what the server offers: tools, resources, templates and prompts.</p></div>
+      <div class="step"><span class="n">02</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Call</h4><p>It sends a name and arguments. The arguments are checked against the input schema before the handler runs.</p></div>
+      <div class="step"><span class="n">03</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Result</h4><p>The handler's JSON returns as content; an error returns as <code>isError</code>, not a protocol fault.</p></div>
+      <div class="step"><span class="n">04</span><span class="dot" style="background:var(--slate)"></span><h4>Notify</h4><p>A notification is a one-way wave: it leaves the server and expects no reply.</p></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="stats reveal">
+      <div class="stat glass"><div class="n">3</div><div class="l">protocol eras</div></div>
+      <div class="stat glass"><div class="n">2</div><div class="l">transports</div></div>
+      <div class="stat glass"><div class="n">3</div><div class="l">capability kinds</div></div>
+      <div class="stat glass"><div class="n num" id="n-items" data-fallback="834">834</div><div class="l">public items in the API</div></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="cards reveal">
+      <div class="card glass">
+        <div class="tag">Two eras at once</div>
+        <h3>Both revisions at once</h3>
+        <p>A request that names <code>2026-07-28</code> in <code>_meta</code> is handled statelessly; <code>initialize</code>, and any request without it, falls back to the handshake (2025-11-25 back to 2024-11-05).</p>
+      </div>
+      <div class="card glass">
+        <div class="tag">Two ways to speak</div>
+        <h3>Streamable HTTP &amp; stdio</h3>
+        <p><code>to_asgi</code> hands a moonasgi app to mooncat: one POST per message, origin-checked against DNS-rebinding. <code>run_stdio</code> speaks line-delimited JSON on native stdio.</p>
+      </div>
+      <div class="card glass">
+        <div class="tag">Two ways to write</div>
+        <h3>Register, or annotate</h3>
+        <p>Call <code>server.tool(name, handler, input_schema=&#8230;)</code> by hand, or mark a function <code>#mcp.tool</code> and let the generator write the same registration, with the JSON Schema from the argument types.</p>
+      </div>
+      <div class="card glass">
+        <div class="tag">Errors, not faults</div>
+        <h3>Results the model can read</h3>
+        <p>A wrong argument or an error the handler raises returns as a result marked <code>isError</code>, which the model reads and corrects from. Only a tool that does not exist is a protocol error.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="cta glass reveal">
+      <p class="eyebrow" style="justify-content:center">Begin</p>
+      <h2>Add moonmcp to a project.</h2>
       <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
-      <p class="hero-links">
+      <div class="links">
         <a href="guide.html">Read the guide &#8594;</a>
         <a href="api.html">Browse the API &#8594;</a>
         <a href="showcase.html">Recorded sessions &#8594;</a>
-      </p>
-    </div>
-
-    <figure class="hero-art">
-      <svg viewBox="0 0 520 520" role="img" aria-label="An astrolabe plate: a server at the centre, with tools, resources and prompts marked on orbits around it.">
-        <g fill="none" stroke="var(--ink)" stroke-width=".8">
-          <circle cx="260" cy="260" r="208" opacity=".5"/>
-          <ellipse cx="260" cy="260" rx="208" ry="72" opacity=".4"/>
-          <ellipse cx="260" cy="260" rx="208" ry="72" transform="rotate(60 260 260)" opacity=".4"/>
-          <ellipse cx="260" cy="260" rx="208" ry="72" transform="rotate(120 260 260)" opacity=".4"/>
-          <circle cx="260" cy="260" r="118" stroke-dasharray="3 6" opacity=".28"/>
-        </g>
-
-        <!-- graduated limb -->
-        <g class="spin" fill="none">
-          <circle cx="260" cy="260" r="214" stroke="var(--ink)" stroke-width=".6" stroke-dasharray="1 9" opacity=".4"/>
-          <g stroke="var(--ink)" stroke-width=".8" opacity=".5">
-            <line x1="260" y1="30" x2="260" y2="44"/><line x1="260" y1="490" x2="260" y2="476"/>
-            <line x1="30" y1="260" x2="44" y2="260"/><line x1="490" y1="260" x2="476" y2="260"/>
-          </g>
-        </g>
-
-        <!-- meridian -->
-        <line x1="260" y1="46" x2="260" y2="474" stroke="var(--brass)" stroke-width=".8" stroke-dasharray="2 7" opacity=".28"/>
-
-        <!-- hairlines to each capability -->
-        <g stroke="var(--ink)" stroke-width=".7" opacity=".16">
-          <line x1="260" y1="260" x2="356" y2="145"/>
-          <line x1="260" y1="260" x2="100" y2="318"/>
-          <line x1="260" y1="260" x2="325" y2="439"/>
-        </g>
-
-        <!-- the server core -->
-        <circle cx="260" cy="260" r="20" fill="none" stroke="var(--ink)" opacity=".25"/>
-        <circle cx="260" cy="260" r="12" fill="none" stroke="var(--brass)" stroke-width="1"/>
-        <circle cx="260" cy="260" r="5.5" fill="var(--ink)"/>
-        <text x="260" y="292" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9.5" letter-spacing="1.5" fill="var(--faint)">SERVER</text>
-
-        <!-- capability bodies -->
-        <circle cx="356" cy="145" r="5" fill="var(--jade)"/>
-        <text x="368" y="142" font-family="'JetBrains Mono',monospace" font-size="9.5" letter-spacing="1" fill="var(--faint)">tools</text>
-        <circle cx="100" cy="318" r="5" fill="var(--amber)"/>
-        <text x="88" y="315" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="9.5" letter-spacing="1" fill="var(--faint)">resources</text>
-        <circle cx="325" cy="439" r="5" fill="var(--amethyst)"/>
-        <text x="325" y="462" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9.5" letter-spacing="1" fill="var(--faint)">prompts</text>
-      </svg>
-      <figcaption>A server at the centre &middot; capabilities in orbit</figcaption>
-    </figure>
-  </div>
-
-  <dl class="spec">
-    <div><dt>Protocol eras</dt><dd><b>2026-07-28</b><br>2025-11-25 &middot; 2024-11-05</dd></div>
-    <div><dt>Transports</dt><dd><b>Streamable HTTP</b><br><b>stdio</b></dd></div>
-    <div><dt>Two ways to write</dt><dd><b>register</b><br><b>#mcp</b> annotations</dd></div>
-  </dl>
-</header>
-
-<section class="wrap">
-  <div class="band reveal">
-    <div class="cell"><div class="n">3</div><div class="l">protocol eras</div></div>
-    <div class="cell"><div class="n">2</div><div class="l">transports</div></div>
-    <div class="cell"><div class="n">3</div><div class="l">capability kinds</div></div>
-    <div class="cell"><div class="n" id="n-items" data-fallback="834">834</div><div class="l">public items in the API</div></div>
-  </div>
-</section>
-
-<div class="rule"><span class="node"></span></div>
-
-<section class="wrap">
-  <div class="features reveal">
-    <div class="feature">
-      <div class="tag">Two eras at once</div>
-      <h3>Both revisions at once</h3>
-      <p>A request that names <code>2026-07-28</code> in <code>_meta</code> is handled statelessly; <code>initialize</code>, and any request without it, falls back to the handshake (2025-11-25 back to 2024-11-05). An unsupported version returns <code>-32022</code> with every version the server speaks.</p>
-    </div>
-    <div class="feature">
-      <div class="tag">Two ways to speak</div>
-      <h3>Streamable HTTP &amp; stdio</h3>
-      <p><code>to_asgi</code> hands a moonasgi app to mooncat: one POST per message, origin-checked against DNS-rebinding. <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
-    </div>
-    <div class="feature">
-      <div class="tag">Two ways to write</div>
-      <h3>Register, or annotate</h3>
-      <p>Call <code>server.tool(name, handler, input_schema=&#8230;)</code> by hand, or mark a function <code>#mcp.tool</code> and let the generator write the same registration, with the JSON Schema from the argument types.</p>
-    </div>
-    <div class="feature">
-      <div class="tag">Three capability kinds</div>
-      <h3>Tools, resources, prompts</h3>
-      <div class="gems">
-        <span><i class="gem gem-jade"></i> Tools</span>
-        <span><i class="gem gem-amber"></i> Resources</span>
-        <span><i class="gem gem-amethyst"></i> Prompts</span>
       </div>
-      <p>Every capability is one component with the same lifecycle: register it, list it, call it, get a typed result back.</p>
     </div>
-  </div>
-</section>
-
-<div class="rule"><span class="node"></span></div>
-
-<section class="wrap">
-  <div class="cta reveal">
-    <div>
-      <p class="kicker">Start</p>
-      <h2>Add moonmcp to a project.</h2>
-      <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
-    </div>
-    <div class="links">
-      <a href="guide.html">Guide</a>
-      <a href="api.html">API</a>
-      <a href="showcase.html">Showcase</a>
-    </div>
-  </div>
-</section>
+  </section>
+</main>
 
 <footer class="site wrap">
   <span>moonmcp &middot; a MoonBit MCP server framework</span>
@@ -168,9 +207,8 @@
 <script>
   (function(){
     var n = document.getElementById("n-items");
-    if (n && window.MOONMCP_NUMBERS && window.MOONMCP_NUMBERS.public_items){
-      n.textContent = window.MOONMCP_NUMBERS.public_items;
-    } else if (n) { n.textContent = n.getAttribute("data-fallback"); }
+    if (n && window.MOONMCP_NUMBERS && window.MOONMCP_NUMBERS.public_items){ n.textContent = window.MOONMCP_NUMBERS.public_items; }
+    else if (n){ n.textContent = n.getAttribute("data-fallback"); }
   })();
 </script>
 </body>

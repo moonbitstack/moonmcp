@@ -11,7 +11,7 @@
   if (stored === "light" || stored === "dark") {
     root.setAttribute("data-theme", stored);
   } else if (!root.getAttribute("data-theme")) {
-    root.setAttribute("data-theme", "light");
+    root.setAttribute("data-theme", "dark");
   }
   document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
     btn.addEventListener("click", function (ev) {

@@ -358,7 +358,20 @@ def main():
         "window.MOONMCP_NUMBERS = " + __import__("json").dumps(numbers) + ";\n", encoding="utf-8", newline="\n")
 
     # api.html
-    side = ['<aside class="sidebar"><p class="side-title">Armillary · moonmcp</p><nav class="side-nav">']
+    mini = ('<svg class="mini-orb" viewBox="0 0 220 110" aria-hidden="true">'
+            '<g fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".5">'
+            '<ellipse cx="110" cy="55" rx="86" ry="30"/>'
+            '<ellipse cx="110" cy="55" rx="86" ry="30" transform="rotate(60 110 55)"/>'
+            '<circle cx="110" cy="55" r="52" stroke-dasharray="3 6" opacity=".5"/></g>'
+            '<g class="thread" stroke-width=".6">'
+            '<path d="M110 55 C 140 45 158 38 176 34"/><path d="M110 55 C 88 62 64 68 44 70"/>'
+            '<path d="M110 55 C 116 78 122 92 126 98"/></g>'
+            '<circle cx="110" cy="55" r="10" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".6"/>'
+            '<circle cx="110" cy="55" r="5.5" fill="var(--ember)"/>'
+            '<circle cx="176" cy="34" r="4.2" fill="var(--jade)"/>'
+            '<circle cx="44" cy="70" r="4.2" fill="var(--amber)"/>'
+            '<circle cx="126" cy="98" r="4.2" fill="var(--amethyst)"/></svg>')
+    side = ['<aside class="sidebar"><p class="side-title">Armillary · moonmcp</p>' + mini + '<nav class="side-nav">']
     for pkgname, title, _, _ in sections:
         side.append('<a href="#pkg-%s">%s</a>' % (pkgname, title))
     side.append('</nav><div class="side-foot" style="margin-top:1.4rem">'
@@ -366,7 +379,7 @@ def main():
                 '<a class="ghost" href="guide.html">Guide</a> '
                 '<a class="ghost" href="showcase.html">Showcase</a></div></aside>')
 
-    head = ('<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8">'
+    head = ('<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             '<script>document.documentElement.classList.add("js")</script>'
             '<title>moonmcp — API reference</title>'
@@ -391,6 +404,7 @@ def main():
                  '<p class="lead">Every type, function, method and value moonmcp exposes, drawn straight from the compiled package interfaces. '
                  'Generated from source &mdash; it cannot drift from the code.</p>']
     main_html.append(gem_legend())
+    main_html.append('<p class="spec-line"><b>MCP</b> 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05 &middot; Streamable HTTP &middot; stdio</p>')
     main_html.append('</header>')
     main_html.append('<div class="rule"><span class="node"></span></div>')
 
