@@ -169,17 +169,17 @@ fn review(code : String, focus? : String) -> String {
       <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives a moonasgi app for mooncat over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
       <div class="grid-2">
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--copper)">Streamable HTTP</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:#8B5A3C">Streamable HTTP</div>
           <div class="code" style="margin-top:.7rem"><pre><code>@mooncat.serve(
   mcp.to_asgi(path="/mcp"),
   port=12000,
 )</code></pre></div>
-          <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
+          <p style="color:var(--sheet-muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
         </div>
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--copper)">stdio</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:#8B5A3C">stdio</div>
           <div class="code" style="margin-top:.7rem"><pre><code>mcp.run_stdio()</code></pre></div>
-          <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
+          <p style="color:var(--sheet-muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
         </div>
       </div>
     </section>
@@ -203,7 +203,7 @@ fn review(code : String, focus? : String) -> String {
   }
 }</code></pre></div>
       <p>Point <code>command</code> at the binary produced by <code>moon build --target native</code> for an example that calls <code>run_stdio()</code>. The server speaks the 2025&#8209;11&#8209;25 handshake on stdio; over HTTP it also answers the 2026&#8209;07&#8209;28 stateless era when the client names it in <code>_meta</code>.</p>
-      <p style="color:var(--muted)">Every snippet on this page is a fragment of the two example servers in <code>src/examples/</code>; each compiles and runs against the published package.</p>
+      <p style="color:var(--sheet-muted)">Every snippet on this page is a fragment of the two example servers in <code>src/examples/</code>; each compiles and runs against the published package.</p>
     </section>
 
     <footer class="site">

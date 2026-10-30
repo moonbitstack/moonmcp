@@ -12,16 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/armillary.css">
 <style>
-  /* showcase-specific layout */
+  /* showcase-specific layout — all colours are parchment-safe (the ledger is
+     light in both themes), so they never come from the flipping theme tokens */
   .session{margin-top:1.2rem;padding:1.4rem 1.5rem 1.6rem}
   .session .era{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-bottom:.3rem}
-  .session .era .rev{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:var(--copper);border:1px solid var(--copper);border-radius:99px;padding:.18rem .6rem}
-  .session .era h3{font-size:1.25rem;margin:0}
-  .session .note{color:var(--muted);font-size:.9rem;max-width:70ch;margin:.2rem 0 1.1rem}
+  .session .era .rev{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:#8B5A3C;border:1px solid rgba(139,90,60,.45);border-radius:99px;padding:.18rem .6rem}
+  .session .era h3{font-size:1.25rem;margin:0;color:var(--sheet-ink)}
+  .session .note{color:var(--sheet-muted);font-size:.9rem;max-width:70ch;margin:.2rem 0 1.1rem}
   .msg{padding:.15rem 0}
   .msg .body{padding:.6rem .85rem}
-  .msg .body .method{display:flex;align-items:center;gap:.45rem;font-family:"JetBrains Mono",monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.5rem}
-  .msg .body .method .verb{color:var(--ink);font-weight:500;letter-spacing:.04em}
+  .msg .body .method{display:flex;align-items:center;gap:.45rem;font-family:"JetBrains Mono",monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:#c9b79a;margin-bottom:.5rem}
+  .msg .body .method .verb{color:#F8EFDC;font-weight:500;letter-spacing:.04em}
   .msg .body pre{margin:0;font-size:.82rem;line-height:1.65}
   .msg .body .gem{margin-right:.15rem}
 
@@ -29,13 +30,13 @@
   @media (width <= 680px){.shots{grid-template-columns:1fr}}
   .shot{margin:0;overflow:hidden;padding:0}
   .shot img{width:100%;height:auto;display:block}
-  .shot figcaption{padding:.7rem .9rem;color:var(--muted);font-size:.86rem;border-top:1px solid var(--sheet-hair)}
-  .shot figcaption b{color:var(--ink);font-weight:500}
+  .shot figcaption{padding:.7rem .9rem;color:var(--sheet-muted);font-size:.86rem;border-top:1px solid var(--sheet-hair)}
+  .shot figcaption b{color:var(--sheet-ink);font-weight:600}
 
   .legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.4rem 0 0}
-  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;color:var(--muted)}
-  .runline{display:flex;align-items:center;gap:.6rem;background:#1a1410;border:1px solid var(--sheet-hair);border-radius:11px;padding:.7rem 1rem;margin-top:.8rem;flex-wrap:wrap}
-  .runline .prompt{color:var(--patina);font-weight:500;user-select:none;font-family:"JetBrains Mono",monospace}
+  .legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;color:var(--sheet-muted)}
+  .runline{display:flex;align-items:center;gap:.6rem;background:#271c14;border:1px solid #42342a;border-radius:6px;padding:.7rem 1rem;margin-top:.8rem;flex-wrap:wrap}
+  .runline .prompt{color:#6FE8BF;font-weight:500;user-select:none;font-family:"JetBrains Mono",monospace}
   .runline code{flex:1;font-size:.9rem;min-width:200px}
 </style>
 </head>
@@ -281,36 +282,28 @@
 
     <section class="section" id="gallery">
       <h2>The debug page</h2>
-      <p class="pdesc">Give <code>to_asgi</code> a path and a browser page appears beside the endpoint: it lists every capability, fills an argument form from each input schema, and shows the JSON-RPC request next to the reply it got back — in either era. The five frames below are real captures of that page.</p>
+      <p class="pdesc">Give <code>to_asgi</code> a path and a browser page appears beside the endpoint: it lists every capability, fills a form from each input schema, and shows the JSON-RPC request beside the reply — in either era.</p>
       <div class="shots">
         <figure class="shot glass">
-          <img src="assets/shots/debug-dark.png" alt="The debug page in the night theme, listing the demo server's tools." loading="lazy">
-          <figcaption><b>Night</b> — the page lists tools, resources, templates and prompts, each with a form.</figcaption>
+          <img src="assets/shots/debug-dark.png" alt="The debug page listing the demo server's tools, resources, templates and prompts, each with a form." loading="lazy">
+          <figcaption><b>Listed</b> — every capability, each with a form built from its input schema.</figcaption>
         </figure>
         <figure class="shot glass">
-          <img src="assets/shots/debug-light-tools.png" alt="The debug page in the dawn theme." loading="lazy">
-          <figcaption><b>Dawn</b> — the same page in the light celestial moment.</figcaption>
+          <img src="assets/shots/debug-call.png" alt="The debug page after a tool call, showing the JSON-RPC request and the reply." loading="lazy">
+          <figcaption><b>A call</b> — the request it built sits beside the reply.</figcaption>
         </figure>
         <figure class="shot glass">
-          <img src="assets/shots/debug-call.png" alt="The debug page after a tool call, showing request and reply." loading="lazy">
-          <figcaption><b>A call</b> — the JSON-RPC request it built sits beside the reply.</figcaption>
-        </figure>
-        <figure class="shot glass">
-          <img src="assets/shots/debug-legacy.png" alt="The debug page speaking the legacy 2025-11-25 era." loading="lazy">
-          <figcaption><b>Legacy era</b> — switch the protocol version and it speaks the handshake revisions.</figcaption>
-        </figure>
-        <figure class="shot glass">
-          <img src="assets/shots/debug-mobile.png" alt="The debug page on a narrow viewport." loading="lazy">
-          <figcaption><b>Mobile</b> — the layout reflows; nothing overflows at a phone width.</figcaption>
+          <img src="assets/shots/debug-legacy.png" alt="The debug page switched to the legacy 2025-11-25 era." loading="lazy">
+          <figcaption><b>Legacy era</b> — switch the version and it speaks the handshake revisions.</figcaption>
         </figure>
       </div>
     </section>
 
     <section class="section" id="how">
       <h2>Run it yourself</h2>
-      <p class="pdesc">The frames above are the demo server over Streamable HTTP. Build it for native and the debug page is served at <code>/debug</code> next to the endpoint:</p>
+      <p class="pdesc">The captures above are the demo server over Streamable HTTP. Build it for native and the debug page is served at <code>/debug</code> next to the endpoint:</p>
       <div class="runline"><span class="prompt">$</span><code>moon run src/examples/http --target native</code><button class="copy" data-copy="moon run src/examples/http --target native">copy</button></div>
-      <p style="color:var(--muted);font-size:.9rem;margin-top:.9rem">Then open <code>http://127.0.0.1:12000/debug</code>. Off by default — the page appears only because the server was built with <code>to_asgi(debug_page="/debug")</code>; a server that is not being debugged answers exactly as before.</p>
+      <p style="color:var(--sheet-muted);font-size:.9rem;margin-top:.9rem">Then open <code>http://127.0.0.1:12000/debug</code>. Off by default — the page appears only because the server was built with <code>to_asgi(debug_page="/debug")</code>; a server that is not being debugged answers exactly as before.</p>
     </section>
 
     <footer class="site">
