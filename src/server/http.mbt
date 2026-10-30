@@ -17,24 +17,26 @@
 /// the transport requires against DNS rebinding. An origin passes when its host
 /// is the request's own `Host`, a loopback address, or one listed in `origins`.
 ///
-/// `debug_page` names a path the debug page is served at, beside the endpoint:
-/// a browser opened on it lists what the server offers and calls it, in both
-/// eras of the protocol. Nothing is served there unless you name the path, and
-/// the path must differ from the endpoint's; the page is off by default and
-/// never carries credentials of its own, so it is for development servers.
+/// `docs` names the path the documentation page is served at, beside the
+/// endpoint: a browser opened on it lists what the server offers and calls it,
+/// in both eras of the protocol. It is on at `/docs` unless told otherwise, as
+/// an API framework's interactive docs are; `docs=None` leaves it off, and a
+/// path equal to the endpoint's is ignored. `theme` picks its look, the moonmcp
+/// website's by default. The page carries no credentials of its own.
 pub fn Server::to_asgi(
   self : Server,
   path~ : String = "/mcp",
   origins~ : Array[String] = [],
-  debug_page? : String,
+  docs~ : String? = Some("/docs"),
+  theme~ : @docs.Theme = @docs.theme,
 ) -> @moonasgi.AsgiApp {
   (scope, receive, send) => {
     match scope {
       Http(hs) => {
         let body = read_body(receive)
-        let (status, headers, payload) = match debug_page {
+        let (status, headers, payload) = match docs {
           Some(page) if page != path && at_page(hs.path, page) =>
-            debug_reply(hs.http_method, debug_page_html(endpoint=path))
+            page_reply(hs.http_method, @docs.page(endpoint=path, theme~))
           _ => self.over_http(hs, body, path, origins)
         }
         send(HttpResponseStart(status~, headers~, trailers=false))
@@ -64,10 +66,10 @@ fn at_page(got : String, want : String) -> Bool {
 }
 
 ///|
-/// The debug page for `GET`, its headers alone for `HEAD`, and `405` for
-/// anything else. It goes out with `no-store`, so that a browser never shows a
+/// The documentation page for `GET`, its headers alone for `HEAD`, and `405`
+/// for anything else. It goes out with `no-store`, so that a browser never shows a
 /// listing from before the server's registrations changed.
-fn debug_reply(
+fn page_reply(
   http_method : String,
   page : String,
 ) -> (Int32, Array[(String, String)], Bytes) {

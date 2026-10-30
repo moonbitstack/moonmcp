@@ -11,8 +11,6 @@ import {
 }
 
 // Values
-pub fn debug_page_html(endpoint? : String) -> String
-
 pub fn[T : @json.FromJson] decode(Map[String, Json], String) -> T raise @json.JsonDecodeError
 
 pub fn[T : @json.FromJson] decode_option(Map[String, Json], String) -> T? raise @json.JsonDecodeError

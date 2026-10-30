@@ -21,6 +21,7 @@ RUNNING_NUMBERS_PATTERN = re.compile(r"(<!--numbers-->)(.*?)(<!--/numbers-->)", 
 # Packages that form the public, runtime API (no build-time tooling, no examples).
 PACKAGES = [
     ("moonmcp", "moonmcp", "Facade", "The names a server is written with. Re-exports the server and the three capability types, plus argument decoding."),
+    ("docs", "docs", "Documentation page", "The page a server serves beside its endpoint, listing what it offers and calling it, in two looks."),
     ("server", "server", "Server", "One server holds tools, resources, templates and prompts, and speaks both protocol eras over Streamable HTTP and stdio."),
     ("tools", "tools", "Tools", "A tool: a handler, an input schema, and a typed result."),
     ("resources", "resources", "Resources", "A resource: a URI and a reader. Templates fill a URI pattern from arguments."),

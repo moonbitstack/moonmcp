@@ -202,11 +202,14 @@ fn review(code : String, focus? : String) -> String {
     </section>
 
     <section class="section" id="debug">
-      <h2>The debug page</h2>
-      <p class="pdesc">While you build, hand the endpoint a path and a browser page appears beside it: it lists every tool, resource, template and prompt, fills a form from each input schema, and shows the raw JSON-RPC request next to the reply &mdash; in either protocol era.</p>
+      <h2>The documentation page</h2>
+      <p class="pdesc">Beside the endpoint a browser page lists every tool, resource, template and prompt, fills a form from each input schema, and shows the raw JSON-RPC request next to the reply &mdash; in either protocol era.</p>
       <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
-mcp.to_asgi(path="/mcp", debug_page="/debug")</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Off by default. Naming a path that is not the endpoint's keeps <code>GET /mcp</code> a <code>405</code>, so a server that is not being debugged answers exactly as before.</p>
+let app = mcp.to_asgi(path="/mcp")                      // the page at /docs
+let moved = mcp.to_asgi(path="/mcp", docs=Some("/tools")) // somewhere else
+let bare = mcp.to_asgi(path="/mcp", docs=None)           // no page
+let plain = mcp.to_asgi(path="/mcp", theme=Plain)        // a neutral look</code></pre><button class="copy" type="button">copy</button></div>
+      <p>On at <code>/docs</code> by default, in this website's look. A path equal to the endpoint's is ignored, so <code>GET /mcp</code> stays a <code>405</code>.</p>
     </section>
 
     <section class="section" id="client">

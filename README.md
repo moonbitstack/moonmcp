@@ -101,7 +101,7 @@ as JSON unless it is a `String`.
 Wire the generator into the build once. In `moon.mod`:
 
 ```
-rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.1 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.2 -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package holding the functions:
@@ -130,19 +130,19 @@ identity; list results also carry `ttlMs` and `cacheScope`, set with
 
 ## Debug page
 
-While a server is being written, give `to_asgi` a path and it serves a page
-that lists what the server offers and calls it from the browser:
+`to_asgi` serves a documentation page beside the endpoint, the way an API
+framework serves its interactive docs:
 
 ```moonbit nocheck
-@mooncat.serve(mcp.to_asgi(debug_page="/debug"), port=12000)
+@mooncat.serve(mcp.to_asgi(), port=12000)
 ```
 
-Open `http://127.0.0.1:12000/debug`. The page asks the endpoint for the tools,
+Open `http://127.0.0.1:12000/docs`. The page asks the endpoint for the tools,
 resources, resource templates and prompts, fills an argument form in from each
 tool's input schema, and shows the JSON-RPC request it built beside the reply
-it got back, in either era of the protocol. Nothing is served there until a
-path is named, and the path cannot be the endpoint's, so a server that is not
-being debugged answers exactly as before. `debug_page_html(endpoint=...)` gives
+it got back, in either era of the protocol. `docs=Some("/other")` moves it,
+`docs=None` leaves it off, and `theme=Plain` swaps the website's look for a
+neutral one. `@docs.page(endpoint=...)` from `moonbitstack/moonmcp/docs` gives
 the same page to a router of your own.
 
 ## Connect a client
@@ -186,7 +186,7 @@ writes the configuration above.
 | Example | Shows |
 |:--|:--|
 | [`demo`](src/examples/demo/) | One server with two tools, a resource, a resource template and a prompt |
-| [`http`](src/examples/http/) | That server over Streamable HTTP, with the debug page at `/debug`: `moon run src/examples/http --target native` |
+| [`http`](src/examples/http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/http --target native` |
 | [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
 | [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
 
@@ -195,7 +195,7 @@ writes the configuration above.
 | Package | What it holds |
 |:--|:--|
 | `moonmcp` | The names a server is written with: `Server`, `Tool`, `Resource`, `Prompt` and the rest |
-| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio, the debug page; `decode`, which reads an argument as a parameter's type |
+| `server` | `Server`: registration, dispatch for both protocol eras, Streamable HTTP, stdio, serving the documentation page; `decode`, which reads an argument as a parameter's type |
 | `cmd/mcp` | The generator behind `#mcp.tool`, `#mcp.resource` and `#mcp.prompt` |
 | `types` | The wire model: content blocks, tools, prompts, resources, capabilities, results |
 | `tools`, `resources`, `prompts` | The components a server offers |

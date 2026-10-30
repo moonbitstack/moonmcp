@@ -1,18 +1,59 @@
-// The debug page: one HTML document with its own style and script, served by
-// `Server::to_asgi` at a path of the program's choosing. Nothing on it is
-// rendered on the server, so the file is a constant and the browser does the
-// listing and the calling itself; the only thing the server splices in is the
-// endpoint to talk to, as JSON, so that no path can break out of the script.
+// The documentation page: one HTML document with its own style and script.
+// Nothing on it is rendered on the server, so it is assembled from constants;
+// the only thing spliced in is the endpoint to talk to, as JSON, so that no
+// path can break out of the script.
 
 ///|
-/// The page, up to the endpoint the script is told to call.
-let debug_page_head : String =
+/// The two looks the page comes in.
+pub(all) enum Theme {
+  /// The moonmcp website's: parchment, ink and copper.
+  Site
+  /// The page as it first shipped: neutral, with violet accents.
+  Plain
+} derive(Eq, Debug)
+
+///|
+pub extend Theme with Eq::{equal, not_equal}
+
+///|
+pub extend Theme with Debug::{to_repr}
+
+///|
+/// The look `page` and `Server::to_asgi` use unless told otherwise: the one
+/// the moonmcp website wears.
+pub let theme : Theme = Site
+
+///|
+/// The page as HTML, for a server whose endpoint answers at `endpoint`: a path
+/// on the same origin, or an absolute URL.
+///
+/// It lists the tools, resources, resource templates and prompts the server
+/// offers and calls them over the endpoint, showing the JSON-RPC request it
+/// built and the reply it got back, in either era of the protocol, chosen on
+/// the page. `Server::to_asgi` serves it at `/docs` unless told otherwise; this
+/// hands the same document to a router of your own.
+pub fn page(endpoint~ : String = "/mcp", theme~ : Theme = theme) -> String {
+  let (top, mark) = match theme {
+    Site => (site_top, site_mark)
+    Plain => (plain_top, plain_mark)
+  }
+  top +
+  before_mark +
+  mark +
+  after_mark +
+  Json(endpoint).stringify() +
+  script_end
+}
+
+///|
+/// The `Site` look: the head of the document, through its style.
+let site_top : String =
   #|<!doctype html>
   #|<html lang="en">
   #|<head>
   #|<meta charset="utf-8">
   #|<meta name="viewport" content="width=device-width,initial-scale=1">
-  #|<title>moonmcp debug</title>
+  #|<title>moonmcp docs</title>
   #|<meta name="robots" content="noindex">
   #|<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23241A12'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='none'%20stroke='%23C98A4B'%20stroke-width='1.6'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='3.2'%20fill='%23D97A2B'/%3E%3C/svg%3E">
   #|<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,12 +162,149 @@ let debug_page_head : String =
   #|  .entry .cols{grid-template-columns:minmax(0,1fr)}
   #|}
   #|</style>
+
+///|
+/// The `Plain` look: the head of the document, through its style.
+let plain_top : String =
+  #|<!doctype html>
+  #|<html lang="en">
+  #|<head>
+  #|<meta charset="utf-8">
+  #|<meta name="viewport" content="width=device-width,initial-scale=1">
+  #|<title>moonmcp docs</title>
+  #|<meta name="robots" content="noindex">
+  #|<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%236d5efc'/%3E%3Ccircle%20cx='15'%20cy='16'%20r='8'%20fill='%23fff'/%3E%3Ccircle%20cx='21'%20cy='13'%20r='7'%20fill='%236d5efc'/%3E%3C/svg%3E">
+  #|<link rel="preconnect" href="https://fonts.googleapis.com">
+  #|<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  #|<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  #|<style>
+  #|:root{
+  #|  --bg:#fbfbfd;--panel:#ffffff;--panel-2:#f6f7fb;--ink:#14181f;--muted:#5b6675;--line:#e8ebf1;
+  #|  --accent:#6d5efc;--accent-soft:#efecff;--out:#0ca678;--code-bg:#f4f5f9;--bad:#d6336c;
+  #|  --shadow:0 1px 2px rgba(20,24,31,.04),0 8px 24px -12px rgba(20,24,31,.10);
+  #|}
+  #|@media (prefers-color-scheme:dark){:root{
+  #|  --bg:#0b0e14;--panel:#131722;--panel-2:#0f131c;--ink:#e9edf6;--muted:#96a1b5;--line:#212736;
+  #|  --accent:#9d8bff;--accent-soft:#1c1b3a;--out:#2dd4a7;--code-bg:#161b26;--bad:#ff7482;
+  #|  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.5);
+  #|}}
+  #|:root[data-theme=light]{--bg:#fbfbfd;--panel:#ffffff;--panel-2:#f6f7fb;--ink:#14181f;--muted:#5b6675;--line:#e8ebf1;--accent:#6d5efc;--accent-soft:#efecff;--out:#0ca678;--code-bg:#f4f5f9;--bad:#d6336c;--shadow:0 1px 2px rgba(20,24,31,.04),0 8px 24px -12px rgba(20,24,31,.10)}
+  #|:root[data-theme=dark]{--bg:#0b0e14;--panel:#131722;--panel-2:#0f131c;--ink:#e9edf6;--muted:#96a1b5;--line:#212736;--accent:#9d8bff;--accent-soft:#1c1b3a;--out:#2dd4a7;--code-bg:#161b26;--bad:#ff7482;--shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.5)}
+  #|*{box-sizing:border-box}
+  #|html,button,input,textarea,select{font-variant-ligatures:no-contextual}
+  #|body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  #|code,pre,textarea,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  #|h1,h2,h3{margin:0}
+  #|a{color:var(--accent)}
+  #|.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  #|  padding:.6rem 1rem;background:var(--panel);border-bottom:1px solid var(--line)}
+  #|.brand{display:flex;align-items:center;gap:.5rem;font-family:"IBM Plex Mono";font-weight:600;font-size:1.05rem}
+  #|.brand svg{width:22px;height:22px;display:block;flex:none}
+  #|.brand .sub{color:var(--muted);font-weight:400}
+  #|.grow{flex:1 1 auto;min-width:0}
+  #|.ep{font-family:"IBM Plex Mono";font-size:.85rem;color:var(--muted);background:var(--code-bg);
+  #|  border:1px solid var(--line);border-radius:7px;padding:.15rem .45rem;overflow-wrap:anywhere}
+  #|.ctl{display:flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--muted)}
+  #|select,input[type=text],textarea{font:inherit;font-size:.9rem;color:var(--ink);background:var(--panel);
+  #|  border:1px solid var(--line);border-radius:8px;padding:.3rem .5rem;min-width:0;max-width:100%}
+  #|textarea{width:100%;resize:vertical}
+  #|select:focus-visible,input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  #|.btn{font:inherit;font-size:.84rem;color:var(--ink);background:var(--panel);border:1px solid var(--line);
+  #|  border-radius:8px;padding:.3rem .65rem;cursor:pointer}
+  #|.btn:hover{border-color:var(--accent);color:var(--accent)}
+  #|.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+  #|.btn.primary:hover{color:#fff;border-color:var(--accent);filter:brightness(1.08)}
+  #|.status{margin:0;padding:.5rem 1rem;color:var(--muted);font-size:.86rem;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  #|.status.bad{color:var(--bad)}
+  #|.wrap{display:grid;grid-template-columns:264px minmax(0,1fr);gap:1.1rem;max-width:1280px;margin:0 auto;padding:1.1rem 1rem 3rem}
+  #|.side{align-self:start;position:sticky;top:4.2rem;max-height:calc(100vh - 5.4rem);overflow-y:auto;
+  #|  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.7rem .6rem;box-shadow:var(--shadow)}
+  #|.group{margin:.2rem 0 .7rem}
+  #|.group h3{font-family:"IBM Plex Mono";font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;
+  #|  color:var(--muted);padding:.3rem .5rem}
+  #|.group .count{float:right;color:var(--accent);text-transform:none;letter-spacing:0}
+  #|.nav-item{display:block;width:100%;text-align:left;font:inherit;font-size:.87rem;font-family:"IBM Plex Mono";
+  #|  color:var(--muted);background:none;border:0;border-left:2px solid transparent;border-radius:0 8px 8px 0;
+  #|  padding:.28rem .5rem;cursor:pointer;overflow-wrap:anywhere}
+  #|.nav-item:hover{background:var(--accent-soft);color:var(--ink)}
+  #|.nav-item.on{background:var(--accent-soft);color:var(--ink);border-left-color:var(--accent);font-weight:500}
+  #|.main{display:grid;gap:1.1rem;min-width:0}
+  #|.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow);min-width:0}
+  #|.card > h2{font-family:"IBM Plex Mono";font-size:1.15rem;letter-spacing:-.01em;margin:0 0 .1rem;overflow-wrap:anywhere}
+  #|.desc{color:var(--muted);margin:.2rem 0 .8rem;font-size:.92rem}
+  #|.kind{display:inline-block;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+  #|  border-radius:6px;padding:.1rem .4rem;vertical-align:.12em;margin-left:.4rem;
+  #|  color:var(--accent);background:var(--accent-soft);border:1px solid color-mix(in oklab,var(--accent) 26%,transparent)}
+  #|.fields{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.1rem .8rem;margin:0 0 .9rem;font-size:.88rem}
+  #|.fields dt{color:var(--muted);font-family:"IBM Plex Mono"}
+  #|.fields dd{margin:0;overflow-wrap:anywhere}
+  #|.lab{display:block;font-size:.78rem;color:var(--muted);font-family:"IBM Plex Mono";margin:.6rem 0 .25rem}
+  #|.row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}
+  #|.hint{font-size:.8rem;color:var(--muted)}
+  #|pre.code{margin:0;background:var(--code-bg);border:1px solid var(--line);border-radius:9px;padding:.6rem .7rem;
+  #|  font-size:.83rem;line-height:1.65;overflow-x:auto;white-space:pre;max-height:26rem;overflow-y:auto}
+  #|.out{margin-top:.9rem}
+  #|.out:empty{display:none}
+  #|.note{border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--panel-2);
+  #|  padding:.5rem .7rem;margin:.5rem 0;font-size:.88rem}
+  #|.note.bad{border-left-color:var(--bad);color:var(--bad)}
+  #|.note.ok{border-left-color:var(--out)}
+  #|.note .h{font-family:"IBM Plex Mono";font-size:.78rem;color:var(--muted);display:block}
+  #|.entry{border-top:1px solid var(--line);padding:.7rem 0}
+  #|.entry:first-child{border-top:0;padding-top:0}
+  #|.entry .head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-family:"IBM Plex Mono";font-size:.82rem;color:var(--muted)}
+  #|.entry .head .op{color:var(--ink)}
+  #|.entry .head .st{font-weight:600}
+  #|.entry .head .st.ok{color:var(--out)}
+  #|.entry .head .st.bad{color:var(--bad)}
+  #|.entry .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:.4rem}
+  #|.entry pre{margin:0}
+  #|.tag{font-size:.7rem;color:var(--muted);font-family:"IBM Plex Mono"}
+  #|@media (width<=860px){
+  #|  .wrap{grid-template-columns:minmax(0,1fr);padding:.9rem .7rem 2.5rem}
+  #|  .side{position:static;max-height:none}
+  #|  .entry .cols{grid-template-columns:minmax(0,1fr)}
+  #|}
+  #|@supports selector(::-webkit-scrollbar){
+  #|  ::-webkit-scrollbar{width:10px;height:10px}
+  #|  ::-webkit-scrollbar-track{background:transparent}
+  #|  ::-webkit-scrollbar-thumb{border-radius:99px;border:3px solid transparent;background-clip:content-box;
+  #|    background-color:color-mix(in srgb,var(--ink) 24%,transparent)}
+  #|  html:not(.scrolling)::-webkit-scrollbar-thumb{background-color:transparent}
+  #|  ::-webkit-scrollbar-corner{background:transparent}
+  #|}
+  #|@supports not selector(::-webkit-scrollbar){
+  #|  *{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 26%,transparent) transparent}
+  #|  html:not(.scrolling){scrollbar-color:transparent transparent}
+  #|}
+  #|@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  #|</style>
+
+///|
+/// The page up to the brand mark, the same in both looks.
+let before_mark : String =
+  #|
   #|</head>
   #|<body>
   #|<header class="bar">
   #|  <div class="brand">
-  #|    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#120C07"/><circle cx="16" cy="16" r="9" fill="none" stroke="#C98A4B" stroke-width="1.6"/><circle cx="16" cy="16" r="3.2" fill="#D97A2B"/></svg>
-  #|    <span>moonmcp</span><span class="sub">debug</span>
+  #|
+
+///|
+/// The brand mark in the `Site` look.
+let site_mark : String =
+  #|<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#120C07"/><circle cx="16" cy="16" r="9" fill="none" stroke="#C98A4B" stroke-width="1.6"/><circle cx="16" cy="16" r="3.2" fill="#D97A2B"/></svg>
+
+///|
+/// The brand mark in the `Plain` look.
+let plain_mark : String =
+  #|<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#6d5efc"/><circle cx="15" cy="16" r="8" fill="#fff"/><circle cx="21" cy="13" r="7" fill="#6d5efc"/></svg>
+
+///|
+/// The page from the brand mark up to the endpoint the script is told to call.
+let after_mark : String =
+  #|
+  #|    <span>moonmcp</span><span class="sub">docs</span>
   #|  </div>
   #|  <span class="ep" id="ep"></span>
   #|  <span class="grow"></span>
@@ -151,14 +329,14 @@ let debug_page_head : String =
   #|    </section>
   #|  </main>
   #|</div>
-  #|<script id="mcp-debug" type="application/json">{"endpoint":
+  #|<script id="mcp-docs" type="application/json">{"endpoint":
 
 ///|
-/// The page, from the endpoint onwards.
-let debug_page_tail : String =
+/// The rest of the script and the document.
+let script_end : String =
   #|}</script>
   #|<script>
-  #|const CFG = JSON.parse(document.getElementById("mcp-debug").textContent);
+  #|const CFG = JSON.parse(document.getElementById("mcp-docs").textContent);
   #|const NAMED = { "tools/call": "name", "prompts/get": "name", "resources/read": "uri" };
   #|const LISTS = [
   #|  ["tools/list", "tools", "tools"],
@@ -388,7 +566,7 @@ let debug_page_tail : String =
   #|  init.addEventListener("click", async () => {
   #|    const reply = await send("initialize", {
   #|      protocolVersion: S.era === "2026-07-28" ? "2025-11-25" : S.era,
-  #|      capabilities: {}, clientInfo: { name: "moonmcp debug", version: "1" }
+  #|      capabilities: {}, clientInfo: { name: "moonmcp docs", version: "1" }
   #|    });
   #|    S.discover = reply && reply.result ? reply.result : reply;
   #|    renderServer(panel);
@@ -614,30 +792,19 @@ let debug_page_tail : String =
   #|}
   #|
   #|const root = document.documentElement;
-  #|const syncTop = () => root.classList.toggle("at-top", window.scrollY <= 0);
-  #|window.addEventListener("scroll", syncTop, { passive: true });
+  #|let idle = 0, near = false;
+  #|const hideSoon = () => { clearTimeout(idle); idle = setTimeout(() => near || root.classList.remove("scrolling"), 1200); };
+  #|window.addEventListener("scroll", () => { root.classList.add("scrolling"); hideSoon(); }, { passive: true });
+  #|window.addEventListener("pointermove", (e) => { const was = near; near = e.pointerType === "mouse" && e.clientX >= root.clientWidth - 24; if (near) root.classList.add("scrolling"); else if (was) hideSoon(); }, { passive: true });
+  #|root.addEventListener("pointerleave", () => { near = false; hideSoon(); });
   #|
   #|el("ep").textContent = CFG.endpoint;
   #|el("era").value = S.era;
   #|el("era").addEventListener("change", e => { S.era = e.target.value; reload(); });
   #|el("reload").addEventListener("click", reload);
   #|initTheme();
-  #|syncTop();
   #|renderLog();
   #|reload();
   #|</script>
   #|</body>
   #|</html>
-
-///|
-/// The debug page as HTML, for a server whose endpoint answers at `endpoint`:
-/// a path on the same origin, or an absolute URL. Serve it from a route of
-/// your own, or let `to_asgi` do it with `debug_page?`.
-///
-/// The page lists the tools, resources, resource templates and prompts the
-/// server offers and calls them over the endpoint, showing the JSON-RPC
-/// request it built and the reply it got back. It speaks either era of the
-/// protocol, chosen on the page.
-pub fn debug_page_html(endpoint~ : String = "/mcp") -> String {
-  debug_page_head + Json(endpoint).stringify() + debug_page_tail
-}

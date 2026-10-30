@@ -1,0 +1,3 @@
+// The documentation page a server serves beside its endpoint: it lists what the
+// server offers and calls it. In a package of its own so a program that serves
+// it from a router of its own can take the HTML without the rest of the server.

@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/docs"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn page(endpoint? : String, theme? : Theme) -> String
+
+pub let theme : Theme
+
+// Errors
+
+// Types and methods
+pub(all) enum Theme {
+  Site
+  Plain
+} derive(Eq, @debug.Debug)
+pub fn Theme::equal(Self, Self) -> Bool
+pub fn Theme::not_equal(Self, Self) -> Bool
+pub fn Theme::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
