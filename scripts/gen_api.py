@@ -296,7 +296,23 @@ def gem_legend():
             '<span class="gem gem-amethyst"></span> <b class="t-amethyst">prompts</b>. '
             'Everything else is the server, the wire, or the errors in between.</p>')
 
+def check_readme_rule_version():
+    """The README pins the generator's version in its build rule. That number is
+    the module's own version, so the two must not drift apart."""
+    mod = (ROOT / "moon.mod").read_text(encoding="utf-8")
+    version = re.search(r'^version\s*=\s*"([^"]+)"', mod, re.M).group(1)
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    found = re.search(r"moonx moonbitstack/moonmcp/cmd/mcp@([\w.\-]+)", readme)
+    if not found:
+        raise SystemExit("gen_api: the README no longer shows the generator's build rule")
+    if found.group(1) != version:
+        raise SystemExit(
+            "gen_api: the README pins the generator at %s but moon.mod is %s"
+            % (found.group(1), version))
+
+
 def main():
+    check_readme_rule_version()
     # gather items per package and count coverage
     sections = []
     total = 0
@@ -374,7 +390,7 @@ def main():
            '<a class="ghost" href="https://github.com/moonbitstack/moonmcp"><svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g transform="translate(0 .9)" fill="none" stroke="rgba(255,236,203,.5)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/></g><g fill="none" stroke="rgba(72,36,12,.7)" stroke-width="1.15"><circle cx="8" cy="8" r="5.9"/><circle cx="8" cy="8" r="3.2"/><path d="M8 1.7v2.2" stroke-linecap="round"/></g></svg> GitHub</a></div></nav>')
 
     main_html = ['<main class="doc ledger"><header>'
-                 '<div class="kicker">Reference</div>'
+                 '<div class="kicker">API</div>'
                  '<h1 class="doc-h1">The public surface</h1>'
                  '<p class="lead">Every type, function, method and value moonmcp exposes, drawn straight from the compiled package interfaces. '
                  'Generated from source &mdash; it cannot drift from the code.</p>']

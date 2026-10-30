@@ -130,7 +130,11 @@ fn count(text : String, unique~ : Bool = false) -> Int32 {
     words.length()
   }
 }</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Each parameter becomes a property of the schema, typed from its MoonBit type. An optional parameter (<code>language? : String</code>) and a labelled one with a default (<code>unique~ : Bool = false</code>) are left out of <code>required</code>, and a missing one arrives as <code>None</code>. The tool's name may differ from the function's. The generated file holds one <code>register(mcp)</code>, which the program calls once, before it serves.</p>
+      <p>Each parameter becomes a property of the schema, typed from its MoonBit type. An optional parameter (<code>language? : String</code>) and a labelled one with a default (<code>unique~ : Bool = false</code>) are left out of <code>required</code>, and a missing one arrives as <code>None</code>. The tool's name may differ from the function's.</p>
+      <p>A project wires the generator once. The package that holds the functions asks for the generated file:</p>
+      <div class="code"><pre><code>dev_build(rule: "mcp", input: "tools.mbt", output: "tools.g.mbt")
+formatter(ignore: [ "tools.g.mbt" ])</code></pre><button class="copy" type="button">copy</button></div>
+      <p>The rule itself goes in <code>moon.mod</code> next to the imports; the README shows the line. From then on <code>moon check</code>, <code>moon build</code> and <code>moon run</code> regenerate <code>tools.g.mbt</code> whenever <code>tools.mbt</code> changes, and that file holds the one <code>register(mcp)</code> the program calls before it serves.</p>
     </section>
 
     <section class="section" id="resources">

@@ -113,6 +113,7 @@
         <li><a href="guide.html#client">Connect a client</a></li>
       </ul>
       <p class="tally"><!--numbers-->834 public items from 12 packages<!--/numbers--></p>
+      <p class="tally-sub">MCP 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05</p>
     </div>
   </section>
 
@@ -175,21 +176,27 @@
   (function(){
     var card = document.getElementById("order");
     var t = document.getElementById("oc-title"), tag = document.getElementById("oc-tag"),
-        d = document.getElementById("oc-desc"), l = document.getElementById("oc-link");
-    document.querySelectorAll(".seat").forEach(function(seat){
-      seat.addEventListener("click", function(){
-        t.textContent = seat.getAttribute("data-title");
-        tag.textContent = seat.getAttribute("data-tag");
-        d.textContent = seat.getAttribute("data-desc");
-        l.setAttribute("href", seat.getAttribute("data-link"));
-        l.innerHTML = seat.getAttribute("data-linktext") + " &#8594;";
-        card.classList.add("open"); card.setAttribute("aria-hidden","false");
-      });
-    });
-    document.getElementById("oc-close").addEventListener("click", function(){
+        d = document.getElementById("oc-desc"), l = document.getElementById("oc-link"),
+        close = document.getElementById("oc-close"), last = null;
+    var open = function(seat){
+      t.textContent = seat.getAttribute("data-title");
+      tag.textContent = seat.getAttribute("data-tag");
+      d.textContent = seat.getAttribute("data-desc");
+      l.setAttribute("href", seat.getAttribute("data-link"));
+      l.innerHTML = seat.getAttribute("data-linktext") + " &#8594;";
+      card.classList.add("open"); card.setAttribute("aria-hidden","false");
+      last = seat; close.focus();
+    };
+    var shut = function(){
+      if (!card.classList.contains("open")) return;
       card.classList.remove("open"); card.setAttribute("aria-hidden","true");
+      if (last) last.focus();
+    };
+    document.querySelectorAll(".seat").forEach(function(seat){
+      seat.addEventListener("click", function(){ open(seat); });
     });
-    document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ card.classList.remove("open"); card.setAttribute("aria-hidden","true"); } });
+    close.addEventListener("click", shut);
+    document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ shut(); } });
   })();
 </script>
 </body>

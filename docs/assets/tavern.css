@@ -255,6 +255,7 @@ p{max-width:72ch}
 .board a{color:#EDE6D2}
 .board a:hover{color:#fff;text-shadow:0 0 12px rgba(255,255,255,.6)}
 .board .tally{margin:1rem 0 0;padding-top:.7rem;border-top:1px dashed rgba(237,230,210,.22);font-family:"Caveat",cursive;font-size:1.25rem;color:#CBC2A6}
+.board .tally-sub{margin:.15rem 0 0;font-family:"JetBrains Mono",monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:#B3A78A}
 
 .arches{position:relative;z-index:2;width:min(1180px,94vw);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1rem,3vw,2.6rem);padding:1rem 0 2.4rem;align-items:end}
 .arch{position:relative;display:block;width:100%;max-width:520px;margin:0 auto;transition:transform .3s var(--ease);filter:drop-shadow(0 20px 28px rgba(0,0,0,.55))}
@@ -288,8 +289,8 @@ p{max-width:72ch}
 .corner a:hover{color:var(--copper-hi)}
 
 /* order card */
-.order-card{position:fixed;right:0;top:0;bottom:0;width:min(380px,88vw);z-index:80;transform:translateX(102%);transition:transform .38s var(--ease);display:flex;flex-direction:column;background:url("tex-leather.svg");background-size:140px;color:#F2E3C8;box-shadow:-20px 0 60px rgba(0,0,0,.6);border-left:1px solid #1a0f0d}
-.order-card.open{transform:none}
+.order-card{position:fixed;right:0;top:0;bottom:0;width:min(380px,88vw);z-index:80;transform:translateX(102%);visibility:hidden;transition:transform .38s var(--ease),visibility .38s;display:flex;flex-direction:column;background:url("tex-leather.svg");background-size:140px;color:#F2E3C8;box-shadow:-20px 0 60px rgba(0,0,0,.6);border-left:1px solid #1a0f0d}
+.order-card.open{transform:none;visibility:visible}
 .order-card .oc-head{padding:1.2rem 1.2rem .8rem;border-bottom:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:space-between;gap:.8rem}
 .order-card .oc-head .oc-title{font-family:"Cormorant Garamond",serif;font-size:1.5rem;color:#fff2d8}
 .order-card .oc-close{all:unset;cursor:pointer;color:#EAD9BC;border:1px solid rgba(255,255,255,.25);border-radius:3px;width:26px;height:26px;display:grid;place-items:center;font-family:"JetBrains Mono",monospace}
