@@ -9,14 +9,28 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/armillary.css">
+<style>
+  .chandelier{left:23%}
+  .signboard{position:absolute;top:104px;left:50%;transform:translateX(-50%);z-index:4;text-align:center;padding:1rem 1.7rem 1.1rem;border-radius:6px;
+    background:url("assets/tex-wood.svg");background-size:200px;border-top:2px solid #1a120b;border-bottom:2px solid #1a120b;
+    border-left:7px solid var(--iron);border-right:7px solid var(--iron);
+    box-shadow:0 12px 34px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1)}
+  .signboard h1{font-family:"Cormorant Garamond",serif;font-size:clamp(1.9rem,4vw,2.7rem);margin:0;color:#F3E6CC;letter-spacing:.02em;text-shadow:0 2px 10px #000}
+  .signboard p{margin:.35rem 0 0;color:#DCCAA9;font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase}
+  @media (width <= 700px){
+    .scene{flex-direction:column;justify-content:flex-end;align-items:center}
+    .signboard{order:-1;position:static;transform:none;margin:0 auto 1rem;display:block;width:min(92vw,420px)}
+  }
+  @media (width <= 980px){.scene{padding-top:150px}}
+</style>
 </head>
 <body>
 
 <nav class="nav">
   <a class="brand" href="index.html">
-    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="var(--gold)" stroke-width="1.1"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.4"/><ellipse cx="16" cy="16" rx="4.4" ry="11"/></g><circle cx="16" cy="16" r="3.2" fill="var(--ember)"/></svg>
+    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="var(--copper-hi)" stroke-width="1.3"><circle cx="16" cy="16" r="11"/><ellipse cx="16" cy="16" rx="11" ry="4.6"/><ellipse cx="16" cy="16" rx="4.6" ry="11"/></g><circle cx="16" cy="16" r="3" fill="var(--fire)"/></svg>
     moonmcp
   </a>
   <div class="links">
@@ -29,186 +43,148 @@
   </div>
 </nav>
 
-<header class="hero">
-  <svg class="armillary" viewBox="0 0 700 640" role="img" aria-label="An armillary sphere: a server star at the centre, tools, resources and prompts as jade, amber and amethyst bodies on gold orbits, and an ember agent roaming the rim.">
-    <defs>
-      <radialGradient id="coreG" cx="50%" cy="42%" r="62%"><stop offset="0%" stop-color="#FFF8E8"/><stop offset="52%" stop-color="#FFE4B5"/><stop offset="100%" stop-color="#E8A94D"/></radialGradient>
-      <radialGradient id="jadeG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#8CF0CE"/><stop offset="58%" stop-color="#3DBF94"/><stop offset="100%" stop-color="#12785B"/></radialGradient>
-      <radialGradient id="amberG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#FFD89A"/><stop offset="58%" stop-color="#E8A94D"/><stop offset="100%" stop-color="#9A6318"/></radialGradient>
-      <radialGradient id="amethystG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="#D9C2FF"/><stop offset="58%" stop-color="#A97DE8"/><stop offset="100%" stop-color="#5B3A93"/></radialGradient>
-      <radialGradient id="emberG" cx="50%" cy="50%" r="55%"><stop offset="0%" stop-color="#FFF8E8"/><stop offset="100%" stop-color="#FFE4B5"/></radialGradient>
-      <filter id="b9" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="9"/></filter>
-      <filter id="b5" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="5"/></filter>
-      <filter id="b3" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="3"/></filter>
-    </defs>
+<div class="tavern">
+  <div class="beams"><i></i><i></i></div>
+  <div class="chandelier"><span class="cord"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span></div>
 
-    <!-- faint star field -->
-    <g fill="var(--muted)" opacity=".35">
-      <circle cx="70" cy="120" r="1.2"/><circle cx="150" cy="60" r="1"/><circle cx="620" cy="90" r="1.1"/>
-      <circle cx="640" cy="240" r="1"/><circle cx="90" cy="330" r="1.2"/><circle cx="660" cy="470" r="1"/>
-      <circle cx="120" cy="500" r="1.1"/><circle cx="560" cy="560" r="1"/><circle cx="250" cy="560" r="1"/>
-    </g>
+  <section class="scene">
+    <div class="signboard">
+      <h1>moonmcp</h1>
+      <p>Model Context Protocol &middot; MoonBit</p>
+    </div>
 
-    <!-- armillary skeleton -->
-    <g class="skeleton" fill="none" stroke="var(--gold)" stroke-width=".7" opacity=".3">
-      <ellipse cx="350" cy="300" rx="230" ry="80"/>
-      <ellipse cx="350" cy="300" rx="230" ry="80" transform="rotate(60 350 300)"/>
-      <ellipse cx="350" cy="300" rx="230" ry="80" transform="rotate(120 350 300)"/>
-    </g>
+    <div class="scene-grid">
+      <div class="bar">
+        <div class="backbar" aria-hidden="true">
+          <div class="shelf"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="shelf"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="seats">
+          <button class="seat" type="button" data-title="Tools" data-tag="jade &middot; #mcp.tool" data-desc="A tool is a handler that reads its arguments and returns JSON, with an input schema the client can show. A wrong argument or an error the handler raises comes back as an isError result the model can correct from." data-link="guide.html#register" data-linktext="Open the guide &middot; Register a tool">
+            <span class="plaque">Tools</span>
+            <span class="menu">A handler, an input schema, and a typed result.</span>
+            <span class="candle" data-state="fire" aria-hidden="true"><i class="flame"></i></span>
+          </button>
+          <button class="seat" type="button" data-title="Resources" data-tag="amber &middot; #mcp.resource" data-desc="A resource is a URI and a reader. A template puts {id} in the URI; each matching read runs the function with the variable read as its MoonBit type." data-link="guide.html#resources" data-linktext="Open the guide &middot; Resources &amp; templates">
+            <span class="plaque">Resources</span>
+            <span class="menu">A URI and a reader; templates fill the URI.</span>
+            <span class="candle" data-state="patina" aria-hidden="true"><i class="flame"></i></span>
+          </button>
+          <button class="seat" type="button" data-title="Prompts" data-tag="amethyst &middot; #mcp.prompt" data-desc="A prompt is a renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments." data-link="guide.html#prompts" data-linktext="Open the guide &middot; Prompts">
+            <span class="plaque">Prompts</span>
+            <span class="menu">Arguments rendered into a model's messages.</span>
+            <span class="candle" data-state="patina" aria-hidden="true"><i class="flame"></i></span>
+          </button>
+        </div>
+        <div class="counter-top"></div>
+        <div class="counter-base"></div>
+        <p class="hint">pull up a stool &middot; tap a window</p>
+      </div>
 
-    <!-- gold-thread orbits -->
-    <g fill="none" stroke="var(--gold)" stroke-width=".75" stroke-dasharray="4 7" opacity=".5">
-      <circle cx="350" cy="300" r="122"/>
-      <circle cx="350" cy="300" r="178"/>
-      <circle cx="350" cy="300" r="230"/>
-    </g>
-    <circle cx="350" cy="300" r="238" fill="none" stroke="var(--gold)" stroke-width=".55" stroke-dasharray="1 9" opacity=".3"/>
+      <div class="oven" aria-label="The server core: a wood-fired oven">
+        <div class="pots" aria-hidden="true"><span class="rail"></span><span class="pot"></span><span class="pot"></span><span class="pot"></span></div>
+        <div class="chimney"></div>
+        <div class="dome">
+          <div class="mouth" aria-hidden="true">
+            <div class="fire"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="ember"></i><i class="ember" style="animation-delay:-1.8s;left:42%"></i></div>
+          </div>
+        </div>
+        <div class="glow" aria-hidden="true"></div>
+        <p class="label">the core, always lit</p>
+      </div>
+    </div>
+  </section>
 
-    <!-- gold threads from the core to each body -->
-    <g class="threading" fill="none" stroke="var(--gold)" stroke-width=".75" opacity=".42">
-      <path d="M350 300 C 420 250, 440 210, 458 178"/>
-      <path d="M350 300 C 280 340, 230 352, 198 358"/>
-      <path d="M350 300 C 372 380, 402 460, 424 500"/>
-    </g>
+  <section class="board-wrap">
+    <div class="board">
+      <h2>The board</h2>
+      <ul>
+        <li><a href="guide.html#install">Install</a></li>
+        <li><a href="guide.html#register">Register a tool</a></li>
+        <li><a href="guide.html#annotate">Annotate</a></li>
+        <li><a href="guide.html#resources">Resources</a></li>
+        <li><a href="guide.html#prompts">Prompts</a></li>
+        <li><a href="guide.html#transports">Transports</a></li>
+        <li><a href="guide.html#debug">Debug page</a></li>
+        <li><a href="guide.html#client">Connect a client</a></li>
+      </ul>
+    </div>
+  </section>
 
-    <!-- the server star -->
-    <circle cx="350" cy="300" r="44" fill="url(#coreG)" filter="url(#b9)" opacity=".55" class="breathe"/>
-    <circle cx="350" cy="300" r="24" fill="url(#coreG)"/>
-    <circle cx="350" cy="300" r="33" fill="none" stroke="var(--gold)" stroke-width=".9" opacity=".55"/>
-    <circle cx="350" cy="300" r="5" fill="#FFF8E8"/>
+  <section class="arches">
+    <a class="arch" href="guide.html"><span class="iron"></span><span class="sign">Down to the guide</span></a>
+    <a class="arch" href="api.html"><span class="iron"></span><span class="sign">The reference cellar</span></a>
+  </section>
 
-    <!-- jade body (tools) on an inner orbit -->
-    <g class="orbit-a"><g class="body">
-      <circle cx="462" cy="166" r="26" fill="url(#jadeG)" filter="url(#b5)" opacity=".55" class="breathe"/>
-      <circle cx="462" cy="166" r="17" fill="url(#jadeG)"/>
-      <circle cx="455" cy="159" r="4.4" fill="#FFFFFF" opacity=".8"/>
-      <circle cx="462" cy="166" r="17" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
-    </g></g>
-    <!-- amber body (resources) -->
-    <g class="orbit-b"><g class="body">
-      <circle cx="186" cy="360" r="26" fill="url(#amberG)" filter="url(#b5)" opacity=".55" class="breathe"/>
-      <circle cx="186" cy="360" r="17" fill="url(#amberG)"/>
-      <circle cx="179" cy="353" r="4.4" fill="#FFFFFF" opacity=".8"/>
-      <circle cx="186" cy="360" r="17" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
-    </g></g>
-    <!-- amethyst body (prompts) -->
-    <g class="orbit-c"><g class="body">
-      <circle cx="429" cy="514" r="24" fill="url(#amethystG)" filter="url(#b5)" opacity=".55" class="breathe"/>
-      <circle cx="429" cy="514" r="15" fill="url(#amethystG)"/>
-      <circle cx="423" cy="508" r="4" fill="#FFFFFF" opacity=".8"/>
-      <circle cx="429" cy="514" r="15" fill="none" stroke="var(--gold)" stroke-width=".5" opacity=".4"/>
-    </g></g>
+  <section class="longtable">
+    <div class="tabletop">
+      <h2>On the table</h2>
+      <div>
+        <div class="slip"><span class="t">order &middot; tools/call add</span>{ "a": 2, "b": 3 }<br>&rarr; { "sum": 5 }</div>
+        <div class="slip"><span class="t">order &middot; resources/read</span>config://app<br>&rarr; { "theme": "dark" }</div>
+      </div>
+      <div>
+        <div class="recipe"><span class="t">recipe &middot; a tool</span><pre>mcp.tool(
+  "add",
+  args =&gt; {
+    guard args.get("a") is Some(Number(a, ..))
+      &amp;&amp; args.get("b") is Some(Number(b, ..)) else {
+      fail("a and b must be numbers")
+    }
+    { "sum": Json(a + b) }
+  },
+  description="Add two numbers",
+)</pre></div>
+      </div>
+    </div>
+  </section>
 
-    <!-- the ember agent, roaming the rim with a trailing light -->
-    <g class="ember"><circle r="7" fill="url(#emberG)" filter="url(#b5)"/><circle r="3.6" fill="url(#emberG)"/></g>
-    <g class="ember t2"><circle r="4.4" fill="url(#emberG)"/></g>
-    <g class="ember t3"><circle r="3" fill="url(#emberG)"/></g>
-  </svg>
+  <nav class="hooks" aria-label="Quick links">
+    <a class="hook" href="guide.html"><span class="plaque">Guide</span></a>
+    <a class="hook" href="api.html"><span class="plaque">API</span></a>
+    <a class="hook" href="showcase.html"><span class="plaque">Showcase</span></a>
+    <a class="hook" href="https://mooncakes.io/docs/moonbitstack/moonmcp"><span class="plaque">mooncakes</span></a>
+  </nav>
 
-  <div class="hero-copy">
-    <p class="eyebrow">Armillary &middot; MCP framework</p>
-    <h1>Model Context Protocol <em>servers for MoonBit.</em></h1>
-    <p class="sub">Register tools, resources and prompts, then serve them over Streamable HTTP or stdio. One server answers both protocol eras, so a client of either connects without configuration.</p>
-    <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
-    <div class="hint"><span class="dot"></span> scroll &middot; the armillary</div>
+  <footer class="corner">
+    <div class="barrels" aria-hidden="true"><span class="cask"></span><span class="cask"></span></div>
+    <div class="closing">Closing time &middot; <b>moonmcp</b>, a MoonBit MCP server framework</div>
+    <span class="grow"></span>
+    <a href="https://github.com/moonbitstack/moonmcp">GitHub</a>
+    <a href="https://mooncakes.io/docs/moonbitstack/moonmcp">mooncakes</a>
+    <span>Apache-2.0</span>
+  </footer>
+</div>
+
+<aside class="order-card" id="order" aria-hidden="true">
+  <div class="oc-head"><span class="oc-title" id="oc-title">Tools</span><button class="oc-close" id="oc-close" aria-label="Close">&#10005;</button></div>
+  <div class="oc-body">
+    <p class="oc-tag" id="oc-tag"></p>
+    <p id="oc-desc"></p>
+    <a id="oc-link" href="#">Open the guide &#8594;</a>
   </div>
-</header>
+</aside>
 
-<main>
-  <section class="wrap">
-    <p class="eyebrow">Capabilities</p>
-    <h2 style="font-size:clamp(1.7rem,3.4vw,2.4rem);margin:.4rem 0 0">Three kinds, three colours.</h2>
-    <p class="lead" style="margin-top:.5rem">Every capability is one component with the same lifecycle: register it, list it, call it, get a typed result back.</p>
-    <div class="bodies reveal">
-      <div class="body-card glass">
-        <div class="cap"><span class="orb orb-jade"></span><span><span class="name">Tools</span><br><span class="tag">jade &middot; #mcp.tool</span></span></div>
-        <p>A handler, an input schema, and a typed result. A wrong argument or an error the handler raises comes back as an <code>isError</code> result the model can correct from.</p>
-      </div>
-      <div class="body-card glass">
-        <div class="cap"><span class="orb orb-amber"></span><span><span class="name">Resources</span><br><span class="tag">amber &middot; #mcp.resource</span></span></div>
-        <p>A URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
-      </div>
-      <div class="body-card glass">
-        <div class="cap"><span class="orb orb-amethyst"></span><span><span class="name">Prompts</span><br><span class="tag">amethyst &middot; #mcp.prompt</span></span></div>
-        <p>A renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap" style="margin-top:clamp(3rem,6vw,5rem)">
-    <p class="eyebrow">A call</p>
-    <h2 style="font-size:clamp(1.7rem,3.4vw,2.4rem);margin:.4rem 0 1.4rem">One call, four moves.</h2>
-    <div class="flow reveal">
-      <div class="step"><span class="n">01</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Discover</h4><p>The client lists what the server offers: tools, resources, templates and prompts.</p></div>
-      <div class="step"><span class="n">02</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Call</h4><p>It sends a name and arguments. The arguments are checked against the input schema before the handler runs.</p></div>
-      <div class="step"><span class="n">03</span><span class="dot" style="background:var(--jade);box-shadow:0 0 12px -1px var(--jade-glow)"></span><h4>Result</h4><p>The handler's JSON returns as content; an error returns as <code>isError</code>, not a protocol fault.</p></div>
-      <div class="step"><span class="n">04</span><span class="dot" style="background:var(--slate)"></span><h4>Notify</h4><p>A notification is a one-way wave: it leaves the server and expects no reply.</p></div>
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="stats reveal">
-      <div class="stat glass"><div class="n">3</div><div class="l">protocol eras</div></div>
-      <div class="stat glass"><div class="n">2</div><div class="l">transports</div></div>
-      <div class="stat glass"><div class="n">3</div><div class="l">capability kinds</div></div>
-      <div class="stat glass"><div class="n num" id="n-items" data-fallback="834">834</div><div class="l">public items in the API</div></div>
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="cards reveal">
-      <div class="card glass">
-        <div class="tag">Two eras at once</div>
-        <h3>Both revisions at once</h3>
-        <p>A request that names <code>2026-07-28</code> in <code>_meta</code> is handled statelessly; <code>initialize</code>, and any request without it, falls back to the handshake (2025-11-25 back to 2024-11-05).</p>
-      </div>
-      <div class="card glass">
-        <div class="tag">Two ways to speak</div>
-        <h3>Streamable HTTP &amp; stdio</h3>
-        <p><code>to_asgi</code> hands a moonasgi app to mooncat: one POST per message, origin-checked against DNS-rebinding. <code>run_stdio</code> speaks line-delimited JSON on native stdio.</p>
-      </div>
-      <div class="card glass">
-        <div class="tag">Two ways to write</div>
-        <h3>Register, or annotate</h3>
-        <p>Call <code>server.tool(name, handler, input_schema=&#8230;)</code> by hand, or mark a function <code>#mcp.tool</code> and let the generator write the same registration, with the JSON Schema from the argument types.</p>
-      </div>
-      <div class="card glass">
-        <div class="tag">Errors, not faults</div>
-        <h3>Results the model can read</h3>
-        <p>A wrong argument or an error the handler raises returns as a result marked <code>isError</code>, which the model reads and corrects from. Only a tool that does not exist is a protocol error.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap">
-    <div class="cta glass reveal">
-      <p class="eyebrow" style="justify-content:center">Begin</p>
-      <h2>Add moonmcp to a project.</h2>
-      <div class="install"><span class="prompt">$</span><code>moon add moonbitstack/moonmcp</code><button class="copy" data-copy="moon add moonbitstack/moonmcp">copy</button></div>
-      <div class="links">
-        <a href="guide.html">Read the guide &#8594;</a>
-        <a href="api.html">Browse the API &#8594;</a>
-        <a href="showcase.html">Recorded sessions &#8594;</a>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer class="site wrap">
-  <span>moonmcp &middot; a MoonBit MCP server framework</span>
-  <span class="grow"></span>
-  <a href="https://github.com/moonbitstack/moonmcp">GitHub</a>
-  <a href="https://mooncakes.io/docs/moonbitstack/moonmcp">mooncakes</a>
-  <span>Apache-2.0</span>
-</footer>
-
-<script src="assets/numbers.js"></script>
 <script src="assets/armillary.js"></script>
 <script>
   (function(){
-    var n = document.getElementById("n-items");
-    if (n && window.MOONMCP_NUMBERS && window.MOONMCP_NUMBERS.public_items){ n.textContent = window.MOONMCP_NUMBERS.public_items; }
-    else if (n){ n.textContent = n.getAttribute("data-fallback"); }
+    var card = document.getElementById("order");
+    var t = document.getElementById("oc-title"), tag = document.getElementById("oc-tag"),
+        d = document.getElementById("oc-desc"), l = document.getElementById("oc-link");
+    document.querySelectorAll(".seat").forEach(function(seat){
+      seat.addEventListener("click", function(){
+        t.textContent = seat.getAttribute("data-title");
+        tag.textContent = seat.getAttribute("data-tag");
+        d.textContent = seat.getAttribute("data-desc");
+        l.setAttribute("href", seat.getAttribute("data-link"));
+        l.innerHTML = seat.getAttribute("data-linktext") + " &#8594;";
+        card.classList.add("open"); card.setAttribute("aria-hidden","false");
+      });
+    });
+    document.getElementById("oc-close").addEventListener("click", function(){
+      card.classList.remove("open"); card.setAttribute("aria-hidden","true");
+    });
+    document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ card.classList.remove("open"); card.setAttribute("aria-hidden","true"); } });
   })();
 </script>
 </body>

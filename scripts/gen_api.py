@@ -358,20 +358,7 @@ def main():
         "window.MOONMCP_NUMBERS = " + __import__("json").dumps(numbers) + ";\n", encoding="utf-8", newline="\n")
 
     # api.html
-    mini = ('<svg class="mini-orb" viewBox="0 0 220 110" aria-hidden="true">'
-            '<g fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".5">'
-            '<ellipse cx="110" cy="55" rx="86" ry="30"/>'
-            '<ellipse cx="110" cy="55" rx="86" ry="30" transform="rotate(60 110 55)"/>'
-            '<circle cx="110" cy="55" r="52" stroke-dasharray="3 6" opacity=".5"/></g>'
-            '<g class="thread" stroke-width=".6">'
-            '<path d="M110 55 C 140 45 158 38 176 34"/><path d="M110 55 C 88 62 64 68 44 70"/>'
-            '<path d="M110 55 C 116 78 122 92 126 98"/></g>'
-            '<circle cx="110" cy="55" r="10" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".6"/>'
-            '<circle cx="110" cy="55" r="5.5" fill="var(--ember)"/>'
-            '<circle cx="176" cy="34" r="4.2" fill="var(--jade)"/>'
-            '<circle cx="44" cy="70" r="4.2" fill="var(--amber)"/>'
-            '<circle cx="126" cy="98" r="4.2" fill="var(--amethyst)"/></svg>')
-    side = ['<aside class="sidebar"><p class="side-title">Armillary · moonmcp</p>' + mini + '<nav class="side-nav">']
+    side = ['<aside class="sidebar"><p class="side-title">The tavern · moonmcp</p><nav class="side-nav">']
     for pkgname, title, _, _ in sections:
         side.append('<a href="#pkg-%s">%s</a>' % (pkgname, title))
     side.append('</nav><div class="side-foot" style="margin-top:1.4rem">'
@@ -387,7 +374,7 @@ def main():
             '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">'
             '<link rel="preconnect" href="https://fonts.googleapis.com">'
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-            '<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">'
+            '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">'
             '<link rel="stylesheet" href="assets/armillary.css"></head><body>')
 
     nav = ('<nav class="nav"><a class="brand" href="index.html">'
@@ -398,7 +385,7 @@ def main():
            '<a class="ghost theme-btn" data-theme-toggle href="#" aria-label="Toggle theme">&#9688; theme</a>'
            '<a class="ghost" href="https://github.com/moonbitstack/moonmcp">GitHub &#8599;</a></div></nav>')
 
-    main_html = ['<main class="doc"><header>'
+    main_html = ['<main class="doc ledger"><header>'
                  '<div class="kicker">Reference</div>'
                  '<h1 class="doc-h1">The public surface</h1>'
                  '<p class="lead">Every type, function, method and value moonmcp exposes, drawn straight from the compiled package interfaces. '

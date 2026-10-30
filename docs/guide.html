@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/armillary.css">
 </head>
 <body>
@@ -31,24 +31,7 @@
 
 <div class="shell">
   <aside class="sidebar">
-    <p class="side-title">Armillary · moonmcp</p>
-    <svg class="mini-orb" viewBox="0 0 220 110" role="img" aria-label="A miniature armillary: a server at the centre, three capability bodies in orbit.">
-      <g fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".5">
-        <ellipse cx="110" cy="55" rx="86" ry="30"/>
-        <ellipse cx="110" cy="55" rx="86" ry="30" transform="rotate(60 110 55)"/>
-        <circle cx="110" cy="55" r="52" stroke-dasharray="3 6" opacity=".5"/>
-      </g>
-      <g class="thread" stroke-width=".6">
-        <path d="M110 55 C 140 45 158 38 176 34"/>
-        <path d="M110 55 C 88 62 64 68 44 70"/>
-        <path d="M110 55 C 116 78 122 92 126 98"/>
-      </g>
-      <circle cx="110" cy="55" r="10" fill="none" stroke="var(--gold)" stroke-width=".6" opacity=".6"/>
-      <circle cx="110" cy="55" r="5.5" fill="var(--ember)"/>
-      <circle cx="176" cy="34" r="4.2" fill="var(--jade)"/>
-      <circle cx="44" cy="70" r="4.2" fill="var(--amber)"/>
-      <circle cx="126" cy="98" r="4.2" fill="var(--amethyst)"/>
-    </svg>
+    <p class="side-title">The tavern · moonmcp</p>
     <nav class="side-nav">
       <div class="group">Start</div>
       <a href="#install">Install</a>
@@ -69,7 +52,7 @@
     </div>
   </aside>
 
-  <main class="doc">
+  <main class="doc ledger">
     <header>
       <div class="kicker">Guide</div>
       <h1 class="doc-h1">Build a server, step by step</h1>
@@ -186,7 +169,7 @@ fn review(code : String, focus? : String) -> String {
       <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives a moonasgi app for mooncat over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on native stdio, built on <code>serve_lines</code> for any stream.</p>
       <div class="grid-2">
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">Streamable HTTP</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--copper)">Streamable HTTP</div>
           <div class="code" style="margin-top:.7rem"><pre><code>@mooncat.serve(
   mcp.to_asgi(path="/mcp"),
   port=12000,
@@ -194,7 +177,7 @@ fn review(code : String, focus? : String) -> String {
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">One POST per message, origin-checked against DNS-rebinding. A foreign <code>Origin</code> is refused with <code>403</code>.</p>
         </div>
         <div class="glass" style="padding:1.2rem 1.3rem">
-          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gold)">stdio</div>
+          <div class="tag" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;color:var(--copper)">stdio</div>
           <div class="code" style="margin-top:.7rem"><pre><code>mcp.run_stdio()</code></pre></div>
           <p style="color:var(--muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
         </div>
