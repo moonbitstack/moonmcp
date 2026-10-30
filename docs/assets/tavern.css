@@ -21,7 +21,6 @@
   --patina:#5C8A72;
   --wine:#6B2E2E;
   --fire:#D97A2B;
-  --fire-hi:#F2B56B;
   --fire-core:#FFE0A8;
   --hair:rgba(241,231,212,.13);
   --sheet:#E9DFCB;
@@ -30,7 +29,6 @@
   --sheet-hair:rgba(36,26,18,.2);
   --bg-tex:url("tex-wood.svg");
   --bg-tex-size:320px;
-  --wall-op:.92;
   --stone-tex:url("tex-stone.svg");
   --stone-size:300px;
   --shadow-ink:0,0,0;
@@ -38,6 +36,9 @@
   --stage-shadow:drop-shadow(0 30px 44px rgba(0,0,0,.6));
   --fire-glow:1;
   --scene-light:none;
+  --gutter-shade:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.07));
+  --side-wash:rgba(0,0,0,.28);
+  --side-line:rgba(0,0,0,.5);
   --vignette:radial-gradient(130% 100% at 64% 30%,transparent 0,rgba(0,0,0,.42) 58%,rgba(0,0,0,.8) 100%);
   --ease:cubic-bezier(.2,.7,.2,1);
 }
@@ -54,7 +55,6 @@
   --patina:#3F6B54;
   --wine:#6B2E2E;
   --fire:#C25A22;
-  --fire-hi:#E08A3C;
   --fire-core:#FFD9A0;
   --hair:rgba(36,26,18,.16);
   --sheet:#FBF6EC;
@@ -63,7 +63,6 @@
   --sheet-hair:rgba(36,26,18,.18);
   --bg-tex:url("tex-plaster.svg");
   --bg-tex-size:420px;
-  --wall-op:.9;
   --stone-tex:url("tex-stone-day.svg");
   --stone-size:340px;
   --shadow-ink:86,62,36;
@@ -72,11 +71,24 @@
   --fire-glow:.5;
   --floor-lit:.94;
   --scene-light:linear-gradient(118deg,rgba(255,253,246,.6),rgba(255,250,240,0) 44%,rgba(86,62,36,.12));
+  --gutter-shade:linear-gradient(180deg,rgba(60,45,25,.12),rgba(60,45,25,.2));
+  --side-wash:rgba(86,62,36,.05);
+  --side-line:rgba(86,62,36,.18);
   --vignette:radial-gradient(130% 100% at 64% 30%,transparent 0,rgba(90,70,40,.08) 62%,rgba(60,45,25,.26) 100%);
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* The material sits on the canvas, not on a fixed layer: the 11px scrollbar
+   gutter is painted by the canvas, so this is what keeps it from showing as a
+   flat strip beside a textured page. */
+html{
+  scroll-behavior:smooth;
+  background-color:var(--wall);
+  background-image:var(--bg-tex);
+  background-size:var(--bg-tex-size);
+  background-attachment:fixed;
+  background-repeat:repeat;
+}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -87,13 +99,8 @@ body{
   color:var(--ink);
   font-family:"Source Serif 4","Noto Serif SC",Georgia,serif;
   font-size:17px;line-height:1.72;
-  background:var(--wall);
+  background:transparent;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-}
-body::before{
-  content:"";position:fixed;inset:0;z-index:-3;
-  background-image:var(--bg-tex);background-size:var(--bg-tex-size);background-repeat:repeat;
-  opacity:var(--wall-op);
 }
 body::after{
   content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
@@ -110,7 +117,12 @@ img{max-width:100%;height:auto}
 /* ---- scrollbars (docs.md pattern) ---- */
 @supports selector(::-webkit-scrollbar){
   html::-webkit-scrollbar{width:11px;height:11px}
-  html::-webkit-scrollbar-track{background:transparent}
+  /* the canvas does not paint its texture under the scrollbar, so the track
+     carries the same material — otherwise it reads as a pale strip */
+  html::-webkit-scrollbar-track{background-color:var(--wall);
+    background-image:var(--gutter-shade),var(--bg-tex);
+    background-size:auto,var(--bg-tex-size);background-position:right top;background-repeat:repeat}
+  html::-webkit-scrollbar-corner{background:transparent}
   html::-webkit-scrollbar-thumb{border-radius:99px;border:3px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 26%,transparent)}
   html.at-top::-webkit-scrollbar-thumb{background-color:transparent}
   pre::-webkit-scrollbar,.sig::-webkit-scrollbar,.msg .body::-webkit-scrollbar,.sidebar::-webkit-scrollbar,.exchange::-webkit-scrollbar{width:9px;height:9px}
@@ -336,7 +348,7 @@ p{max-width:72ch}
 
 /* ================= docs pages: parchment ledger ================= */
 .shell{display:grid;grid-template-columns:252px minmax(0,1fr);max-width:1250px;margin:0 auto}
-.sidebar{position:sticky;top:60px;align-self:start;height:calc(100vh - 60px);overflow-y:auto;padding:1.3rem .9rem 2.6rem;border-right:1px solid rgba(0,0,0,.5);background:linear-gradient(180deg,rgba(0,0,0,.28),transparent)}
+.sidebar{position:sticky;top:60px;align-self:start;height:calc(100vh - 60px);overflow-y:auto;padding:1.3rem .9rem 2.6rem;border-right:1px solid var(--side-line);background:linear-gradient(180deg,var(--side-wash),transparent)}
 .sidebar .side-title{font-family:"JetBrains Mono",monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.2em;color:var(--copper-hi);margin:0 0 .9rem .2rem}
 .side-nav{display:flex;flex-direction:column;gap:.02rem}
 .side-nav .group{font-family:"JetBrains Mono",monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:var(--faint);margin:1.1rem 0 .3rem .3rem}
@@ -417,7 +429,7 @@ footer.site .grow{margin-left:auto}
 }
 @media (width <= 860px){
   .shell{grid-template-columns:minmax(0,1fr)}
-  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid rgba(0,0,0,.5);padding-bottom:1.1rem}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--side-line);padding-bottom:1.1rem}
   .side-nav{flex-flow:row wrap;gap:.1rem .2rem}
   .side-nav a{border-left:none;border-radius:4px}
   .side-nav a.active{border-left:none;box-shadow:inset 0 -2px 0 var(--fire)}
