@@ -101,7 +101,7 @@ as JSON unless it is a `String`.
 Wire the generator into the build once. In `moon.mod`:
 
 ```
-rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.3 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.4 -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package holding the functions:
