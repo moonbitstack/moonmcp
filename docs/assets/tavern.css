@@ -124,14 +124,14 @@ img{max-width:100%;height:auto}
     background-size:auto,var(--bg-tex-size);background-position:right top;background-repeat:repeat}
   html::-webkit-scrollbar-corner{background:transparent}
   html::-webkit-scrollbar-thumb{border-radius:99px;border:3px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 26%,transparent)}
-  html:not(.scrolling)::-webkit-scrollbar-thumb{background-color:transparent}
+  html:not(.scrolled)::-webkit-scrollbar-thumb{background-color:transparent}
   pre::-webkit-scrollbar,.sig::-webkit-scrollbar,.msg .body::-webkit-scrollbar,.sidebar::-webkit-scrollbar,.exchange::-webkit-scrollbar{width:9px;height:9px}
   pre::-webkit-scrollbar-track,.sig::-webkit-scrollbar-track,.msg .body::-webkit-scrollbar-track,.sidebar::-webkit-scrollbar-track,.exchange::-webkit-scrollbar-track{background:transparent}
   pre::-webkit-scrollbar-thumb,.sig::-webkit-scrollbar-thumb,.msg .body::-webkit-scrollbar-thumb,.sidebar::-webkit-scrollbar-thumb,.exchange::-webkit-scrollbar-thumb{border-radius:99px;border:2px solid transparent;background-clip:content-box;background-color:color-mix(in srgb,var(--ink) 24%,transparent)}
 }
 @supports not selector(::-webkit-scrollbar){
   html{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 28%,transparent) transparent}
-  html:not(.scrolling){scrollbar-color:transparent transparent}
+  html:not(.scrolled){scrollbar-color:transparent transparent}
   pre,.sig,.msg .body,.sidebar,.exchange{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 26%,transparent) transparent}
 }
 

@@ -270,12 +270,12 @@ let plain_top : String =
   #|  ::-webkit-scrollbar-track{background:transparent}
   #|  ::-webkit-scrollbar-thumb{border-radius:99px;border:3px solid transparent;background-clip:content-box;
   #|    background-color:color-mix(in srgb,var(--ink) 24%,transparent)}
-  #|  html:not(.scrolling)::-webkit-scrollbar-thumb{background-color:transparent}
+  #|  html:not(.scrolled)::-webkit-scrollbar-thumb{background-color:transparent}
   #|  ::-webkit-scrollbar-corner{background:transparent}
   #|}
   #|@supports not selector(::-webkit-scrollbar){
   #|  *{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 26%,transparent) transparent}
-  #|  html:not(.scrolling){scrollbar-color:transparent transparent}
+  #|  html:not(.scrolled){scrollbar-color:transparent transparent}
   #|}
   #|@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   #|</style>
@@ -792,11 +792,9 @@ let script_end : String =
   #|}
   #|
   #|const root = document.documentElement;
-  #|let idle = 0, near = false;
-  #|const hideSoon = () => { clearTimeout(idle); idle = setTimeout(() => near || root.classList.remove("scrolling"), 1200); };
-  #|window.addEventListener("scroll", () => { root.classList.add("scrolling"); hideSoon(); }, { passive: true });
-  #|window.addEventListener("pointermove", (e) => { const was = near; near = e.pointerType === "mouse" && e.clientX >= root.clientWidth - 24; if (near) root.classList.add("scrolling"); else if (was) hideSoon(); }, { passive: true });
-  #|root.addEventListener("pointerleave", () => { near = false; hideSoon(); });
+  #|const scrolled = () => root.classList.toggle("scrolled", scrollY > 0);
+  #|window.addEventListener("scroll", scrolled, { passive: true });
+  #|scrolled();
   #|
   #|el("ep").textContent = CFG.endpoint;
   #|el("era").value = S.era;
