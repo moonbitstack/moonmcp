@@ -130,17 +130,13 @@
         <div class="slip"><span class="t">order &middot; resources/read</span>config://app<br>&rarr; { "theme": "dark" }</div>
       </div>
       <div>
-        <div class="recipe"><span class="t">recipe &middot; a tool</span><pre>mcp.tool(
-  "add",
-  args =&gt; {
-    guard args.get("a") is Some(Number(a, ..))
-      &amp;&amp; args.get("b") is Some(Number(b, ..)) else {
-      fail("a and b must be numbers")
-    }
-    { "sum": Json(a + b) }
-  },
-  description="Add two numbers",
-)</pre></div>
+        <div class="recipe"><span class="t">recipe &middot; a tool</span><pre>#mcp.tool(description="Add two numbers")
+fn add(a : Double, b : Double) -&gt; Double {
+  a + b
+}
+
+// and once, before serving
+register(mcp)</pre></div>
       </div>
     </div>
   </section>

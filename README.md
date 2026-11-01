@@ -19,26 +19,22 @@ protocol version in `_meta` is served statelessly under revision 2026-07-28; an
 
 ## Quick start
 
-```moonbit
+Write the tools on the functions themselves:
+
+```moonbit nocheck
+#mcp.tool(description="Add two numbers")
+fn add(a : Double, b : Double) -> Double {
+  a + b
+}
+
+#mcp.resource("config://app", mime_type="application/json")
+fn config() -> String {
+  "{\"theme\":\"dark\"}"
+}
+
 async fn main {
   let mcp = @moonmcp.Server::new("demo", version="1.0.0")
-  mcp.tool(
-    "add",
-    args => {
-      guard args.get("a") is Some(Number(a, ..)) &&
-        args.get("b") is Some(Number(b, ..)) else {
-        fail("a and b must be numbers")
-      }
-      { "sum": Json(a + b) }
-    },
-    description="Add two numbers",
-    input_schema={
-      "type": "object",
-      "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
-      "required": ["a", "b"],
-    },
-  )
-  mcp.resource("config://app", () => "{\"theme\":\"dark\"}", mime_type="application/json")
+  register(mcp)
   @mooncat.serve(mcp.to_asgi(), port=12000) catch {
     e => println("stopped: \{e}")
   }
@@ -51,24 +47,9 @@ server as a subprocess, call `mcp.run_stdio()` instead of serving HTTP.
 `moon.mod` needs `moonbitstack/moonmcp`, `moonbitstack/mooncat` and
 `moonbitlang/async`, and the package with `main` imports the same three.
 
-## Registering
-
-| Call | Offers |
-|:--|:--|
-| `tool(name, handler, input_schema=, output_schema=, description=, annotations=)` | A tool. The handler returns any JSON value: an object becomes structured content as well as text. |
-| `resource(uri, read, mime_type=)` | A resource read as text. |
-| `template(uri_template, read)` | Every resource an RFC 6570 template names; `read` gets the matched parameters. |
-| `prompt(name, render, arguments=)` | A prompt rendered as one user message. |
-| `add_tool`, `add_resource`, `add_template`, `add_prompt` | A component built in full with `Tool::new`, `Resource::new`, `ResourceTemplate::new` or `Prompt::new`. |
-
-Arguments are checked against the tool's input schema (JSON Schema 2020-12)
-before the handler runs. A wrong argument or an error the handler raises comes
-back as a result marked `isError`, which the model reads and can correct itself
-from; only a tool that does not exist is a protocol error.
-
 ## Annotations
 
-The same registrations, written on the functions themselves:
+Each kind of thing a server offers has its annotation:
 
 ```moonbit nocheck
 #mcp.tool(description="Add two numbers")
@@ -101,7 +82,7 @@ as JSON unless it is a `String`.
 Wire the generator into the build once. In `moon.mod`:
 
 ```
-rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.5 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.6 -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package holding the functions:
@@ -114,6 +95,50 @@ formatter(ignore: [ "tools.g.mbt" ])
 `moon check`, `moon build` and `moon run` regenerate `tools.g.mbt` whenever
 `tools.mbt` changes. It holds `register(mcp)`, which the program calls once
 before serving.
+
+## Registering by hand
+
+Annotations generate these calls, and a tool built at run time is written the same way:
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool(
+    "add",
+    args => {
+      guard args.get("a") is Some(Number(a, ..)) &&
+        args.get("b") is Some(Number(b, ..)) else {
+        fail("a and b must be numbers")
+      }
+      { "sum": Json(a + b) }
+    },
+    description="Add two numbers",
+    input_schema={
+      "type": "object",
+      "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+      "required": ["a", "b"],
+    },
+  )
+  mcp.resource("config://app", () => "{\"theme\":\"dark\"}", mime_type="application/json")
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
+    e => println("stopped: \{e}")
+  }
+}
+```
+
+
+| Call | Offers |
+|:--|:--|
+| `tool(name, handler, input_schema=, output_schema=, description=, annotations=)` | A tool. The handler returns any JSON value: an object becomes structured content as well as text. |
+| `resource(uri, read, mime_type=)` | A resource read as text. |
+| `template(uri_template, read)` | Every resource an RFC 6570 template names; `read` gets the matched parameters. |
+| `prompt(name, render, arguments=)` | A prompt rendered as one user message. |
+| `add_tool`, `add_resource`, `add_template`, `add_prompt` | A component built in full with `Tool::new`, `Resource::new`, `ResourceTemplate::new` or `Prompt::new`. |
+
+Arguments are checked against the tool's input schema (JSON Schema 2020-12)
+before the handler runs. A wrong argument or an error the handler raises comes
+back as a result marked `isError`, which the model reads and can correct itself
+from; only a tool that does not exist is a protocol error.
 
 ## Transports
 

@@ -34,8 +34,8 @@
     <nav class="side-nav">
       <div class="group">Start</div>
       <a href="#install">Install</a>
-      <a href="#register">Register a tool</a>
-      <a href="#annotate">Annotate instead</a>
+      <a href="#annotate">Annotate a function</a>
+      <a href="#register">Register by hand</a>
       <div class="group">Capabilities</div>
       <a href="#resources">Resources &amp; templates</a>
       <a href="#prompts">Prompts</a>
@@ -68,38 +68,9 @@
       <p>The code below builds the two example servers in <code>src/examples/</code> &mdash; the demo one, and the annotated one &mdash; a capability at a time. Every MoonBit block on this page is compiled by <code>scripts/check_docs.py</code>, so none of them can drift from the package.</p>
     </section>
 
-    <section class="section" id="register">
-      <h2>Register a tool, by hand</h2>
-      <p class="pdesc">A tool has a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
-      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0",
-  instructions="Arithmetic and greetings, for trying a client out.")
-mcp.tool(
-  "add",
-  args => {
-    guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
-      args.get("b") is Some(Number(b, ..)) else {
-      raise @exceptions.Tool("a and b must be numbers")
-    }
-    { "sum": Json(a + b) }
-  },
-  description="Add two numbers",
-  input_schema={
-    "type": "object",
-    "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
-    "required": ["a", "b"],
-  },
-)</code></pre><button class="copy" type="button">copy</button></div>
-      <p>The handler receives the call's arguments as a <code>Map[String, Json]</code>. Reading a number out of that map, and re-reading an optional one as a parameter's type, is what <code>decode</code> and <code>decode_option</code> do for you when you annotate instead. Raise <code>@exceptions.Tool</code> and the error returns as an <code>isError</code> result.</p>
-      <p>A call the client makes lands back as exactly the JSON you returned, wrapped and marked as a result:</p>
-      <div class="exchange glass" style="padding:1rem 1.1rem">
-        <div class="msg agent"><div class="who">call</div><div class="body">tools/call &middot; <code>{ "a": 2, "b": 3 }</code></div></div>
-        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "content": [ { "type": "text", "text": "{\"sum\":5}" } ], "structuredContent": { "sum": 5 }, "isError": false }</code></div></div>
-      </div>
-    </section>
-
     <section class="section" id="annotate">
-      <h2>Annotate, instead</h2>
-      <p class="pdesc">The same work can be written as plain functions. <code>#mcp.tool</code> reads the argument types and builds the input schema; the generator, wired into <code>moonx dev_build</code>, writes the registration you would otherwise write by hand.</p>
+      <h2>Annotate a function</h2>
+      <p class="pdesc"><code>#mcp.tool</code> reads the argument types and builds the input schema; the generator, wired into <code>moonx dev_build</code>, writes the registration you would otherwise write by hand.</p>
       <div class="code"><pre><code class="language-moonbit">#mcp.tool(description="Add two numbers")
 fn add(a : Double, b : Double) -> Double {
   a + b
@@ -135,6 +106,35 @@ fn count(text : String, unique~ : Bool = false) -> Int32 {
       <div class="code"><pre><code>dev_build(rule: "mcp", input: "tools.mbt", output: "tools.g.mbt")
 formatter(ignore: [ "tools.g.mbt" ])</code></pre><button class="copy" type="button">copy</button></div>
       <p>The rule itself goes in <code>moon.mod</code> next to the imports; the README shows the line. From then on <code>moon check</code>, <code>moon build</code> and <code>moon run</code> regenerate <code>tools.g.mbt</code> whenever <code>tools.mbt</code> changes, and that file holds the one <code>register(mcp)</code> the program calls before it serves.</p>
+    </section>
+
+    <section class="section" id="register">
+      <h2>Register by hand</h2>
+      <p class="pdesc">A tool has a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0",
+  instructions="Arithmetic and greetings, for trying a client out.")
+mcp.tool(
+  "add",
+  args => {
+    guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
+      args.get("b") is Some(Number(b, ..)) else {
+      raise @exceptions.Tool("a and b must be numbers")
+    }
+    { "sum": Json(a + b) }
+  },
+  description="Add two numbers",
+  input_schema={
+    "type": "object",
+    "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+    "required": ["a", "b"],
+  },
+)</code></pre><button class="copy" type="button">copy</button></div>
+      <p>The handler receives the call's arguments as a <code>Map[String, Json]</code>. Reading a number out of that map, and re-reading an optional one as a parameter's type, is what <code>decode</code> and <code>decode_option</code> do for you when you annotate instead. Raise <code>@exceptions.Tool</code> and the error returns as an <code>isError</code> result.</p>
+      <p>A call the client makes lands back as exactly the JSON you returned, wrapped and marked as a result:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">call</div><div class="body">tools/call &middot; <code>{ "a": 2, "b": 3 }</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "content": [ { "type": "text", "text": "{\"sum\":5}" } ], "structuredContent": { "sum": 5 }, "isError": false }</code></div></div>
+      </div>
     </section>
 
     <section class="section" id="resources">
