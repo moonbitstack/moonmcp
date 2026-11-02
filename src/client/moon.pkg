@@ -1,0 +1,18 @@
+// The client: the same protocol seen from the other end, over an in-memory
+// server, a pair of line streams, or HTTP.
+import {
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/server",
+  "moonbitlang/core/json",
+  "moonbitlang/async",
+}
+
+import {
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitlang/async",
+  "moonbitlang/async/aqueue",
+} for "test"

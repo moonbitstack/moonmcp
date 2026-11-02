@@ -4,4 +4,7 @@ import {
   "moonbitstack/moonmcp/resources",
   "moonbitstack/moonmcp/prompts",
   "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/context",
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/types",
 }

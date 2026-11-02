@@ -1,0 +1,10 @@
+// A client and a server in one program, over the in-memory transport:
+// `moon run src/examples/client --target native`.
+supported_targets = "+native"
+
+import {
+  "moonbitlang/async",
+  "moonbitstack/moonmcp",
+}
+
+pkgtype(kind: "executable")
