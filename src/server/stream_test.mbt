@@ -306,3 +306,31 @@ async test "a resource update reaches only the subscriber that named it" {
   assert_eq(dig(seen[1], ["method"]), Some("notifications/resources/updated"))
   assert_eq(dig(seen[1], ["params", "uri"]), Some("config://app"))
 }
+
+///|
+async test "closing the input closes an open subscription with it" {
+  let mcp = streaming_demo()
+  let to_server : @aqueue.Queue[String?] = @aqueue.Queue::Queue(
+    kind=@aqueue.Kind::Unbounded,
+  )
+  let lines : Array[String] = []
+  let listen : Json = {
+    "jsonrpc": "2.0",
+    "id": Json::number(1.0),
+    "method": Json::string("subscriptions/listen"),
+    "params": {
+      "notifications": { "toolsListChanged": true },
+      "_meta": {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }
+  to_server.put(Some(listen.stringify()))
+  to_server.put(None)
+  // Returning at all is the assertion: a stream left waiting on a queue nobody
+  // feeds holds the process open, which is what this test is here to catch.
+  mcp.serve_lines(() => to_server.get(), line => lines.push(line))
+  assert_eq(lines.length() >= 1, true)
+  assert_eq(lines[0].contains("acknowledged"), true)
+}

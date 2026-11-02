@@ -31,6 +31,10 @@ pub async fn Server::serve_lines(
   )
   let withdrawn = Cancellations::new()
   let headers : Map[String, String] = Map([])
+  // Open subscriptions, so that closing the input can end them: a stream that
+  // waits on a queue nobody will feed would otherwise hold the process open.
+  let subscriptions : Array[@aqueue.Queue[Json]] = []
+  let listening : Array[@async.Task[Unit]] = []
   @async.with_task_group(async fn(group : @async.TaskGroup[Unit]) {
     ignore(group.spawn(async fn() { drain(outbox, send) }))
     let tasks : Array[@async.Task[Unit]] = []
@@ -63,11 +67,20 @@ pub async fn Server::serve_lines(
                 Some(id) => withdrawn.add(id)
                 None => ()
               }
-            Some(operation) if operation == @types.method_subscriptions_listen =>
-              group.spawn_bg(
-                async fn() { serve_one_listen(self, message, send, withdrawn) },
-                allow_failure=true,
+            Some(operation) if operation == @types.method_subscriptions_listen => {
+              let queue : @aqueue.Queue[Json] = @aqueue.Queue::Queue(
+                kind=@aqueue.Kind::Unbounded,
               )
+              subscriptions.push(queue)
+              listening.push(
+                group.spawn(
+                  async fn() {
+                    serve_one_listen(self, message, send, withdrawn, queue)
+                  },
+                  allow_failure=true,
+                ),
+              )
+            }
             _ => {
               let answered = request_id_of(message) is Some(_)
               let turn = seq
@@ -98,6 +111,12 @@ pub async fn Server::serve_lines(
     // Every answer still being worked out is settled before the stream closes,
     // and the sentinel goes last, so the writer drains in order.
     for task in tasks {
+      task.wait()
+    }
+    for queue in subscriptions {
+      ignore(queue.try_put(Json::null()) catch { _ => false })
+    }
+    for task in listening {
       task.wait()
     }
     outbox.put((-1, "")) catch {
@@ -165,6 +184,7 @@ async fn serve_one_listen(
   message : Json,
   send : async (String) -> Unit,
   withdrawn : Cancellations,
+  queue : @aqueue.Queue[Json],
 ) -> Unit {
   let id = match request_id_of(message) {
     Some(id) => id
@@ -176,8 +196,18 @@ async fn serve_one_listen(
     headers=Map([]),
     gone=fn() { withdrawn.has(id) },
   )
-  server.serve_subscription(id, params, channel, cancellations=withdrawn) catch {
+  server.serve_subscription(
+    id,
+    params,
+    channel,
+    cancellations=withdrawn,
+    queue~,
+  ) catch {
     _ => ()
+  }
+  if withdrawn.has(id) {
+    // The client let go of the stream; it wants no closing reply.
+    return
   }
   let reply : Json = {
     "jsonrpc": "2.0",

@@ -138,10 +138,17 @@ pub async fn Server::serve_subscription(
   params : Map[String, Json],
   channel : Channel,
   cancellations? : Cancellations,
+  queue? : @aqueue.Queue[Json],
 ) -> Unit {
   let filter = filter_of(params)
   let key = id_key(id)
-  let queue = self.watch(key, filter)
+  let queue = match queue {
+    Some(queue) => {
+      self.watchers[key] = { filter, queue, }
+      queue
+    }
+    None => self.watch(key, filter)
+  }
   defer {
     self.unwatch(key)
     if cancellations is Some(withdrawn) {
@@ -167,7 +174,9 @@ pub async fn Server::serve_subscription(
       break
     }
     let message = queue.get()
-    guard message is Object(obj) else { continue }
+    // `null` is not a message: it is the caller saying the stream is over,
+    // which is how the read loop shuts a subscription down before it leaves.
+    guard message is Object(obj) else { break }
     let out = obj.copy()
     let meta : Map[String, Json] = match obj.get("_meta") {
       Some(Object(existing)) => existing.copy()
