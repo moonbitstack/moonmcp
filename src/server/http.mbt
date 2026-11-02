@@ -39,6 +39,7 @@ pub fn Server::to_asgi(
   origins~ : Array[String] = [],
   docs~ : String? = Some("/docs"),
   theme~ : @docs.Theme = @docs.theme,
+  auth~ : @auth.Bearer? = None,
 ) -> @moonasgi.AsgiApp {
   (scope, receive, send) => {
     match scope {
@@ -57,7 +58,7 @@ pub fn Server::to_asgi(
             send(HttpResponseStart(status~, headers~, trailers=false))
             send(HttpResponseBody(body=payload, more_body=false))
           }
-          None => self.over_http(hs, body, path, origins, send)
+          None => self.over_http(hs, body, path, origins, send, auth)
         }
       }
       WebSocket(_) => send(WebSocketClose(code=1000, reason=""))
@@ -132,6 +133,7 @@ async fn Server::over_http(
   path : String,
   origins : Array[String],
   send : @moonasgi.Send,
+  auth : @auth.Bearer?,
 ) -> Unit {
   let plain = [("content-type", "text/plain; charset=utf-8")]
   if hs.path != path && hs.path != path + "/" {
@@ -152,6 +154,20 @@ async fn Server::over_http(
   guard header(hs.headers, "content-type") is Some(kind) &&
     kind.to_lower().has_prefix("application/json") else {
     return reply_json(send, 415, plain, b"Unsupported Media Type")
+  }
+  // The token is checked before the body is read: a caller who is not allowed
+  // in learns nothing about the request, not even whether it parses.
+  let principal = match auth {
+    Some(bearer) =>
+      match header(hs.headers, "authorization") {
+        Some(value) =>
+          match bearer.check(value) {
+            Ok(principal) => Some(principal)
+            Err(reason) => return challenge(send, reason)
+          }
+        None => return challenge(send, "a bearer token is required")
+      }
+    None => None
   }
   let message = @json.parse(@utf8.decode_lossy(body[:])) catch {
     _ =>
@@ -185,12 +201,14 @@ async fn Server::over_http(
     return json_reply(send, 400, refusal(id, f).1)
   }
   if modern && accepts_event_stream(hs.headers) && streams(message) {
-    return self.stream_http(hs, message, send)
+    return self.stream_http(hs, message, send, principal)
   }
   let channel = Channel::new(
     emit=fn(_) { () },
     headers=header_map(hs.headers),
     gone=fn() { false },
+    subject?=principal.bind(principal => principal.subject),
+    claims=principal.map(principal => principal.claims).unwrap_or(Map([])),
   )
   match self.answer(message, channel~) {
     None => reply_json(send, 202, [], b"")
@@ -242,6 +260,7 @@ async fn Server::stream_http(
   hs : @moonasgi.HttpScope,
   message : Json,
   send : @moonasgi.Send,
+  principal : @auth.Principal?,
 ) -> Unit {
   let headers = [
     ("content-type", "text/event-stream"),
@@ -258,9 +277,13 @@ async fn Server::stream_http(
       _ => alive = false
     }
   }
-  let channel = Channel::new(emit=frame, headers=header_map(hs.headers), gone=fn() {
-    !alive
-  })
+  let channel = Channel::new(
+    emit=frame,
+    headers=header_map(hs.headers),
+    gone=fn() { !alive },
+    subject?=principal.bind(principal => principal.subject),
+    claims=principal.map(principal => principal.claims).unwrap_or(Map([])),
+  )
   match method_of(message) {
     Some(op) if op == @types.method_subscriptions_listen =>
       match request_id_of(message) {
@@ -288,6 +311,25 @@ async fn Server::stream_http(
   send(HttpResponseBody(body=b"", more_body=false)) catch {
     _ => ()
   }
+}
+
+///|
+/// The answer to a request whose token is missing or does not verify: `401`
+/// with the challenge RFC 6750 asks for, and nothing of the request in it.
+async fn challenge(send : @moonasgi.Send, reason : String) -> Unit {
+  let header = "Bearer realm=\"mcp\", error=\"invalid_token\", " +
+    "error_description=\"" +
+    reason +
+    "\""
+  reply_json(
+    send,
+    401,
+    [
+      ("www-authenticate", header),
+      ("content-type", "text/plain; charset=utf-8"),
+    ],
+    b"",
+  )
 }
 
 ///|

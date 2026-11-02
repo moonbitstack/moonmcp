@@ -2,10 +2,12 @@
 // request, progress reports, log messages and cancellation.
 import {
   "moonbitstack/moonmcp/types",
+  "moonbitstack/moonlog",
 }
 
 import {
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/types",
+  "moonbitstack/moonlog",
   "moonbitlang/async",
 } for "test"

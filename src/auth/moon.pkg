@@ -1,0 +1,17 @@
+// The bearer token an HTTP transport checks before it serves anything:
+// verification through `mooncred`'s JWT, or a check of the caller's own.
+import {
+  "moonbitstack/mooncred/jwt",
+  "moonbitstack/mooncrypt/hash/sha2",
+  "moonbitstack/mooncrypt/mac/hmac",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/async",
+}
+
+import {
+  "moonbitstack/moonmcp/auth",
+  "moonbitstack/mooncred/jwt",
+  "moonbitstack/mooncrypt/hash/sha2",
+  "moonbitstack/mooncrypt/mac/hmac",
+  "moonbitlang/core/encoding/utf8",
+} for "test"

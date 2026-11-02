@@ -3,6 +3,7 @@ package "moonbitstack/moonmcp"
 
 import {
   "moonbitlang/core/json",
+  "moonbitstack/moonmcp/auth",
   "moonbitstack/moonmcp/client",
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",
@@ -25,6 +26,8 @@ pub fn text_block(String) -> @types.ContentBlock
 // Types and methods
 
 // Type aliases
+pub using @auth {type Bearer}
+
 pub using @types {type CacheScope}
 
 pub using @server {type Cancellations}
@@ -44,6 +47,8 @@ pub using @client {type Lines}
 pub using @client {type Memory}
 
 pub using @prompts {type Message}
+
+pub using @auth {type Principal}
 
 pub using @prompts {type Prompt}
 

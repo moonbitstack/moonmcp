@@ -7,4 +7,5 @@ import {
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/client",
   "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/auth",
 }

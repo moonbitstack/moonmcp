@@ -323,6 +323,75 @@ A transport is anything implementing `Transport`: `ask`, `tell`, `listen` and
 `close`. `Memory`, `Lines` and `Http` ship here; a fourth is a hundred lines,
 and the client above it does not change.
 
+## Authorization
+
+An endpoint that should not be open takes a bearer token: the header is checked
+before the body is read, and a request without a good one is answered `401` with
+the `WWW-Authenticate` challenge the specification asks for.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  let bearer = @moonmcp.Bearer::hmac(secret="s3cret")
+  @mooncat.serve(mcp.to_asgi(auth=Some(bearer)), port=12000) catch {
+    _ => ()
+  }
+}
+```
+
+`Bearer::hmac` verifies a token signed with a shared secret — the signature, the
+expiry, and the issuer and audience when they are given. `Bearer::own` takes a
+check of your own for everything else: an RSA or ECDSA key, a key set fetched
+from the issuer, an opaque token looked up in a table.
+
+A handler reads who called from its context; the claims are there too, as the
+issuer wrote them:
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.tool_context(
+    "whoami",
+    async fn(_args : Map[String, Json], context : @moonmcp.Context) {
+      let subject = context.subject().unwrap_or("nobody")
+      let role = match context.claims().get("role") {
+        Some(String(role)) => role
+        _ => "no role"
+      }
+      @moonmcp.ToolResult::new(content=[
+        @moonmcp.text_block("\{subject} (\{role})"),
+      ])
+    },
+  )
+}
+```
+
+## Logging
+
+The server keeps no log of its own unless it is handed one. Given a structured
+logger, it writes every request it served, every one it refused, and the lines a
+handler asks for — `Context::log` writes there as well as sending
+`notifications/message`, so a client that went away does not take the record
+with it.
+
+```moonbit
+async fn main {
+  let sink = @moonlog.Lines::new(fn(line) { println(line) })
+  let hub = @moonlog.Hub::new()
+  let slot = @moonlog.Slot::new(sink, name="console").layout(
+    @moonlog.Pattern::parse("{level} {target}: {msg}"),
+  )
+  ignore(hub.add(slot) catch {
+    e => abort("the log hub refused the slot: " + e.to_text())
+  })
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.log_to(logger=hub.logger("moonmcp"))
+}
+```
+
+`Context::logger` hands a handler the same logger, scoped to its request, for
+lines of its own.
+
 ## Debug page
 
 `to_asgi` serves a documentation page beside the endpoint, the way an API
@@ -399,6 +468,7 @@ writes the configuration above.
 | `context` | `Context` and `Facts`: what a handler is told about the request it serves |
 | `client` | `Client` and the `Transport` contract, with the in-memory and line transports |
 | `client/http` | The HTTP transport |
+| `auth` | `Bearer` and `Principal`: the token an HTTP endpoint checks, verified through `mooncred` |
 | `component`, `tasks`, `settings`, `config`, `utilities` | Component metadata, task configuration, settings, the `mcp.json` client configuration, media helpers |
 
 ## Install

@@ -44,6 +44,8 @@
       <a href="#transports">Transports</a>
       <a href="#streams">Progress &amp; subscriptions</a>
       <a href="#mrtr">Ask the client</a>
+      <a href="#auth">Authorization</a>
+      <a href="#logging">Logging</a>
       <a href="#debug">Debug page</a>
       <a href="#client">Connect a client</a>
       <a href="#reach">Reach a server from MoonBit</a>
@@ -285,6 +287,43 @@ mcp.tool_context("greet", async fn(_args : Map[String, Json], context : @context
         <div class="msg agent"><div class="who">first leg</div><div class="body"><code>{ "resultType": "input_required", "inputRequests": [ &hellip; ], "requestState": "greeting" }</code></div></div>
         <div class="msg" style="margin-top:-.2rem"><div class="who">retry</div><div class="body"><code>{ "name": "greet", "inputResponses": { "name": "Ada" }, "requestState": "greeting" }</code></div></div>
       </div>
+    </section>
+
+    <section class="section" id="auth">
+      <h2>Authorization</h2>
+      <p class="pdesc">An endpoint that should not be open takes a bearer token. The header is checked before the body is read; a request without a good one is answered <code>401</code> with the <code>WWW-Authenticate</code> challenge the specification asks for.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
+let app = mcp.to_asgi(auth=Some(@auth.Bearer::hmac(secret="s3cret")))
+// anywhere else: a check of your own
+let own = @auth.Bearer::own(check=fn(token) {
+  if token == "let-me-in" {
+    Ok({ subject: Some("alice"), claims: Map([]) })
+  } else {
+    Err("no such token")
+  }
+})</code></pre><button class="copy" type="button">copy</button></div>
+      <p><code>Bearer::hmac</code> checks a token signed with a shared secret — its signature, its expiry, and the issuer and audience when they were named. For anything else — an RSA or ECDSA key, a key set fetched from the issuer, an opaque token in a table — <code>Bearer::own</code> takes the whole decision, so the framework never has an opinion about how a token is judged.</p>
+      <p>A handler reads who called from its context, and the claims as the issuer wrote them:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">on a Context</div><div class="body"><code>subject()</code> &middot; <code>claims()</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">refused</div><div class="body"><code>401</code> &middot; <code>WWW-Authenticate: Bearer realm="mcp", error="invalid_token", error_description="the token has expired"</code></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="logging">
+      <h2>Logging</h2>
+      <p class="pdesc">The server keeps no log of its own unless it is handed one. Given a structured logger it writes every request it served, every one it refused, and the lines a handler asks for.</p>
+      <div class="code"><pre><code class="language-moonbit">let sink = @moonlog.Lines::new(fn(line) { println(line) })
+let hub = @moonlog.Hub::new()
+let slot = @moonlog.Slot::new(sink, name="console").layout(
+  @moonlog.Pattern::parse("{level} {target}: {msg}"),
+)
+ignore(hub.add(slot) catch {
+  e =&gt; abort("the log hub refused the slot: " + e.to_text())
+})
+let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.log_to(logger=hub.logger("moonmcp"))</code></pre><button class="copy" type="button">copy</button></div>
+      <p><code>Context::log</code> writes to that logger <em>and</em> sends <code>notifications/message</code>, so a client that went away does not take the record with it; <code>Context::logger</code> hands a handler the same logger scoped to its request, for lines of its own.</p>
     </section>
 
     <section class="section" id="debug">

@@ -28,6 +28,9 @@ pub using @context {type Context, type Facts}
 pub using @client {type Client, type Memory, type Lines, type Refused}
 
 ///|
+pub using @auth {type Bearer, type Principal}
+
+///|
 pub using @types {type CacheScope, text_block}
 
 ///|

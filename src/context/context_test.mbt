@@ -88,3 +88,33 @@ async test "a quiet context answers and reports nothing" {
     _ => fail("raised")
   }
 }
+
+///|
+async test "a log line reaches the server's own log as well" {
+  let sink = @moonlog.Memory::new()
+  let hub = @moonlog.Hub::new(clock=fn() { 0L })
+  ignore(
+    hub.add(
+      @moonlog.Slot::new(sink, name="test").layout(
+        @moonlog.Pattern::parse("{level} {target}: {msg}"),
+      ),
+    ) catch {
+      e => fail("the log hub refused the slot: " + e.to_text())
+    },
+  )
+  let ctx = @context.Context::new(
+    facts=@context.Facts::new(),
+    logger=hub.logger("moonmcp"),
+  )
+  ctx.info("a line for the server") catch {
+    _ => fail("raised")
+  }
+  ctx.log(level=@types.Critical, message="and a loud one") catch {
+    _ => fail("raised")
+  }
+  let lines = sink.lines()
+  assert_eq(lines.length(), 2)
+  assert_eq(lines[0].contains("a line for the server"), true)
+  assert_eq(lines[0].contains("moonmcp"), true)
+  assert_eq(lines[1].contains("FATAL"), true)
+}

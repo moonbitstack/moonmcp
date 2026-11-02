@@ -46,6 +46,7 @@ pub struct Server {
   priv templates : Array[@resources.ResourceTemplate]
   priv prompts : Map[String, @prompts.Prompt]
   priv watchers : Map[String, Watcher]
+  priv mut logger : @moonlog.Logger?
 }
 
 ///|
@@ -68,7 +69,21 @@ pub fn Server::new(
     templates: [],
     prompts: Map([]),
     watchers: Map([]),
+    logger: None,
   }
+}
+
+///|
+/// Write the server's own log through `logger` (← a structured logger passed
+/// in, never reached for globally): a request served, a request refused, a
+/// subscription opened. `Context::log` writes here too, beside the
+/// notification it sends, so a client that went away does not take the record
+/// with it.
+///
+/// Without one the server keeps no log of its own; the `notifications/message`
+/// its handlers ask for still go to the client.
+pub fn Server::log_to(self : Server, logger~ : @moonlog.Logger) -> Unit {
+  self.logger = Some(logger)
 }
 
 ///|

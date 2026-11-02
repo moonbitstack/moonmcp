@@ -16,6 +16,10 @@ pub(all) struct Facts {
   headers : Map[String, String]
   input_responses : Map[String, Json]
   request_state : String?
+  /// The subject the transport's token vouched for, when it checked one.
+  subject : String?
+  /// Every claim that token carried; empty when there was no token.
+  claims : Map[String, Json]
 } derive(Debug, Eq)
 
 ///|
@@ -31,6 +35,8 @@ pub fn Facts::new(
   headers~ : Map[String, String] = Map([]),
   input_responses~ : Map[String, Json] = Map([]),
   request_state? : String,
+  subject? : String,
+  claims~ : Map[String, Json] = Map([]),
 ) -> Facts {
   {
     protocol_version,
@@ -42,6 +48,8 @@ pub fn Facts::new(
     headers,
     input_responses,
     request_state,
+    subject,
+    claims,
   }
 }
 
@@ -56,6 +64,7 @@ pub struct Context {
   priv facts : Facts
   priv emit : async (Json) -> Unit
   priv gone : () -> Bool
+  priv logger : @moonlog.Logger?
 }
 
 ///|
@@ -66,8 +75,9 @@ pub fn Context::new(
   facts~ : Facts,
   emit~ : async (Json) -> Unit = fn(_) { () },
   gone~ : () -> Bool = fn() { false },
+  logger? : @moonlog.Logger,
 ) -> Context {
-  { facts, emit, gone, }
+  { facts, emit, gone, logger, }
 }
 
 ///|
@@ -147,6 +157,28 @@ pub fn Context::input_responses(self : Context) -> Map[String, Json] {
 }
 
 ///|
+/// The subject a bearer token vouched for, when the transport checked one.
+/// `None` over stdio, and over HTTP when the endpoint is open.
+pub fn Context::subject(self : Context) -> String? {
+  self.facts.subject
+}
+
+///|
+/// Every claim the token carried, as the issuer wrote them. Empty when no
+/// token was checked.
+pub fn Context::claims(self : Context) -> Map[String, Json] {
+  self.facts.claims
+}
+
+///|
+/// The server's log, scoped to this request: its id and operation are already
+/// bound, so a line says which request it came from. `None` when the server
+/// was given no logger, which is the default.
+pub fn Context::logger(self : Context) -> @moonlog.Logger? {
+  self.logger
+}
+
+///|
 /// The opaque state the server asked the client to hand back on the retry, or
 /// `None` on the first leg.
 pub fn Context::request_state(self : Context) -> String? {
@@ -198,6 +230,18 @@ pub async fn Context::log(
   logger? : String,
   data? : Json,
 ) -> Unit {
+  // The server's own log first: a client that went away should not take the
+  // record of what happened with it.
+  if self.logger is Some(log) {
+    let fields : Array[(String, @moonlog.Value)] = []
+    if logger is Some(name) {
+      fields.push(("logger", @moonlog.Value::of_str(name)))
+    }
+    if data is Some(value) {
+      fields.push(("data", @moonlog.Value::of_str(value.stringify())))
+    }
+    log.log(severity(level), message, fields~)
+  }
   let params : Map[String, Json] = {
     "level": Json::string(level.to_wire()),
     "data": Json::string(message),
@@ -250,3 +294,16 @@ pub extend Facts with Debug::{to_repr}
 
 ///|
 pub extend Facts with Eq::{not_equal, equal}
+
+///|
+/// The same severity in the server's own log, which has six levels where the
+/// protocol has eight.
+fn severity(level : @types.LoggingLevel) -> @moonlog.Level {
+  match level {
+    @types.Debug => @moonlog.debug
+    @types.Info | @types.Notice => @moonlog.info
+    @types.Warning => @moonlog.warn
+    @types.Error => @moonlog.error
+    @types.Critical | @types.Alert | @types.Emergency => @moonlog.fatal
+  }
+}

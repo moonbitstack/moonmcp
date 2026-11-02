@@ -135,15 +135,23 @@ async fn Server::answer(
     )
   }
   let era = era_of(params)
-  let context = context_of(op, id, params, channel)
+  let log = self.request_logger(op, id)
+  let context = context_of(op, id, params, channel, log)
   let result = self.dispatch(op, params, era, context) catch {
-    Fail(_) as f => return Some(refusal(id, f))
-    e => return Some(refusal(id, fail(internal_error, "\{e}")))
+    Fail(_) as f => {
+      log_failure(log, op, f.code, f.message)
+      return Some(refusal(id, f))
+    }
+    e => {
+      log_failure(log, op, internal_error, "\{e}")
+      return Some(refusal(id, fail(internal_error, "\{e}")))
+    }
   }
   let result = match era {
     Modern(_) => self.stamp(result, op)
     Legacy => result
   }
+  log_served(log, op)
   Some((None, { "jsonrpc": "2.0", "id": id, "result": result }))
 }
 
@@ -154,6 +162,7 @@ fn context_of(
   id : Json,
   params : Map[String, Json],
   channel : Channel,
+  logger : @moonlog.Logger?,
 ) -> @context.Context {
   let meta = match params.get("_meta") {
     Some(Object(meta)) => meta
@@ -191,10 +200,61 @@ fn context_of(
       headers=channel.headers,
       input_responses~,
       request_state?,
+      subject?=channel.subject,
+      claims=channel.claims,
     ),
     emit=channel.emit,
     gone=channel.gone,
+    logger?,
   )
+}
+
+///|
+/// The server's log for one request: the target stays `moonmcp`, and the
+/// request's method and id are bound so every line says which one it was.
+/// `None` when the server was given no logger.
+fn Server::request_logger(
+  self : Server,
+  op : String,
+  id : Json,
+) -> @moonlog.Logger? {
+  match self.logger {
+    Some(log) =>
+      Some(
+        log
+        .under("request")
+        .bound("method", @moonlog.Value::of_str(op))
+        .bound("id", @moonlog.Value::of_str(id.stringify())),
+      )
+    None => None
+  }
+}
+
+///|
+/// One line for a request that was answered.
+fn log_served(log : @moonlog.Logger?, op : String) -> Unit {
+  match log {
+    Some(log) => log.debug("served \{op}")
+    None => ()
+  }
+}
+
+///|
+/// One line for a request that was refused, at the severity its code deserves.
+fn log_failure(
+  log : @moonlog.Logger?,
+  op : String,
+  code : Int32,
+  message : String,
+) -> Unit {
+  match log {
+    Some(log) =>
+      log.log(@moonlog.warn, "refused \{op}", fields=[
+        ("code", @moonlog.Value::of_int(code)),
+        ("why", @moonlog.Value::of_str(message)),
+      ])
+    None => ()
+  }
 }
 
 ///|

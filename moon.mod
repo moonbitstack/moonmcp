@@ -21,5 +21,8 @@ import {
   "moonbitstack/moonbase@0.4.2",
   "moonbitstack/mooncat@0.18.8",
   "moonbitstack/moonast@0.2.3",
+  "moonbitstack/moonlog@0.1.3",
+  "moonbitstack/mooncred@0.6.7",
+  "moonbitstack/mooncrypt@0.4.6",
   "moonbitlang/parser@0.4.6",
 }

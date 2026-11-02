@@ -12,6 +12,10 @@ pub(all) struct Channel {
   emit : async (Json) -> Unit
   headers : Map[String, String]
   gone : () -> Bool
+  /// The subject the transport's token vouched for, if it checked one.
+  subject : String?
+  /// Every claim that token carried.
+  claims : Map[String, Json]
 }
 
 ///|
@@ -20,14 +24,22 @@ pub fn Channel::new(
   emit~ : async (Json) -> Unit,
   headers~ : Map[String, String],
   gone~ : () -> Bool,
+  subject? : String,
+  claims~ : Map[String, Json] = Map([]),
 ) -> Channel {
-  { emit, headers, gone, }
+  { emit, headers, gone, subject, claims, }
 }
 
 ///|
 /// A channel with nowhere to send and no caller to lose.
 pub fn Channel::quiet() -> Channel {
-  { emit: fn(_) { () }, headers: Map([]), gone: fn() { false }, }
+  {
+    emit: fn(_) { () },
+    headers: Map([]),
+    gone: fn() { false },
+    subject: None,
+    claims: Map([]),
+  }
 }
 
 ///|
