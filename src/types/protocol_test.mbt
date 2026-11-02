@@ -82,6 +82,7 @@ test "initialize result round trips" {
     protocol_version: @types.latest_protocol_version,
     capabilities: {
       experimental: None,
+      extensions: None,
       logging: Some(true),
       completions: None,
       prompts: Some({ list_changed: Some(true), }),
@@ -202,6 +203,8 @@ test "discover result flattens the wrapped payload" {
       "content": Json::array([]),
       "isError": Json::boolean(false),
     }),
+    ttl_ms: None,
+    cache_scope: None,
     meta: None,
   }
   let json = @types.DiscoverResult::to_json(result)

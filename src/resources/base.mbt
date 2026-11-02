@@ -84,7 +84,8 @@ pub fn ResourceResult::to_mcp_result(
 ) -> @types.ReadResourceResult {
   {
     contents: self.contents.map(fn(item) { item.to_mcp_resource_contents(uri) }),
-    cache_control: None,
+    ttl_ms: None,
+    cache_scope: None,
     meta: self.meta,
   }
 }

@@ -138,7 +138,6 @@ pub fn ToolResult::to_mcp_result(self : ToolResult) -> @types.CallToolResult {
         content: self.content,
         structured_content: self.structured_content,
         is_error: self.is_error,
-        cache_control: None,
         meta: self.meta,
       }
   }

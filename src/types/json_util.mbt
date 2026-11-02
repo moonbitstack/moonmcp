@@ -43,6 +43,35 @@ fn put_opt_json(obj : Map[String, Json], key : String, value : Json?) -> Unit {
 }
 
 ///|
+fn put_opt_cache_scope(
+  obj : Map[String, Json],
+  key : String,
+  value : CacheScope?,
+) -> Unit {
+  if value is Some(v) {
+    obj[key] = Json::string(v.to_wire())
+  }
+}
+
+///|
+fn opt_cache_scope(
+  obj : Map[String, Json],
+  path : @json.JsonPath,
+  key : String,
+) -> CacheScope? raise @json.JsonDecodeError {
+  match obj.get(key) {
+    Some(String(v)) =>
+      match cache_scope_of_wire(v) {
+        Some(scope) => Some(scope)
+        None =>
+          raise decode_error(path, "field \{key}: unknown cache scope \{v}")
+      }
+    Some(Null) | None => None
+    Some(_) => raise decode_error(path, "field \{key}: expected string")
+  }
+}
+
+///|
 fn put_opt_array(
   obj : Map[String, Json],
   key : String,

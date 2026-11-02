@@ -79,7 +79,6 @@ pub fn PromptResult::to_mcp_prompt_result(
   {
     description: self.description,
     messages: self.messages.map(Message::to_mcp_prompt_message),
-    cache_control: None,
     meta: self.meta,
   }
 }

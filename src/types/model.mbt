@@ -53,6 +53,7 @@ pub(all) struct PromptsCapabilities {
 /// What a server supports; absent groups mean the feature is off.
 pub(all) struct ServerCapabilities {
   experimental : Map[String, Json]?
+  extensions : Map[String, Json]?
   logging : Bool?
   completions : Bool?
   prompts : PromptsCapabilities?
@@ -65,6 +66,7 @@ pub(all) struct ServerCapabilities {
 pub fn ServerCapabilities::new() -> ServerCapabilities {
   {
     experimental: None,
+    extensions: None,
     logging: None,
     completions: None,
     prompts: None,
@@ -80,6 +82,7 @@ pub impl ToJson for ServerCapabilities with fn to_json(
 ) -> Json {
   let obj : Map[String, Json] = Map([])
   put_opt_map(obj, "experimental", self.experimental)
+  put_opt_map(obj, "extensions", self.extensions)
   if self.logging is Some(true) {
     put_opt_map(obj, "logging", Some({}))
   }
@@ -141,6 +144,7 @@ pub impl FromJson for ServerCapabilities with fn from_json(
 
   {
     experimental: opt_obj(obj, path, "experimental"),
+    extensions: opt_obj(obj, path, "extensions"),
     logging: opt_obj(obj, path, "logging").map_or(None, fn(_) { Some(true) }),
     completions: opt_obj(obj, path, "completions").map_or(None, fn(_) {
       Some(true)
@@ -156,6 +160,7 @@ pub impl FromJson for ServerCapabilities with fn from_json(
 /// What a client supports.
 pub(all) struct ClientCapabilities {
   experimental : Map[String, Json]?
+  extensions : Map[String, Json]?
   roots_list_changed : Bool?
   sampling : Bool?
   elicitation : Bool?
@@ -163,11 +168,25 @@ pub(all) struct ClientCapabilities {
 } derive(Debug, Eq)
 
 ///|
+/// A client that asks for nothing beyond the core protocol.
+pub fn ClientCapabilities::new() -> ClientCapabilities {
+  {
+    experimental: None,
+    extensions: None,
+    roots_list_changed: None,
+    sampling: None,
+    elicitation: None,
+    tasks: None,
+  }
+}
+
+///|
 pub impl ToJson for ClientCapabilities with fn to_json(
   self : ClientCapabilities,
 ) -> Json {
   let obj : Map[String, Json] = Map([])
   put_opt_map(obj, "experimental", self.experimental)
+  put_opt_map(obj, "extensions", self.extensions)
   if self.roots_list_changed is Some(true) {
     put_opt_map(obj, "roots", Some({ "listChanged": Json::boolean(true) }))
   }
@@ -191,6 +210,7 @@ pub impl FromJson for ClientCapabilities with fn from_json(
   let obj = expect_obj(json, path, "ClientCapabilities")
   {
     experimental: opt_obj(obj, path, "experimental"),
+    extensions: opt_obj(obj, path, "extensions"),
     roots_list_changed: match opt_obj(obj, path, "roots") {
       Some(roots) => opt_bool(roots, path, "listChanged")
       None => None
@@ -833,3 +853,80 @@ pub extend ToolExecution with Eq::{not_equal, equal}
 
 ///|
 pub extend ToolExecution with ToJson::{to_json}
+
+///|
+/// The notifications a client opts in to on a `subscriptions/listen` stream.
+/// Every field is off unless asked for, so a server that honours this sends
+/// only what the client named.
+pub(all) struct SubscriptionFilter {
+  tools_list_changed : Bool?
+  prompts_list_changed : Bool?
+  resources_list_changed : Bool?
+  resource_subscriptions : Array[String]?
+} derive(Debug, Eq)
+
+///|
+/// A filter that asks for nothing, which is what an empty object decodes to.
+pub fn SubscriptionFilter::new() -> SubscriptionFilter {
+  {
+    tools_list_changed: None,
+    prompts_list_changed: None,
+    resources_list_changed: None,
+    resource_subscriptions: None,
+  }
+}
+
+///|
+/// Whether the client asked for the notification that a list changed.
+pub fn SubscriptionFilter::wants(
+  self : SubscriptionFilter,
+  notification : String,
+) -> Bool {
+  match notification {
+    "notifications/tools/list_changed" => self.tools_list_changed == Some(true)
+    "notifications/prompts/list_changed" =>
+      self.prompts_list_changed == Some(true)
+    "notifications/resources/list_changed" =>
+      self.resources_list_changed == Some(true)
+    "notifications/resources/updated" => self.resource_subscriptions is Some(_)
+    _ => false
+  }
+}
+
+///|
+pub impl ToJson for SubscriptionFilter with fn to_json(
+  self : SubscriptionFilter,
+) -> Json {
+  let obj : Map[String, Json] = Map([])
+  put_opt_bool(obj, "toolsListChanged", self.tools_list_changed)
+  put_opt_bool(obj, "promptsListChanged", self.prompts_list_changed)
+  put_opt_bool(obj, "resourcesListChanged", self.resources_list_changed)
+  put_opt_str_array(obj, "resourceSubscriptions", self.resource_subscriptions)
+  Json(obj)
+}
+
+///|
+pub impl FromJson for SubscriptionFilter with fn from_json(
+  json : Json,
+  path : @json.JsonPath,
+) -> SubscriptionFilter raise @json.JsonDecodeError {
+  let obj = expect_obj(json, path, "SubscriptionFilter")
+  {
+    tools_list_changed: opt_bool(obj, path, "toolsListChanged"),
+    prompts_list_changed: opt_bool(obj, path, "promptsListChanged"),
+    resources_list_changed: opt_bool(obj, path, "resourcesListChanged"),
+    resource_subscriptions: opt_str_array(obj, path, "resourceSubscriptions"),
+  }
+}
+
+///|
+pub extend SubscriptionFilter with @json.FromJson::{from_json}
+
+///|
+pub extend SubscriptionFilter with Debug::{to_repr}
+
+///|
+pub extend SubscriptionFilter with Eq::{not_equal, equal}
+
+///|
+pub extend SubscriptionFilter with ToJson::{to_json}

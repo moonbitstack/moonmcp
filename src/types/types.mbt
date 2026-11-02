@@ -32,17 +32,47 @@ pub fn handshake_protocol_versions() -> Array[String] {
 }
 
 ///|
-/// Request `_meta` keys used to propagate session facts.
-pub let server_info_meta_key : String = "serverInfo"
+/// The `_meta` keys a 2026-07-28 request and reply carry their session facts
+/// under. The prefix is the one the specification reserves for itself, so a
+/// request from another revision is told apart by the presence of one of these
+/// alone.
+pub let server_info_meta_key : String = "io.modelcontextprotocol/serverInfo"
 
 ///|
-pub let client_info_meta_key : String = "clientInfo"
+pub let client_info_meta_key : String = "io.modelcontextprotocol/clientInfo"
 
 ///|
-pub let protocol_version_meta_key : String = "protocolVersion"
+pub let protocol_version_meta_key : String = "io.modelcontextprotocol/protocolVersion"
 
 ///|
-pub let client_capabilities_meta_key : String = "clientCapabilities"
+pub let client_capabilities_meta_key : String = "io.modelcontextprotocol/clientCapabilities"
+
+///|
+/// The scope of a cacheable result, the `cacheScope` a list or a read carries:
+/// who may keep the reply. `Public` says it holds nothing tied to one caller;
+/// `Private` says a cache must belong to the authorisation context it was
+/// fetched in.
+pub(all) enum CacheScope {
+  Public
+  Private
+} derive(Debug, Eq)
+
+///|
+pub fn CacheScope::to_wire(self : CacheScope) -> String {
+  match self {
+    Public => "public"
+    Private => "private"
+  }
+}
+
+///|
+pub fn cache_scope_of_wire(value : String) -> CacheScope? {
+  match value {
+    "public" => Some(Public)
+    "private" => Some(Private)
+    _ => None
+  }
+}
 
 ///|
 /// Verbosity levels for `notifications/message`, ordered debug → emergency.
@@ -137,6 +167,15 @@ pub let method_elicitation_create_form : String = "elicitation/createForm"
 
 ///|
 pub let method_server_discover : String = "server/discover"
+
+///|
+pub let method_subscriptions_listen : String = "subscriptions/listen"
+
+///|
+pub let notification_subscriptions_acknowledged : String = "notifications/subscriptions/acknowledged"
+
+///|
+pub let subscription_id_meta_key : String = "io.modelcontextprotocol/subscriptionId"
 
 ///|
 pub let method_input_response : String = "input/response"
@@ -255,3 +294,9 @@ pub extend LoggingLevel with Debug::{to_repr}
 
 ///|
 pub extend LoggingLevel with Eq::{not_equal, equal}
+
+///|
+pub extend CacheScope with Debug::{to_repr}
+
+///|
+pub extend CacheScope with Eq::{not_equal, equal}

@@ -43,7 +43,8 @@ pub impl FromJson for InitializeResult with fn from_json(
 pub(all) struct ListToolsResult {
   tools : Array[Tool]
   next_cursor : String?
-  cache_control : String?
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -52,7 +53,8 @@ pub impl ToJson for ListToolsResult with fn to_json(self : ListToolsResult) -> J
   let obj : Map[String, Json] = Map([])
   put_opt_array(obj, "tools", Some(self.tools.map(Tool::to_json)))
   put_opt_str(obj, "nextCursor", self.next_cursor)
-  put_opt_str(obj, "cacheControl", self.cache_control)
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -68,7 +70,8 @@ pub impl FromJson for ListToolsResult with fn from_json(
       @json.from_json(value)
     }),
     next_cursor: opt_str(obj, path, "nextCursor"),
-    cache_control: opt_str(obj, path, "cacheControl"),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -79,19 +82,12 @@ pub(all) struct CallToolResult {
   content : Array[ContentBlock]
   structured_content : Map[String, Json]?
   is_error : Bool
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
 ///|
 pub fn CallToolResult::new(content : Array[ContentBlock]) -> CallToolResult {
-  {
-    content,
-    structured_content: None,
-    is_error: false,
-    cache_control: None,
-    meta: None,
-  }
+  { content, structured_content: None, is_error: false, meta: None, }
 }
 
 ///|
@@ -100,7 +96,6 @@ pub fn CallToolResult::error(message : String) -> CallToolResult {
     content: [text_block(message)],
     structured_content: None,
     is_error: true,
-    cache_control: None,
     meta: None,
   }
 }
@@ -111,7 +106,6 @@ pub impl ToJson for CallToolResult with fn to_json(self : CallToolResult) -> Jso
   put_opt_array(obj, "content", Some(self.content.map(ContentBlock::to_json)))
   put_opt_map(obj, "structuredContent", self.structured_content)
   put_opt_bool(obj, "isError", Some(self.is_error))
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -128,7 +122,6 @@ pub impl FromJson for CallToolResult with fn from_json(
     .map(value => @json.from_json(value)),
     structured_content: opt_obj(obj, path, "structuredContent"),
     is_error: opt_bool(obj, path, "isError").unwrap_or(false),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -138,7 +131,8 @@ pub impl FromJson for CallToolResult with fn from_json(
 pub(all) struct ListPromptsResult {
   prompts : Array[Prompt]
   next_cursor : String?
-  cache_control : String?
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -147,7 +141,8 @@ pub impl ToJson for ListPromptsResult with fn to_json(self : ListPromptsResult) 
   let obj : Map[String, Json] = Map([])
   put_opt_array(obj, "prompts", Some(self.prompts.map(Prompt::to_json)))
   put_opt_str(obj, "nextCursor", self.next_cursor)
-  put_opt_str(obj, "cacheControl", self.cache_control)
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -163,7 +158,8 @@ pub impl FromJson for ListPromptsResult with fn from_json(
       @json.from_json(value)
     }),
     next_cursor: opt_str(obj, path, "nextCursor"),
-    cache_control: opt_str(obj, path, "cacheControl"),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -204,7 +200,6 @@ pub impl FromJson for PromptMessage with fn from_json(
 pub(all) struct GetPromptResult {
   description : String?
   messages : Array[PromptMessage]
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -217,7 +212,6 @@ pub impl ToJson for GetPromptResult with fn to_json(self : GetPromptResult) -> J
     "messages",
     Some(self.messages.map(PromptMessage::to_json)),
   )
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -233,7 +227,6 @@ pub impl FromJson for GetPromptResult with fn from_json(
     messages: req_array(obj, path, "GetPromptResult", "messages").map(value => {
       @json.from_json(value)
     }),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -243,7 +236,8 @@ pub impl FromJson for GetPromptResult with fn from_json(
 pub(all) struct ListResourcesResult {
   resources : Array[Resource]
   next_cursor : String?
-  cache_control : String?
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -254,7 +248,8 @@ pub impl ToJson for ListResourcesResult with fn to_json(
   let obj : Map[String, Json] = Map([])
   put_opt_array(obj, "resources", Some(self.resources.map(Resource::to_json)))
   put_opt_str(obj, "nextCursor", self.next_cursor)
-  put_opt_str(obj, "cacheControl", self.cache_control)
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -270,7 +265,8 @@ pub impl FromJson for ListResourcesResult with fn from_json(
       @json.from_json(value)
     }),
     next_cursor: opt_str(obj, path, "nextCursor"),
-    cache_control: opt_str(obj, path, "cacheControl"),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -279,7 +275,8 @@ pub impl FromJson for ListResourcesResult with fn from_json(
 /// The result of a `resources/read` call.
 pub(all) struct ReadResourceResult {
   contents : Array[ResourceContents]
-  cache_control : String?
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -293,7 +290,8 @@ pub impl ToJson for ReadResourceResult with fn to_json(
     "contents",
     Some(self.contents.map(ResourceContents::to_json)),
   )
-  put_opt_str(obj, "cacheControl", self.cache_control)
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -308,7 +306,8 @@ pub impl FromJson for ReadResourceResult with fn from_json(
     contents: req_array(obj, path, "ReadResourceResult", "contents").map(value => {
       @json.from_json(value)
     }),
-    cache_control: opt_str(obj, path, "cacheControl"),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -318,7 +317,8 @@ pub impl FromJson for ReadResourceResult with fn from_json(
 pub(all) struct ListResourceTemplatesResult {
   resource_templates : Array[ResourceTemplate]
   next_cursor : String?
-  cache_control : String?
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -333,7 +333,8 @@ pub impl ToJson for ListResourceTemplatesResult with fn to_json(
     Some(self.resource_templates.map(ResourceTemplate::to_json)),
   )
   put_opt_str(obj, "nextCursor", self.next_cursor)
-  put_opt_str(obj, "cacheControl", self.cache_control)
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -349,7 +350,8 @@ pub impl FromJson for ListResourceTemplatesResult with fn from_json(
       obj, path, "ListResourceTemplatesResult", "resourceTemplates",
     ).map(value => @json.from_json(value)),
     next_cursor: opt_str(obj, path, "nextCursor"),
-    cache_control: opt_str(obj, path, "cacheControl"),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -388,7 +390,6 @@ pub impl FromJson for Completion with fn from_json(
 /// The result of a `completion/complete` call.
 pub(all) struct CompleteResult {
   completion : Completion
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -396,7 +397,6 @@ pub(all) struct CompleteResult {
 pub impl ToJson for CompleteResult with fn to_json(self : CompleteResult) -> Json {
   let obj : Map[String, Json] = Map([])
   put_opt_json(obj, "completion", Some(self.completion.to_json()))
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -409,7 +409,6 @@ pub impl FromJson for CompleteResult with fn from_json(
   let obj = expect_obj(json, path, "CompleteResult")
   {
     completion: @json.from_json(obj.get("completion").unwrap_or(Json::null())),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -443,7 +442,6 @@ pub(all) struct CreateMessageResult {
   stop_reason : String?
   role : Role
   content : ContentBlock
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -456,7 +454,6 @@ pub impl ToJson for CreateMessageResult with fn to_json(
   put_opt_str(obj, "stopReason", self.stop_reason)
   put_str(obj, "role", self.role.to_wire())
   put_opt_json(obj, "content", Some(ContentBlock::to_json(self.content)))
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -477,7 +474,6 @@ pub impl FromJson for CreateMessageResult with fn from_json(
     stop_reason: opt_str(obj, path, "stopReason"),
     role,
     content: @json.from_json(obj.get("content").unwrap_or(Json::null())),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -487,23 +483,22 @@ pub impl FromJson for CreateMessageResult with fn from_json(
 pub(all) struct ElicitResult {
   action : String
   content : Map[String, Json]?
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
 ///|
 pub fn ElicitResult::accept(content : Map[String, Json]) -> ElicitResult {
-  { action: "accept", content: Some(content), cache_control: None, meta: None, }
+  { action: "accept", content: Some(content), meta: None, }
 }
 
 ///|
 pub fn ElicitResult::decline() -> ElicitResult {
-  { action: "decline", content: None, cache_control: None, meta: None, }
+  { action: "decline", content: None, meta: None, }
 }
 
 ///|
 pub fn ElicitResult::cancel() -> ElicitResult {
-  { action: "cancel", content: None, cache_control: None, meta: None, }
+  { action: "cancel", content: None, meta: None, }
 }
 
 ///|
@@ -511,7 +506,6 @@ pub impl ToJson for ElicitResult with fn to_json(self : ElicitResult) -> Json {
   let obj : Map[String, Json] = Map([])
   put_str(obj, "action", self.action)
   put_opt_map(obj, "content", self.content)
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -525,7 +519,6 @@ pub impl FromJson for ElicitResult with fn from_json(
   {
     action: req_str(obj, path, "ElicitResult", "action"),
     content: opt_obj(obj, path, "content"),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -534,7 +527,6 @@ pub impl FromJson for ElicitResult with fn from_json(
 /// The result of a `roots/list` call.
 pub(all) struct ListRootsResult {
   roots : Array[Root]
-  cache_control : String?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -542,7 +534,6 @@ pub(all) struct ListRootsResult {
 pub impl ToJson for ListRootsResult with fn to_json(self : ListRootsResult) -> Json {
   let obj : Map[String, Json] = Map([])
   put_opt_array(obj, "roots", Some(self.roots.map(Root::to_json)))
-  put_opt_str(obj, "cacheControl", self.cache_control)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -557,7 +548,6 @@ pub impl FromJson for ListRootsResult with fn from_json(
     roots: req_array(obj, path, "ListRootsResult", "roots").map(value => {
       @json.from_json(value)
     }),
-    cache_control: opt_str(obj, path, "cacheControl"),
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -660,6 +650,8 @@ pub impl FromJson for CreateTaskResult with fn from_json(
 pub(all) struct DiscoverResult {
   result_type : String
   result : Json
+  ttl_ms : Int32?
+  cache_scope : CacheScope?
   meta : Map[String, Json]?
 } derive(Debug, Eq)
 
@@ -674,6 +666,8 @@ pub impl ToJson for DiscoverResult with fn to_json(self : DiscoverResult) -> Jso
       }
     _ => put_opt_json(obj, "result", Some(self.result))
   }
+  put_opt_int(obj, "ttlMs", self.ttl_ms)
+  put_opt_cache_scope(obj, "cacheScope", self.cache_scope)
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -687,11 +681,20 @@ pub impl FromJson for DiscoverResult with fn from_json(
   let result_type = req_str(obj, path, "DiscoverResult", "resultType")
   let result : Map[String, Json] = Map([])
   for key, value in obj {
-    if key != "resultType" && key != "_meta" {
+    if key != "resultType" &&
+      key != "_meta" &&
+      key != "ttlMs" &&
+      key != "cacheScope" {
       result[key] = value
     }
   }
-  { result_type, result: Json(result), meta: opt_obj(obj, path, "_meta"), }
+  {
+    result_type,
+    result: Json(result),
+    ttl_ms: opt_int(obj, path, "ttlMs"),
+    cache_scope: opt_cache_scope(obj, path, "cacheScope"),
+    meta: opt_obj(obj, path, "_meta"),
+  }
 }
 
 ///|
