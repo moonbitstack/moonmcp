@@ -36,3 +36,34 @@ test "error data round trip" {
   let decoded : @types.ErrorData = @json.from_json(@json.ToJson::to_json(data))
   assert_eq(decoded, data)
 }
+
+///|
+test "a cacheable list result round trips its time-to-live and scope" {
+  let result : @types.ListToolsResult = {
+    tools: [],
+    next_cursor: None,
+    ttl_ms: Some(30_000),
+    cache_scope: Some(@types.Public),
+    meta: None,
+  }
+  let json = @types.ListToolsResult::to_json(result)
+  guard json is Object(obj) else { fail("expected object") }
+  assert_eq(obj.get("ttlMs"), Some(Json::number(30_000.0)))
+  assert_eq(obj.get("cacheScope"), Some(Json::string("public")))
+  let round_tripped : @types.ListToolsResult = @json.from_json(json)
+  assert_eq(round_tripped, result)
+}
+
+///|
+test "a cacheable result without hints writes neither field" {
+  let result : @types.ReadResourceResult = {
+    contents: [],
+    ttl_ms: None,
+    cache_scope: None,
+    meta: None,
+  }
+  let json = @types.ReadResourceResult::to_json(result)
+  guard json is Object(obj) else { fail("expected object") }
+  assert_eq(obj.get("ttlMs"), None)
+  assert_eq(obj.get("cacheScope"), None)
+}

@@ -200,11 +200,11 @@ async test "a withdrawn request tells its handler to stop" {
     while !context.is_cancelled() {
       @async.pause()
       rounds += 1
-      if rounds > 10000 {
-        break
+      if rounds > 200 {
+        raise @exceptions.Tool("never withdrawn")
       }
     }
-    raise @exceptions.Tool("withdrawn")
+    raise @exceptions.Tool("withdrawn after \{rounds} rounds")
   })
   let to_server : @aqueue.Queue[String?] = @aqueue.Queue::Queue(
     kind=@aqueue.Kind::Unbounded,
@@ -248,7 +248,7 @@ async test "a withdrawn request tells its handler to stop" {
         None => break
       }
     }
-    assert_eq(reply.contains("withdrawn"), true)
+    assert_eq(reply.contains("withdrawn after"), true)
     to_server.put(None)
   })
 }
