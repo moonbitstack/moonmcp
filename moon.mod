@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmcp"
 
-version = "0.1.6"
+version = "0.1.7"
 
 readme = "README.md"
 
@@ -19,10 +19,10 @@ import {
   "moonbitstack/moonschema@0.2.2",
   "moonbitstack/moonasgi@0.10.4",
   "moonbitstack/moonbase@0.4.2",
-  "moonbitstack/mooncat@0.18.8",
+  "moonbitstack/mooncat@0.19.2",
   "moonbitstack/moonast@0.2.3",
   "moonbitstack/moonlog@0.1.3",
   "moonbitstack/mooncred@0.6.7",
-  "moonbitstack/mooncrypt@0.4.6",
+  "moonbitstack/mooncrypt@0.4.8",
   "moonbitlang/parser@0.4.6",
 }
