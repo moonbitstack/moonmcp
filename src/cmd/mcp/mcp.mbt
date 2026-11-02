@@ -38,7 +38,7 @@ fn quoted(text : String) -> String {
 fn schema_of(ty : String) -> String {
   let ty = ty.trim(chars=" ").to_owned()
   if ty.has_suffix("?") {
-    let inner = ty.view(end_offset=ty.length() - 1).to_owned()
+    let inner = ty.exact_view(end=ty.length() - 1).to_owned()
     return "{ \"anyOf\": [\{schema_of(inner)}, { \"type\": \"null\" }] }"
   }
   match generic(ty) {
@@ -74,8 +74,8 @@ fn schema_of(ty : String) -> String {
 /// with their argument.
 fn generic(ty : String) -> (String, Array[String])? {
   guard ty.find("[") is Some(open) && ty.has_suffix("]") else { return None }
-  let name = ty.view(end_offset=open).to_owned()
-  let inside = ty.view(start_offset=open + 1, end_offset=ty.length() - 1)
+  let name = ty.exact_view(end=open).to_owned()
+  let inside = ty.exact_view(start=open + 1, end=ty.length() - 1)
   let args = []
   let mut depth = 0
   let mut from = 0
@@ -85,17 +85,14 @@ fn generic(ty : String) -> (String, Array[String])? {
       ']' => depth -= 1
       ',' if depth == 0 => {
         args.push(
-          inside
-          .view(start_offset=from, end_offset=i)
-          .trim(chars=" ")
-          .to_owned(),
+          inside.exact_view(start=from, end=i).trim(chars=" ").to_owned(),
         )
         from = i + 1
       }
       _ => ()
     }
   }
-  args.push(inside.view(start_offset=from).trim(chars=" ").to_owned())
+  args.push(inside.exact_view(start=from).trim(chars=" ").to_owned())
   Some((name, args))
 }
 

@@ -198,14 +198,14 @@ fn allowed(origin : String, host : String?, origins : Array[String]) -> Bool {
     return true
   }
   let rest = match origin.find("://") {
-    Some(k) => origin.view(start_offset=k + 3).to_owned()
+    Some(k) => origin.exact_view(start=k + 3).to_owned()
     None => return false
   }
   if host is Some(h) && rest == h {
     return true
   }
   let name = match rest.rev_find(":") {
-    Some(k) if !rest.has_suffix("]") => rest.view(end_offset=k).to_owned()
+    Some(k) if !rest.has_suffix("]") => rest.exact_view(end=k).to_owned()
     _ => rest
   }
   name is ("localhost" | "127.0.0.1" | "[::1]")
@@ -304,7 +304,7 @@ fn decoded(value : String) -> String? {
   guard value.has_prefix("=?base64?") && value.has_suffix("?=") else {
     return Some(value)
   }
-  let inner = value.view(start_offset=9, end_offset=value.length() - 2)
+  let inner = value.exact_view(start=9, end=value.length() - 2)
   let bytes = @base64.decode(inner) catch { _ => return None }
   try @utf8.decode(bytes[:]) catch {
     _ => None
