@@ -6,6 +6,7 @@ import {
   "moonbitstack/moonmcp/resources",
   "moonbitstack/moonmcp/prompts",
   "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/docs",
   "moonbitstack/moonschema",
   "moonbitstack/moonasgi",
@@ -15,14 +16,21 @@ import {
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/async/stdio",
   "moonbitlang/async/io",
+  "moonbitlang/async/aqueue",
+  "moonbitlang/async",
 }
 
 import {
   "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/docs",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
   "moonbitstack/moonasgi",
+  "moonbitstack/moonasgi/client",
   "moonbitstack/moonasgi/testing",
   "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
   "moonbitlang/async",
 } for "test"
 

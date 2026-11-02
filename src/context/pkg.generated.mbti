@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/context"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonmcp/types",
+}
+
+// Values
+pub fn notification(String, Map[String, Json]) -> Json
+
+// Errors
+
+// Types and methods
+pub struct Context {
+  // private fields
+}
+pub fn Context::client_capabilities(Self) -> @types.ClientCapabilities?
+pub fn Context::client_info(Self) -> @types.Implementation?
+pub async fn Context::debug(Self, String) -> Unit
+pub async fn Context::error(Self, String) -> Unit
+pub fn Context::facts(Self) -> Facts
+pub fn Context::header(Self, String) -> String?
+pub fn Context::headers(Self) -> Map[String, String]
+pub async fn Context::info(Self, String) -> Unit
+pub fn Context::input_responses(Self) -> Map[String, Json]
+pub fn Context::is_cancelled(Self) -> Bool
+pub async fn Context::log(Self, level~ : @types.LoggingLevel, message~ : String, logger? : String, data? : Json) -> Unit
+pub fn Context::new(facts~ : Facts, emit? : async (Json) -> Unit, gone? : () -> Bool) -> Self
+pub fn Context::operation(Self) -> String
+pub fn Context::progress_token(Self) -> Json?
+pub fn Context::protocol_version(Self) -> String
+pub fn Context::quiet() -> Self
+pub async fn Context::report_progress(Self, progress~ : Double, total? : Double, message? : String) -> Unit
+pub fn Context::request_id(Self) -> Json
+pub fn Context::request_state(Self) -> String?
+pub async fn Context::warning(Self, String) -> Unit
+
+pub(all) struct Facts {
+  protocol_version : String
+  operation : String
+  request_id : Json
+  client_info : @types.Implementation?
+  client_capabilities : @types.ClientCapabilities?
+  progress_token : Json?
+  headers : Map[String, String]
+  input_responses : Map[String, Json]
+  request_state : String?
+} derive(Eq, @debug.Debug)
+pub fn Facts::equal(Self, Self) -> Bool
+pub fn Facts::new(operation? : String, request_id? : Json, protocol_version? : String, client_info? : @types.Implementation, client_capabilities? : @types.ClientCapabilities, progress_token? : Json, headers? : Map[String, String], input_responses? : Map[String, Json], request_state? : String) -> Self
+pub fn Facts::not_equal(Self, Self) -> Bool
+pub fn Facts::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

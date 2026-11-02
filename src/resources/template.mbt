@@ -18,6 +18,9 @@ pub(all) struct ResourceTemplate {
   list_query_params : @set.Set[String]
   segments : Array[TemplateSegment]
   read_fn : async (Map[String, Json]) -> RawResourceValue raise @exceptions.FastMCPError
+  /// The reader that also takes the request it serves; `None` when the
+  /// template was registered from a function that wants only its parameters.
+  context_read_fn : (async (Map[String, Json], @context.Context) -> RawResourceValue raise @exceptions.FastMCPError)?
 }
 
 ///|
@@ -71,6 +74,7 @@ pub fn ResourceTemplate::new(
   annotations? : @types.Annotations,
   security~ : ResourceSecuritySetting = Inherit,
   list_query_params~ : @set.Set[String] = @set.Set::from_array([]),
+  context_read_fn? : async (Map[String, Json], @context.Context) -> RawResourceValue raise @exceptions.FastMCPError,
 ) -> ResourceTemplate raise @exceptions.FastMCPError {
   let all_params = parse_template_params(uri_template)
   if all_params.is_empty() {
@@ -97,6 +101,7 @@ pub fn ResourceTemplate::new(
     list_query_params,
     segments: parse_template(uri_template),
     read_fn,
+    context_read_fn,
   }
 }
 
@@ -159,6 +164,20 @@ pub async fn ResourceTemplate::read(
   arguments : Map[String, Json],
 ) -> RawResourceValue raise @exceptions.FastMCPError {
   (self.read_fn)(arguments)
+}
+
+///|
+/// Read the template in the request it serves. A template registered from a
+/// function that wants only its parameters ignores the context.
+pub async fn ResourceTemplate::read_with(
+  self : ResourceTemplate,
+  arguments : Map[String, Json],
+  context : @context.Context,
+) -> RawResourceValue raise @exceptions.FastMCPError {
+  match self.context_read_fn {
+    Some(read) => read(arguments, context)
+    None => self.read(arguments)
+  }
 }
 
 ///|

@@ -14,6 +14,9 @@ pub(all) struct Resource {
   mime_type : String
   annotations : @types.Annotations?
   read_fn : async () -> RawResourceValue raise @exceptions.FastMCPError
+  /// The reader that also takes the request it serves; `None` when the
+  /// resource was registered from a function that wants no context.
+  context_read_fn : (async (@context.Context) -> RawResourceValue raise @exceptions.FastMCPError)?
 }
 
 ///|
@@ -54,6 +57,7 @@ pub fn Resource::new(
   tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
+  context_read_fn? : async (@context.Context) -> RawResourceValue raise @exceptions.FastMCPError,
 ) -> Resource {
   {
     component: @component.ComponentBase::new(
@@ -70,6 +74,7 @@ pub fn Resource::new(
     mime_type,
     annotations,
     read_fn,
+    context_read_fn,
   }
 }
 
@@ -147,6 +152,7 @@ pub fn Resource::from_function(
   tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   annotations? : @types.Annotations,
+  context_read_fn? : async (@context.Context) -> RawResourceValue raise @exceptions.FastMCPError,
 ) -> Resource {
   Resource::new(
     uri,
@@ -160,6 +166,7 @@ pub fn Resource::from_function(
     tags~,
     meta?,
     annotations?,
+    context_read_fn?,
   )
 }
 
@@ -183,6 +190,19 @@ pub fn Resource::convert_result(
     mime_type=self.mime_type,
     meta?=self.component.meta,
   )
+}
+
+///|
+/// Read the resource in the request it serves. A resource registered from a
+/// function that wants no context ignores it.
+pub async fn Resource::read_with(
+  self : Resource,
+  context : @context.Context,
+) -> RawResourceValue raise @exceptions.FastMCPError {
+  match self.context_read_fn {
+    Some(read) => read(context)
+    None => self.read()
+  }
 }
 
 ///|

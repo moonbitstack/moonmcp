@@ -7,6 +7,15 @@ pub(all) enum Scope {
 } derive(Eq, Debug)
 
 ///|
+/// The same scope as the wire names it.
+pub fn Scope::to_cache_scope(self : Scope) -> @types.CacheScope {
+  match self {
+    Public => @types.Public
+    Private => @types.Private
+  }
+}
+
+///|
 pub extend Scope with Eq::{equal, not_equal}
 
 ///|
@@ -36,6 +45,7 @@ pub struct Server {
   priv resources : Map[String, @resources.Resource]
   priv templates : Array[@resources.ResourceTemplate]
   priv prompts : Map[String, @prompts.Prompt]
+  priv watchers : Map[String, Watcher]
 }
 
 ///|
@@ -57,6 +67,7 @@ pub fn Server::new(
     resources: Map([]),
     templates: [],
     prompts: Map([]),
+    watchers: Map([]),
   }
 }
 
@@ -232,6 +243,147 @@ pub fn Server::prompt(
       title?,
       description?,
       arguments~,
+    ),
+  )
+}
+
+///|
+/// Offer a tool that also sees the request it serves (← FastMCP's `Context`
+/// parameter): its identity in `_meta`, the headers that carried it, the
+/// progress token it offered, and whatever the client answered on a retry.
+///
+/// The handler answers with a `ToolResult`. An ordinary one carries content;
+/// `ToolResult::input_required` carries an ask instead, which the client
+/// satisfies and then sends the same call again with `inputResponses` and
+/// `requestState`, or with an answer if it cannot.
+pub fn Server::tool_context(
+  self : Server,
+  name : String,
+  run : async (Map[String, Json], @context.Context) -> @tools.ToolResult,
+  input_schema~ : Json = { "type": "object" },
+  title? : String,
+  description? : String,
+  output_schema? : Json,
+  annotations? : @types.ToolAnnotations,
+) -> Unit {
+  let shape = @tools.Tool::new(
+    name,
+    parameters=input_schema,
+    run_fn=_ => @tools.ToolResult::new(),
+    title?,
+    description?,
+    output_schema?,
+    annotations?,
+  ) catch {
+    e => abort("tool '\{name}': \{text_of(e)}")
+  }
+  self.add_tool({
+    ..shape,
+    context_run_fn: Some(async fn(
+      args,
+      context,
+    ) raise @exceptions.FastMCPError {
+      run(args, context) catch {
+        @exceptions.Mcp(data) => raise @exceptions.Mcp(data)
+        e => raise @exceptions.Tool(text_of(e))
+      }
+    }),
+  })
+}
+
+///|
+/// Offer a resource whose reader sees the request it serves. A read that needs
+/// something from the client answers with `ResourceResult::input_required`
+/// instead of contents.
+pub fn Server::resource_context(
+  self : Server,
+  uri : String,
+  read : async (@context.Context) -> @resources.RawResourceValue,
+  name? : String,
+  title? : String,
+  description? : String,
+  mime_type~ : String = "text/plain",
+) -> Unit {
+  self.add_resource(
+    @resources.Resource::from_function(
+      uri,
+      read_fn=() => Text(""),
+      name?,
+      title?,
+      description?,
+      mime_type~,
+      context_read_fn=async fn(context) raise @exceptions.FastMCPError {
+        read(context) catch {
+          @exceptions.Mcp(data) => raise @exceptions.Mcp(data)
+          @exceptions.NotFound(m) => raise @exceptions.NotFound(m)
+          e => raise @exceptions.Resource(text_of(e))
+        }
+      },
+    ),
+  )
+}
+
+///|
+/// Offer the resources an RFC 6570 template names, read in the request that
+/// matched them.
+pub fn Server::template_context(
+  self : Server,
+  uri_template : String,
+  read : async (Map[String, Json], @context.Context) -> @resources.RawResourceValue,
+  name? : String,
+  title? : String,
+  description? : String,
+  mime_type~ : String = "text/plain",
+) -> Unit {
+  let properties : Map[String, Json] = Map([])
+  for param in @resources.parse_template_params(uri_template) {
+    properties[param] = { "type": "string" }
+  }
+  let template = @resources.ResourceTemplate::new(
+    uri_template,
+    parameters={ "type": "object", "properties": Json(properties) },
+    read_fn=_ => Text(""),
+    name?,
+    title?,
+    description?,
+    mime_type~,
+    context_read_fn=async fn(params, context) raise @exceptions.FastMCPError {
+      read(params, context) catch {
+        @exceptions.Mcp(data) => raise @exceptions.Mcp(data)
+        @exceptions.NotFound(m) => raise @exceptions.NotFound(m)
+        e => raise @exceptions.Resource(text_of(e))
+      }
+    },
+  ) catch {
+    e => abort("resource template '\{uri_template}': \{text_of(e)}")
+  }
+  self.add_template(template)
+}
+
+///|
+/// Offer a prompt whose renderer sees the request it serves.
+pub fn Server::prompt_context(
+  self : Server,
+  name : String,
+  render : async (Map[String, Json], @context.Context) -> @prompts.RenderedPrompt,
+  title? : String,
+  description? : String,
+  arguments~ : Array[@types.PromptArgument] = [],
+) -> Unit {
+  self.add_prompt(
+    @prompts.Prompt::new(
+      name,
+      render_fn=_ => @prompts.RenderedPrompt::Text(""),
+      title?,
+      description?,
+      arguments~,
+      context_render_fn=async fn(args, context) raise @exceptions.FastMCPError {
+        render(args, context) catch {
+          @exceptions.Mcp(data) => raise @exceptions.Mcp(data)
+          @exceptions.Validation(m) => raise @exceptions.Validation(m)
+          e => raise @exceptions.Prompt(text_of(e))
+        }
+      },
     ),
   )
 }

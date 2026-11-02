@@ -157,6 +157,9 @@ pub(all) struct Tool {
   /// Execution timeout in seconds; `None` applies no timeout.
   timeout : Double?
   run_fn : async (Map[String, Json]) -> ToolResult raise @exceptions.FastMCPError
+  /// The handler that also takes the request it serves; `None` when the tool
+  /// was registered from a function that wants only its arguments.
+  context_run_fn : (async (Map[String, Json], @context.Context) -> ToolResult raise @exceptions.FastMCPError)?
 }
 
 ///|
@@ -199,6 +202,7 @@ pub fn Tool::new(
   task_config~ : @tasks.TaskConfig = @tasks.TaskConfig::new(
     mode=@tasks.Forbidden,
   ),
+  context_run_fn? : async (Map[String, Json], @context.Context) -> ToolResult raise @exceptions.FastMCPError,
 ) -> Tool raise @exceptions.FastMCPError {
   if !is_valid_tool_name(name) {
     raise @exceptions.Validation(
@@ -223,6 +227,7 @@ pub fn Tool::new(
     execution,
     timeout,
     run_fn,
+    context_run_fn,
   }
 }
 
@@ -233,6 +238,20 @@ pub async fn Tool::run(
   arguments : Map[String, Json],
 ) -> ToolResult raise @exceptions.FastMCPError {
   (self.run_fn)(arguments)
+}
+
+///|
+/// Run the tool with arguments and the request it serves. A tool registered
+/// from a function that wants only its arguments ignores the context.
+pub async fn Tool::run_with(
+  self : Tool,
+  arguments : Map[String, Json],
+  context : @context.Context,
+) -> ToolResult raise @exceptions.FastMCPError {
+  match self.context_run_fn {
+    Some(run) => run(arguments, context)
+    None => self.run(arguments)
+  }
 }
 
 ///|

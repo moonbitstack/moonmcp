@@ -2,6 +2,11 @@
 // mirrors its version, method and name into headers so that intermediaries can
 // route without reading the body; the server checks that the two agree before
 // it trusts either.
+//
+// A request that has something to say before its answer — progress reports, a
+// log line, or a subscription that stays open — is answered with an SSE stream
+// instead of one JSON object. Which of the two a client gets is decided before
+// the message is served, from what the request asks for and what it accepts.
 
 ///|
 /// The server as an ASGI application serving the MCP endpoint at `path`
@@ -12,6 +17,11 @@
 /// notification. Sessions, the `GET` stream and `DELETE` belong to the
 /// revisions before 2026-07-28 and are optional there; this server keeps no
 /// session, so `GET` and `DELETE` answer `405`.
+///
+/// A 2026-07-28 request that offers a progress token, or that opens a
+/// subscription, is answered with `text/event-stream` when the client accepts
+/// it: the notifications the handler sends arrive on that stream, and the
+/// reply ends it.
 ///
 /// A request whose `Origin` header names another site is refused with `403`, as
 /// the transport requires against DNS rebinding. An origin passes when its host
@@ -34,13 +44,21 @@ pub fn Server::to_asgi(
     match scope {
       Http(hs) => {
         let body = read_body(receive)
-        let (status, headers, payload) = match docs {
-          Some(page) if page != path && at_page(hs.path, page) =>
-            page_reply(hs.http_method, @docs.page(endpoint=path, theme~))
-          _ => self.over_http(hs, body, path, origins)
+        let page = match docs {
+          Some(page) if page != path && at_page(hs.path, page) => Some(page)
+          _ => None
         }
-        send(HttpResponseStart(status~, headers~, trailers=false))
-        send(HttpResponseBody(body=payload, more_body=false))
+        match page {
+          Some(_) => {
+            let (status, headers, payload) = page_reply(
+              hs.http_method,
+              @docs.page(endpoint=path, theme~),
+            )
+            send(HttpResponseStart(status~, headers~, trailers=false))
+            send(HttpResponseBody(body=payload, more_body=false))
+          }
+          None => self.over_http(hs, body, path, origins, send)
+        }
       }
       WebSocket(_) => send(WebSocketClose(code=1000, reason=""))
       Lifespan(_) =>
@@ -113,31 +131,39 @@ async fn Server::over_http(
   body : Bytes,
   path : String,
   origins : Array[String],
-) -> (Int32, Array[(String, String)], Bytes) {
+  send : @moonasgi.Send,
+) -> Unit {
   let plain = [("content-type", "text/plain; charset=utf-8")]
   if hs.path != path && hs.path != path + "/" {
-    return (404, plain, b"Not Found")
+    return reply_json(send, 404, plain, b"Not Found")
   }
   if header(hs.headers, "origin") is Some(origin) &&
     !allowed(origin, header(hs.headers, "host"), origins) {
-    return (403, plain, b"Forbidden")
+    return reply_json(send, 403, plain, b"Forbidden")
   }
   if hs.http_method != "POST" {
-    return (405, [("allow", "POST"), ..plain], b"Method Not Allowed")
+    return reply_json(
+      send,
+      405,
+      [("allow", "POST"), ..plain],
+      b"Method Not Allowed",
+    )
   }
   guard header(hs.headers, "content-type") is Some(kind) &&
     kind.to_lower().has_prefix("application/json") else {
-    return (415, plain, b"Unsupported Media Type")
+    return reply_json(send, 415, plain, b"Unsupported Media Type")
   }
   let message = @json.parse(@utf8.decode_lossy(body[:])) catch {
     _ =>
       return json_reply(
+        send,
         400,
         refusal(Json::null(), fail(parse_error, "Parse error")).1,
       )
   }
   if message is Array(_) {
     return json_reply(
+      send,
       400,
       refusal(Json::null(), fail(invalid_request, "Batches are not accepted")).1,
     )
@@ -146,19 +172,28 @@ async fn Server::over_http(
     Object(m) => m.get("id").unwrap_or(Json::null())
     _ => Json::null()
   }
-  let modern = message is Object(m) &&
-    m.get("params") is Some(Object(p)) &&
-    era_of(p) is Modern(_)
+  let modern = match message {
+    Object(m) => m.get("params") is Some(Object(p)) && era_of(p) is Modern(_)
+    _ => false
+  }
   let refused = if modern {
     self.check_headers(hs.headers, message)
   } else {
     legacy_header(hs.headers, message)
   }
   if refused is Some(f) {
-    return json_reply(400, refusal(id, f).1)
+    return json_reply(send, 400, refusal(id, f).1)
   }
-  match self.answer(message) {
-    None => (202, [], b"")
+  if modern && accepts_event_stream(hs.headers) && streams(message) {
+    return self.stream_http(hs, message, send)
+  }
+  let channel = Channel::new(
+    emit=fn(_) { () },
+    headers=header_map(hs.headers),
+    gone=fn() { false },
+  )
+  match self.answer(message, channel~) {
+    None => reply_json(send, 202, [], b"")
     Some((code, reply)) => {
       let status = match code {
         Some(c) if c == parse_error || c == invalid_request => 400
@@ -167,17 +202,133 @@ async fn Server::over_http(
         Some(c) if modern && c == method_not_found => 404
         _ => 200
       }
-      json_reply(status, reply)
+      json_reply(send, status, reply)
     }
   }
 }
 
 ///|
-fn json_reply(
+/// Whether the request has anything to send beside its answer, which is what
+/// makes the answer a stream: a progress token, or a subscription that stays
+/// open until the client lets go.
+fn streams(message : Json) -> Bool {
+  match method_of(message) {
+    Some(op) if op == @types.method_subscriptions_listen => true
+    _ =>
+      params_of(message).get("_meta") is Some(Object(meta)) &&
+      meta.get("progressToken") is Some(_)
+  }
+}
+
+///|
+/// Whether the client will take an SSE stream: the transport has it list both
+/// content types, and this server honours the listing rather than ignoring it.
+fn accepts_event_stream(headers : Array[(String, String)]) -> Bool {
+  match header(headers, "accept") {
+    Some(accept) => accept.contains("text/event-stream")
+    None => false
+  }
+}
+
+///|
+/// Serve one request as an SSE stream: the notifications its handler sends,
+/// then the reply, then the end of the stream.
+///
+/// A write that fails means the client has gone; the handler sees that through
+/// the context's own notice, which is what closes the connection in this
+/// revision, rather than any cancellation message.
+async fn Server::stream_http(
+  self : Server,
+  hs : @moonasgi.HttpScope,
+  message : Json,
+  send : @moonasgi.Send,
+) -> Unit {
+  let headers = [
+    ("content-type", "text/event-stream"),
+    ("cache-control", "no-store"),
+    ("x-accel-buffering", "no"),
+  ]
+  send(HttpResponseStart(status=200, headers~, trailers=false))
+  let mut alive = true
+  let frame = async fn(out : Json) {
+    if !alive {
+      return
+    }
+    send(HttpResponseBody(body=@utf8.encode(sse_frame(out)), more_body=true)) catch {
+      _ => alive = false
+    }
+  }
+  let channel = Channel::new(emit=frame, headers=header_map(hs.headers), gone=fn() {
+    !alive
+  })
+  match method_of(message) {
+    Some(op) if op == @types.method_subscriptions_listen =>
+      match request_id_of(message) {
+        Some(id) => {
+          self.serve_subscription(id, params_of(message), channel) catch {
+            _ => ()
+          }
+          let closed : Json = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "result": subscription_closed_result(id),
+          }
+          frame(closed) catch {
+            _ => ()
+          }
+        }
+        None => ()
+      }
+    _ =>
+      match self.answer(message, channel~) {
+        Some((_, reply)) => frame(reply) catch { _ => () }
+        None => ()
+      }
+  }
+  send(HttpResponseBody(body=b"", more_body=false)) catch {
+    _ => ()
+  }
+}
+
+///|
+/// One server-sent event carrying `message`. The stream serves JSON-RPC
+/// messages only, so the event name is fixed and no id is set: streams are not
+/// resumed.
+fn sse_frame(message : Json) -> String {
+  "event: message\ndata: " + message.stringify() + "\n\n"
+}
+
+///|
+/// Every header a request carried, keyed in lower case, as a handler reads
+/// them from its context.
+fn header_map(headers : Array[(String, String)]) -> Map[String, String] {
+  let map : Map[String, String] = Map([])
+  for pair in headers {
+    map[pair.0] = pair.1
+  }
+  map
+}
+
+///|
+async fn reply_json(
+  send : @moonasgi.Send,
+  status : Int32,
+  headers : Array[(String, String)],
+  body : Bytes,
+) -> Unit {
+  send(HttpResponseStart(status~, headers~, trailers=false))
+  send(HttpResponseBody(body~, more_body=false))
+}
+
+///|
+/// A JSON body with its status.
+async fn json_reply(
+  send : @moonasgi.Send,
   status : Int32,
   reply : Json,
-) -> (Int32, Array[(String, String)], Bytes) {
-  (
+) -> Unit {
+  reply_json(
+    send,
     status,
     [("content-type", "application/json")],
     @utf8.encode(reply.stringify()),

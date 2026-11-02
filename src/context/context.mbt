@@ -1,0 +1,252 @@
+// The request a handler is serving, handed to it beside its arguments: who
+// asked, for what, and the way back out to the client while the answer is
+// still being worked out.
+
+///|
+/// What one request says about itself: the revision it was sent under, the
+/// client's identity and capabilities, the progress token it offered, the
+/// headers that carried it, and the answers it brings back to an earlier leg.
+pub(all) struct Facts {
+  protocol_version : String
+  operation : String
+  request_id : Json
+  client_info : @types.Implementation?
+  client_capabilities : @types.ClientCapabilities?
+  progress_token : Json?
+  headers : Map[String, String]
+  input_responses : Map[String, Json]
+  request_state : String?
+} derive(Debug, Eq)
+
+///|
+/// The facts of a request that carries nothing but its own name, which is what
+/// a handler called straight from a program sees.
+pub fn Facts::new(
+  operation~ : String = "",
+  request_id~ : Json = Json::null(),
+  protocol_version~ : String = @types.latest_protocol_version,
+  client_info? : @types.Implementation,
+  client_capabilities? : @types.ClientCapabilities,
+  progress_token? : Json,
+  headers~ : Map[String, String] = Map([]),
+  input_responses~ : Map[String, Json] = Map([]),
+  request_state? : String,
+) -> Facts {
+  {
+    protocol_version,
+    operation,
+    request_id,
+    client_info,
+    client_capabilities,
+    progress_token,
+    headers,
+    input_responses,
+    request_state,
+  }
+}
+
+///|
+/// The request a tool, a resource or a prompt is serving: the facts above, and
+/// the two things a handler can do with the connection while it runs, report
+/// progress and ask whether the caller has gone away.
+///
+/// A `Context` is passed by the framework with every request; a handler called
+/// straight from a program gets `Context::quiet`, whose reports go nowhere.
+pub struct Context {
+  priv facts : Facts
+  priv emit : async (Json) -> Unit
+  priv gone : () -> Bool
+}
+
+///|
+/// Whether a message leaving a handler goes out at all, and whether the caller
+/// is still there. Both are supplied by the transport that carries the
+/// request; the defaults do nothing.
+pub fn Context::new(
+  facts~ : Facts,
+  emit~ : async (Json) -> Unit = fn(_) { () },
+  gone~ : () -> Bool = fn() { false },
+) -> Context {
+  { facts, emit, gone, }
+}
+
+///|
+/// A context for a call made without a connection: reports are dropped and the
+/// caller is always there.
+pub fn Context::quiet() -> Context {
+  Context::new(facts=Facts::new())
+}
+
+///|
+/// The facts this request was served with.
+pub fn Context::facts(self : Context) -> Facts {
+  self.facts
+}
+
+///|
+/// The protocol revision the request was sent under.
+pub fn Context::protocol_version(self : Context) -> String {
+  self.facts.protocol_version
+}
+
+///|
+/// The method that reached this handler, for example `tools/call`.
+pub fn Context::operation(self : Context) -> String {
+  self.facts.operation
+}
+
+///|
+/// The JSON-RPC id of the request, which a progress notification or a
+/// subscription echoes back.
+pub fn Context::request_id(self : Context) -> Json {
+  self.facts.request_id
+}
+
+///|
+/// Who the client says it is. Self-reported and unverified, of use for display
+/// and for logging, never for a permission decision.
+pub fn Context::client_info(self : Context) -> @types.Implementation? {
+  self.facts.client_info
+}
+
+///|
+/// What the client says it can do on this request. A request carries its own
+/// capabilities, so this is never inherited from an earlier one.
+pub fn Context::client_capabilities(
+  self : Context,
+) -> @types.ClientCapabilities? {
+  self.facts.client_capabilities
+}
+
+///|
+/// The token the client gave for progress reports, if it asked for any. A
+/// handler that reports progress without one is not answered, and the reports
+/// go nowhere.
+pub fn Context::progress_token(self : Context) -> Json? {
+  self.facts.progress_token
+}
+
+///|
+/// The value of the request header `name`, in lower case as ASGI carries it.
+/// Over stdio there are none.
+pub fn Context::header(self : Context, name : String) -> String? {
+  self.facts.headers.get(name)
+}
+
+///|
+/// Every header the request carried, keyed in lower case.
+pub fn Context::headers(self : Context) -> Map[String, String] {
+  self.facts.headers
+}
+
+///|
+/// The answers a client sent back with a retried request, keyed by the id the
+/// server gave each input request.
+pub fn Context::input_responses(self : Context) -> Map[String, Json] {
+  self.facts.input_responses
+}
+
+///|
+/// The opaque state the server asked the client to hand back on the retry, or
+/// `None` on the first leg.
+pub fn Context::request_state(self : Context) -> String? {
+  self.facts.request_state
+}
+
+///|
+/// Whether the caller said it no longer wants this answer. A long handler
+/// should stop; the framework drops whatever it returns.
+pub fn Context::is_cancelled(self : Context) -> Bool {
+  (self.gone)()
+}
+
+///|
+/// Report how far along the work is. Silent when the client gave no progress
+/// token, as the specification has it: a report the caller did not ask for is
+/// not sent.
+///
+/// `progress` grows towards `total`; a report without `total` says how much is
+/// done but not how much is left.
+pub async fn Context::report_progress(
+  self : Context,
+  progress~ : Double,
+  total? : Double,
+  message? : String,
+) -> Unit {
+  guard self.facts.progress_token is Some(token) else { return }
+  let params : Map[String, Json] = {
+    "progressToken": token,
+    "progress": Json::number(progress),
+  }
+  if total is Some(value) {
+    params["total"] = Json::number(value)
+  }
+  if message is Some(text) {
+    params["message"] = Json::string(text)
+  }
+  (self.emit)(notification(@types.notification_progress, params))
+}
+
+///|
+/// Report a log message to the client, at `level`, as `notifications/message`.
+/// It travels the same way progress does: on the stream of the request that
+/// caused it, and nowhere when the transport has no stream.
+pub async fn Context::log(
+  self : Context,
+  level~ : @types.LoggingLevel,
+  message~ : String,
+  logger? : String,
+  data? : Json,
+) -> Unit {
+  let params : Map[String, Json] = {
+    "level": Json::string(level.to_wire()),
+    "data": Json::string(message),
+  }
+  if logger is Some(name) {
+    params["logger"] = Json::string(name)
+  }
+  if data is Some(value) {
+    params["data"] = value
+  }
+  (self.emit)(notification(@types.notification_message, params))
+}
+
+///|
+/// A log message at `debug`.
+pub async fn Context::debug(self : Context, message : String) -> Unit {
+  self.log(level=@types.Debug, message~)
+}
+
+///|
+/// A log message at `info`.
+pub async fn Context::info(self : Context, message : String) -> Unit {
+  self.log(level=@types.Info, message~)
+}
+
+///|
+/// A log message at `warning`.
+pub async fn Context::warning(self : Context, message : String) -> Unit {
+  self.log(level=@types.Warning, message~)
+}
+
+///|
+/// A log message at `error`.
+pub async fn Context::error(self : Context, message : String) -> Unit {
+  self.log(level=@types.Error, message~)
+}
+
+///|
+/// One notification message, framed as the wire carries it.
+pub fn notification(operation : String, params : Map[String, Json]) -> Json {
+  {
+    "jsonrpc": "2.0",
+    "method": Json::string(operation),
+    "params": Json(params),
+  }
+}
+
+///|
+pub extend Facts with Debug::{to_repr}
+
+///|
+pub extend Facts with Eq::{not_equal, equal}

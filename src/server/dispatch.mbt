@@ -18,6 +18,12 @@ let version_key = "io.modelcontextprotocol/protocolVersion"
 let server_info_key = "io.modelcontextprotocol/serverInfo"
 
 ///|
+let client_info_key = "io.modelcontextprotocol/clientInfo"
+
+///|
+let client_capabilities_key = "io.modelcontextprotocol/clientCapabilities"
+
+///|
 let parse_error = -32700
 
 ///|
@@ -66,8 +72,26 @@ priv enum Era {
 /// low-level server's message loop). `None` is the answer to a notification.
 /// A message that is not JSON-RPC at all is answered with the error JSON-RPC
 /// prescribes, under a `null` id.
+///
+/// This is the form for a caller with no channel of its own, so a handler's
+/// progress reports and log messages are dropped. A transport that can carry
+/// them calls `handle_with`.
 pub async fn Server::handle(self : Server, message : Json) -> Json? {
-  match self.answer(message) {
+  match self.answer(message, channel=Channel::quiet()) {
+    Some((_, reply)) => Some(reply)
+    None => None
+  }
+}
+
+///|
+/// Answer one message over `channel`, which carries the request's headers and
+/// whatever the handlers send beside the reply.
+pub async fn Server::handle_with(
+  self : Server,
+  message : Json,
+  channel~ : Channel,
+) -> Json? {
+  match self.answer(message, channel~) {
     Some((_, reply)) => Some(reply)
     None => None
   }
@@ -76,7 +100,11 @@ pub async fn Server::handle(self : Server, message : Json) -> Json? {
 ///|
 /// The reply to `message` and the error code inside it, if it is an error;
 /// a transport maps the code to its own status.
-async fn Server::answer(self : Server, message : Json) -> (Int32?, Json)? {
+async fn Server::answer(
+  self : Server,
+  message : Json,
+  channel~ : Channel,
+) -> (Int32?, Json)? {
   guard message is Object(m) &&
     m.get("jsonrpc") is Some(String("2.0")) &&
     m.get("method") is Some(String(op)) else {
@@ -107,7 +135,8 @@ async fn Server::answer(self : Server, message : Json) -> (Int32?, Json)? {
     )
   }
   let era = era_of(params)
-  let result = self.dispatch(op, params, era) catch {
+  let context = context_of(op, id, params, channel)
+  let result = self.dispatch(op, params, era, context) catch {
     Fail(_) as f => return Some(refusal(id, f))
     e => return Some(refusal(id, fail(internal_error, "\{e}")))
   }
@@ -116,6 +145,56 @@ async fn Server::answer(self : Server, message : Json) -> (Int32?, Json)? {
     Legacy => result
   }
   Some((None, { "jsonrpc": "2.0", "id": id, "result": result }))
+}
+
+///|
+/// The request's facts, as its handler will see them.
+fn context_of(
+  op : String,
+  id : Json,
+  params : Map[String, Json],
+  channel : Channel,
+) -> @context.Context {
+  let meta = match params.get("_meta") {
+    Some(Object(meta)) => meta
+    _ => Map([])
+  }
+  let protocol_version = match meta.get(version_key) {
+    Some(String(version)) => version
+    _ => @types.latest_protocol_version
+  }
+  let client_info : @types.Implementation? = match meta.get(client_info_key) {
+    Some(value) => @json.from_json(value) catch { _ => None }
+    None => None
+  }
+  let client_capabilities : @types.ClientCapabilities? = match
+    meta.get(client_capabilities_key) {
+    Some(value) => @json.from_json(value) catch { _ => None }
+    None => None
+  }
+  let input_responses = match params.get("inputResponses") {
+    Some(Object(responses)) => responses
+    _ => Map([])
+  }
+  let request_state = match params.get("requestState") {
+    Some(String(state)) => Some(state)
+    _ => None
+  }
+  @context.Context::new(
+    facts=@context.Facts::new(
+      operation=op,
+      request_id=id,
+      protocol_version~,
+      client_info?,
+      client_capabilities?,
+      progress_token?=meta.get("progressToken"),
+      headers=channel.headers,
+      input_responses~,
+      request_state?,
+    ),
+    emit=channel.emit,
+    gone=channel.gone,
+  )
 }
 
 ///|
@@ -144,12 +223,28 @@ fn era_of(params : Map[String, Json]) -> Era {
 }
 
 ///|
+/// Whether a result is an ask for input rather than a finished answer: such a
+/// result carries the input requests or the state to hand back on the retry.
+fn is_input_ask(result : Json) -> Bool {
+  guard result is Object(obj) else { return false }
+  obj.contains("inputRequests") || obj.contains("requestState")
+}
+
+///|
 /// The fields every 2026-07-28 result carries: `resultType`, the server's
 /// identity in `_meta`, and on the cacheable ones the caching hints.
+///
+/// A result that asks for input says so in `resultType`, which is how a client
+/// knows to answer the input requests and send the call again rather than
+/// treat the reply as an answer.
 fn Server::stamp(self : Server, result : Json, op : String) -> Json {
   guard result is Object(r) else { return result }
   let out = r.copy()
-  out["resultType"] = "complete"
+  out["resultType"] = if is_input_ask(result) {
+    "input_required"
+  } else {
+    "complete"
+  }
   let meta = match r.get("_meta") {
     Some(Object(m)) => m.copy()
     _ => Map([])
@@ -163,21 +258,21 @@ fn Server::stamp(self : Server, result : Json, op : String) -> Json {
     | "resources/templates/list"
     | "resources/read"
     | "prompts/list") {
-    out["ttlMs"] = Json(self.ttl_ms)
-    out["cacheScope"] = match self.scope {
-      Public => "public"
-      Private => "private"
-    }
+    out["ttlMs"] = Json::number(self.ttl_ms.to_double())
+    out["cacheScope"] = Json::string(self.scope.to_cache_scope().to_wire())
   }
   Json(out)
 }
 
 ///|
+/// Which specification revision a request was served under, for the parts of
+/// the answer that differ between them.
 async fn Server::dispatch(
   self : Server,
   op : String,
   params : Map[String, Json],
   era : Era,
+  context : @context.Context,
 ) -> Json {
   if era is Modern(version) && !modern_versions.contains(version) {
     raise fail(unsupported_version, "Unsupported protocol version", data={
@@ -199,7 +294,7 @@ async fn Server::dispatch(
         ),
       }
     }
-    ("tools/call", _) => self.call_tool(params)
+    ("tools/call", _) => self.call_tool(params, context)
     ("resources/list", _) => {
       no_cursor(params)
       {
@@ -219,7 +314,7 @@ async fn Server::dispatch(
         ),
       }
     }
-    ("resources/read", _) => self.read_resource(params, era)
+    ("resources/read", _) => self.read_resource(params, era, context)
     ("prompts/list", _) => {
       no_cursor(params)
       {
@@ -228,7 +323,7 @@ async fn Server::dispatch(
         ),
       }
     }
-    ("prompts/get", _) => self.get_prompt(params)
+    ("prompts/get", _) => self.get_prompt(params, context)
     _ => raise fail(method_not_found, "Method not found: \{op}")
   }
 }
@@ -282,9 +377,9 @@ fn Server::initialize(self : Server, params : Map[String, Json]) -> Json raise {
 ///|
 fn capabilities() -> Json {
   {
-    "tools": { "listChanged": false },
-    "resources": { "subscribe": false, "listChanged": false },
-    "prompts": { "listChanged": false },
+    "tools": { "listChanged": true },
+    "resources": { "subscribe": true, "listChanged": true },
+    "prompts": { "listChanged": true },
   }
 }
 
@@ -292,7 +387,15 @@ fn capabilities() -> Json {
 /// A call checked against the tool's input schema, then run. A wrong argument
 /// or a failing tool is a result marked `isError`, which the model reads and
 /// can correct itself from; only a tool that is not there is a protocol error.
-async fn Server::call_tool(self : Server, params : Map[String, Json]) -> Json {
+///
+/// A tool that asks for input instead of answering ends the leg with the ask,
+/// which the client answers by sending the same call with the answers and the
+/// state it was given.
+async fn Server::call_tool(
+  self : Server,
+  params : Map[String, Json],
+  context : @context.Context,
+) -> Json {
   guard params.get("name") is Some(String(name)) else {
     raise fail(invalid_params, "tools/call needs a name")
   }
@@ -316,12 +419,15 @@ async fn Server::call_tool(self : Server, params : Map[String, Json]) -> Json {
       )
     }
   }
-  let result = tool.run(args) catch {
+  let result = tool.run_with(args, context) catch {
     @exceptions.Mcp(data) =>
       raise fail(data.code, data.message, data?=data.data)
     e => return tool_error(text_of(e))
   }
-  result.to_mcp_result().to_json()
+  match result.input_required {
+    Some(ask) => ask.to_json()
+    None => result.to_mcp_result().to_json()
+  }
 }
 
 ///|
@@ -365,14 +471,15 @@ async fn Server::read_resource(
   self : Server,
   params : Map[String, Json],
   era : Era,
+  context : @context.Context,
 ) -> Json {
   guard params.get("uri") is Some(String(uri)) else {
     raise fail(invalid_params, "resources/read needs a uri")
   }
-  let result = if self.resources.get(uri) is Some(resource) {
-    resource.read_result() catch {
-      e => raise as_fail(e)
-    }
+  let result : @resources.ResourceResult = if self.resources.get(uri)
+    is Some(resource) {
+    let raw = resource.read_with(context) catch { e => raise as_fail(e) }
+    resource.convert_result(raw)
   } else {
     let mut found = None
     for template in self.templates {
@@ -391,15 +498,21 @@ async fn Server::read_resource(
       }
       raise fail(code, "Resource not found", data={ "uri": Json(uri) })
     }
-    template.read_result(uri, args) catch {
-      e => raise as_fail(e)
-    }
+    let raw = template.read_with(args, context) catch { e => raise as_fail(e) }
+    template.convert_result(raw)
   }
-  result.to_mcp_result(uri).to_json()
+  match result.input_required {
+    Some(ask) => ask.to_json()
+    None => result.to_mcp_result(uri).to_json()
+  }
 }
 
 ///|
-async fn Server::get_prompt(self : Server, params : Map[String, Json]) -> Json {
+async fn Server::get_prompt(
+  self : Server,
+  params : Map[String, Json],
+  context : @context.Context,
+) -> Json {
   guard params.get("name") is Some(String(name)) else {
     raise fail(invalid_params, "prompts/get needs a name")
   }
@@ -411,6 +524,12 @@ async fn Server::get_prompt(self : Server, params : Map[String, Json]) -> Json {
     None | Some(Null) => Map([])
     Some(_) => raise fail(invalid_params, "arguments must be an object")
   }
-  let rendered = prompt.render_result(args) catch { e => raise as_fail(e) }
-  rendered.to_mcp_prompt_result().to_json()
+  let rendered = prompt.render_with(args, context) catch {
+    e => raise as_fail(e)
+  }
+  let result = prompt.convert_result(rendered)
+  match result.input_required {
+    Some(ask) => ask.to_json()
+    None => result.to_mcp_prompt_result().to_json()
+  }
 }

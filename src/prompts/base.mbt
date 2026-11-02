@@ -99,6 +99,9 @@ pub(all) struct Prompt {
   /// Arguments that can be passed to the prompt.
   arguments : Array[@types.PromptArgument]?
   render_fn : async (Map[String, Json]) -> RenderedPrompt raise @exceptions.FastMCPError
+  /// The renderer that also takes the request it serves; `None` when the
+  /// prompt was registered from a function that wants only its arguments.
+  context_render_fn : (async (Map[String, Json], @context.Context) -> RenderedPrompt raise @exceptions.FastMCPError)?
 }
 
 ///|
@@ -133,6 +136,7 @@ pub fn Prompt::new(
   tags~ : @set.Set[String] = @set.Set::from_array([]),
   meta? : Map[String, Json],
   arguments? : Array[@types.PromptArgument],
+  context_render_fn? : async (Map[String, Json], @context.Context) -> RenderedPrompt raise @exceptions.FastMCPError,
 ) -> Prompt {
   {
     component: @component.ComponentBase::new(
@@ -147,6 +151,7 @@ pub fn Prompt::new(
     ),
     arguments,
     render_fn,
+    context_render_fn,
   }
 }
 
@@ -157,6 +162,20 @@ pub async fn Prompt::render(
   arguments : Map[String, Json],
 ) -> RenderedPrompt raise @exceptions.FastMCPError {
   (self.render_fn)(arguments)
+}
+
+///|
+/// Render the prompt in the request it serves. A prompt registered from a
+/// function that wants only its arguments ignores the context.
+pub async fn Prompt::render_with(
+  self : Prompt,
+  arguments : Map[String, Json],
+  context : @context.Context,
+) -> RenderedPrompt raise @exceptions.FastMCPError {
+  match self.context_render_fn {
+    Some(render) => render(arguments, context)
+    None => self.render(arguments)
+  }
 }
 
 ///|

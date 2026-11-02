@@ -3,11 +3,14 @@ package "moonbitstack/moonmcp"
 
 import {
   "moonbitlang/core/json",
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",
   "moonbitstack/moonmcp/prompts",
   "moonbitstack/moonmcp/resources",
   "moonbitstack/moonmcp/server",
   "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
 }
 
 // Values
@@ -15,16 +18,36 @@ pub fn[T : @json.FromJson] decode(Map[String, Json], String) -> T raise @json.Js
 
 pub fn[T : @json.FromJson] decode_option(Map[String, Json], String) -> T? raise @json.JsonDecodeError
 
+pub fn text_block(String) -> @types.ContentBlock
+
 // Errors
 
 // Types and methods
 
 // Type aliases
+pub using @types {type CacheScope}
+
+pub using @server {type Cancellations}
+
+pub using @server {type Channel}
+
+pub using @client {type Client}
+
+pub using @context {type Context}
+
+pub using @context {type Facts}
+
 pub using @exceptions {type FastMCPError}
+
+pub using @client {type Lines}
+
+pub using @client {type Memory}
 
 pub using @prompts {type Message}
 
 pub using @prompts {type Prompt}
+
+pub using @client {type Refused}
 
 pub using @resources {type Resource}
 
