@@ -38,6 +38,31 @@ pub fn server() -> @server.Server {
       "required": ["name"],
     },
   )
+  mcp.tool_context(
+    "count",
+    async fn(args : Map[String, Json], context : @context.Context) {
+      let up_to = match args.get("up_to") {
+        Some(Number(value, ..)) => value.to_int()
+        _ => 3
+      }
+      for i in 0..<up_to {
+        let step = i + 1
+        context.report_progress(
+          progress=step.to_double(),
+          total=(up_to + 1).to_double(),
+          message="step \{step}",
+        ) catch {
+          _ => ()
+        }
+      }
+      @tools.ToolResult::new(content=[@types.text_block("counted to \{up_to}")])
+    },
+    description="Count to a number, reporting progress as it goes",
+    input_schema={
+      "type": "object",
+      "properties": { "up_to": { "type": "number" } },
+    },
+  )
   mcp.resource(
     "config://app",
     () => "{\"theme\":\"dark\"}",

@@ -380,7 +380,7 @@ writes the configuration above.
 
 | Example | Shows |
 |:--|:--|
-| [`demo`](src/examples/demo/) | One server with two tools, a resource, a resource template and a prompt |
+| [`demo`](src/examples/demo/) | One server with three tools, a resource, a resource template and a prompt; one tool reports progress |
 | [`http`](src/examples/http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/http --target native` |
 | [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
 | [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
