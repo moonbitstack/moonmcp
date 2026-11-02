@@ -10,6 +10,8 @@ pub(all) struct FastMCPMeta {
 } derive(Debug, Eq)
 
 ///|
+/// No tags and no versions: what a component without metadata of its own
+/// carries.
 pub fn FastMCPMeta::empty() -> FastMCPMeta {
   { tags: [], version: None, versions: [], }
 }

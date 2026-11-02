@@ -39,6 +39,8 @@ pub fn Memory::new(server : @server.Server) -> Memory {
 }
 
 ///|
+/// Ask the server in this program. Nothing carried the message, so its
+/// handlers see no headers and no client identity.
 pub impl Transport for Memory with fn ask(
   self : Memory,
   message : Json,
@@ -64,6 +66,7 @@ pub impl Transport for Memory with fn ask(
 }
 
 ///|
+/// Hand a notification to the server; nothing comes back.
 pub impl Transport for Memory with fn tell(self : Memory, message : Json) -> Unit {
   let channel = @server.Channel::new(emit=fn(_) { () }, headers=Map([]), gone=fn() {
     false
@@ -72,6 +75,8 @@ pub impl Transport for Memory with fn tell(self : Memory, message : Json) -> Uni
 }
 
 ///|
+/// Open a subscription on the server and hand its notifications on until
+/// the stream ends.
 pub impl Transport for Memory with fn listen(
   self : Memory,
   message : Json,
@@ -87,6 +92,7 @@ pub impl Transport for Memory with fn listen(
 }
 
 ///|
+/// Nothing to let go: the server is in this process.
 pub impl Transport for Memory with fn close(_self : Memory) -> Unit {
   ()
 }
@@ -115,6 +121,8 @@ pub fn Lines::new(
 }
 
 ///|
+/// Write the request and read until the reply carrying its id arrives,
+/// handing every other message to `on_notification`.
 pub impl Transport for Lines with fn ask(
   self : Lines,
   message : Json,
@@ -150,8 +158,7 @@ pub impl Transport for Lines with fn ask(
 }
 
 ///|
-
-///|
+/// Write one notification; nothing is read back.
 pub impl Transport for Lines with fn tell(self : Lines, message : Json) -> Unit {
   self.lock.acquire()
   defer self.lock.release()
@@ -159,6 +166,8 @@ pub impl Transport for Lines with fn tell(self : Lines, message : Json) -> Unit 
 }
 
 ///|
+/// Write the listen request and hand on every message of the stream, until
+/// the reply that closes it.
 pub impl Transport for Lines with fn listen(
   self : Lines,
   message : Json,
@@ -187,6 +196,7 @@ pub impl Transport for Lines with fn listen(
 }
 
 ///|
+/// Nothing to let go: the streams belong to whoever made them.
 pub impl Transport for Lines with fn close(_self : Lines) -> Unit {
   ()
 }

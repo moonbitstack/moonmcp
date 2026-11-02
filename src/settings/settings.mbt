@@ -18,9 +18,11 @@ fn to_lower_ascii(value : String) -> String {
 }
 
 ///|
+/// The largest inline content this library accepts: ten mebibytes.
 pub let ten_mb_in_bytes : Int32 = 1024 * 1024 * 10
 
 ///|
+/// How much a server says about its own work, from debug to critical.
 pub(all) enum LogLevel {
   Debug
   Info
@@ -41,6 +43,7 @@ pub fn LogLevel::to_wire(self : LogLevel) -> String {
 }
 
 ///|
+/// The log level a settings file names, or `None` for an unknown one.
 pub fn log_level_from_wire(value : String) -> LogLevel? {
   match to_upper_ascii(value) {
     "DEBUG" => Some(Debug)
@@ -70,6 +73,7 @@ pub fn TelemetryMode::to_wire(self : TelemetryMode) -> String {
 }
 
 ///|
+/// The telemetry mode a settings file names, or `None` for an unknown one.
 pub fn telemetry_mode_from_wire(value : String) -> TelemetryMode? {
   match value {
     "native" => Some(Native)
@@ -80,6 +84,7 @@ pub fn telemetry_mode_from_wire(value : String) -> TelemetryMode? {
 }
 
 ///|
+/// The transport a client configuration names for a server.
 pub(all) enum TransportKind {
   Stdio
   Http
@@ -98,6 +103,8 @@ pub fn TransportKind::to_wire(self : TransportKind) -> String {
 }
 
 ///|
+/// The transport a settings file or a client configuration names, or `None`
+/// for one this library does not speak.
 pub fn transport_kind_from_wire(value : String) -> TransportKind? {
   match value {
     "stdio" => Some(Stdio)
@@ -109,6 +116,7 @@ pub fn transport_kind_from_wire(value : String) -> TransportKind? {
 }
 
 ///|
+/// When the tool looks for a newer version of itself.
 pub(all) enum CheckForUpdates {
   Stable
   Prerelease
@@ -116,6 +124,7 @@ pub(all) enum CheckForUpdates {
 } derive(Debug, Eq)
 
 ///|
+/// How long an idle session is kept: the server's choice, never, or a number of seconds.
 pub(all) enum SessionIdleTimeout {
   Auto
   Never
@@ -133,6 +142,8 @@ pub fn SessionIdleTimeout::to_wire(self : SessionIdleTimeout) -> String {
 }
 
 ///|
+/// The idle timeout a settings file names: a number of seconds, or the
+/// words this library knows.
 pub fn session_idle_timeout_from_wire(value : String) -> SessionIdleTimeout? {
   match to_lower_ascii(value) {
     "auto" => Some(Auto)

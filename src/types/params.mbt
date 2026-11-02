@@ -39,6 +39,7 @@ pub impl FromJson for Reference with fn from_json(
 }
 
 ///|
+/// One argument offered for completion: which argument it is, and the value to complete.
 pub(all) struct CompletionArgument {
   name : String
   value : String
@@ -67,6 +68,7 @@ pub impl FromJson for CompletionArgument with fn from_json(
 }
 
 ///|
+/// What the completion request is about: the argument being completed and the text around it.
 pub(all) struct CompletionContext {
   reference : Reference
   argument : CompletionArgument

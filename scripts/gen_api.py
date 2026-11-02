@@ -168,29 +168,41 @@ def parse_source_comments(path):
             i += 1
             continue
         if s.startswith("pub") or s.startswith("pub("):
-            # gather the signature up to its opening brace
+            # Gather the signature up to its opening brace. A signature already
+            # closed on its first line must not swallow the body's braces, or
+            # the scan loses every declaration that follows it.
             sig = s
-            j = i + 1
-            while j < len(lines):
-                ns = lines[j].strip()
-                if "{" in ns and not ns.startswith("//"):
-                    pre = ns.split("{", 1)[0].strip()
-                    if pre:
-                        sig += " " + pre
+            j = i
+            while ("{" not in sig and " = " not in sig and j + 1 < len(lines)):
+                ns = lines[j + 1].strip()
+                if ns.startswith("//") or ns.startswith("pub"):
                     break
-                if ns.startswith("//"):
-                    break
-                sig += " " + ns
                 j += 1
+                sig += " " + ns
+            sig = sig.split("{", 1)[0].split(" = ", 1)[0]
             _, name = classify(sig)
             key = name
-            mm = re.search(r"::([A-Za-z_][A-Za-z0-9_]*)\s*\(", sig)
-            if mm:
-                key = mm.group(1)
-            if key and doc:
-                docs[key] = " ".join(d.strip() for d in doc).strip()
+            own = re.search(
+                r"([A-Za-z_][A-Za-z0-9_]*)\s*::\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+                sig)
+            if own:
+                key = own.group(1) + "::" + own.group(2)
+            else:
+                # `pub impl Trait for Type with fn method(` documents
+                # `Type::method`, the name the interface lists it under.
+                impl = re.search(
+                    r"\bimpl\b.*?\bfor\s+(@?[A-Za-z_][\w.]*)\s+with\s+fn\s+([A-Za-z_]\w*)\s*\(",
+                    sig)
+                if impl:
+                    key = impl.group(1).split(".")[-1] + "::" + impl.group(2)
+            # A `///|` separator on its own is not a description; leaving it
+            # out keeps a bare separator from overwriting the real doc an
+            # earlier file gave a method of the same name.
+            text = " ".join(d.strip() for d in doc).strip()
+            if key and text:
+                docs[key] = text
             doc = []
-            i = j
+            i = j if j > i else i + 1
             continue
         doc = []
         i += 1
@@ -248,9 +260,21 @@ AUTO = {
     "default_title": "A title derived from a tool name.",
 }
 
+IMPL = re.compile(
+    r"impl(?:\s*\[[^\]]*\])?\s+(@?[A-Za-z_][\w.]*)\s+for\s+(@?[A-Za-z_][\w.]*)")
+TRAIT_ITEM = re.compile(r"^pub\(open\)\s+trait\s+(\w+)")
+
+
 def auto_desc(kind, name, sig):
     if name in AUTO:
         return AUTO[name]
+    found = IMPL.search(sig)
+    if found:
+        return "The `%s` implementation for `%s`." % (found.group(1), found.group(2))
+    found = TRAIT_ITEM.match(sig)
+    if found:
+        return "A contract a transport implements to carry the client's messages."
+
     if kind == "struct":
         return "A data shape. The fields below are its wire and in-memory members."
     if kind == "enum":
@@ -261,7 +285,7 @@ def auto_desc(kind, name, sig):
         return "A constant value."
     if kind == "alias":
         return "A re-exported name, defined in another package."
-    return "A public item of this server framework."
+    return None
 
 def tint(sig):
     s = html.escape(sig)
@@ -341,13 +365,18 @@ def main():
                     have.add((kind, name))
         rows = []
         for kind, sig, name in items:
-            d = docs.get(name)
-            if d is None:
-                d = docs.get(sig.split("::")[-1].split("(")[0]) if "::" in sig else None
+            owned = re.search(
+                r"([A-Za-z_][A-Za-z0-9_]*)\s*::\s*([A-Za-z_][A-Za-z0-9_]*)", sig)
+            d = docs.get(owned.group(1) + "::" + owned.group(2)) if owned else docs.get(name)
             if d:
                 covered += 1
             else:
                 d = auto_desc(kind, name, sig)
+                if d is None:
+                    raise SystemExit(
+                        "gen_api: %s lists `%s` with no doc comment and no "
+                        "description this generator can derive; write one in "
+                        "the source" % (pkgname, sig))
             rows.append((kind, sig, d))
         total += len(items)
         sections.append((pkgname, title, desc, rows))

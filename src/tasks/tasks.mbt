@@ -6,9 +6,11 @@
 pub let tasks_extension_id : String = "io.modelcontextprotocol/tasks"
 
 ///|
+/// How often a task is polled when the caller says nothing: five seconds.
 pub let default_poll_interval_ms : Int32 = 5000
 
 ///|
+/// How long a task's result is kept when the caller says nothing: one minute.
 pub let default_ttl_ms : Int32 = 60000
 
 ///|
@@ -29,6 +31,8 @@ pub fn TaskMode::to_wire(self : TaskMode) -> String {
 }
 
 ///|
+/// The task mode a wire string names, or `None` for one this library does
+/// not offer.
 pub fn task_mode_from_wire(value : String) -> TaskMode? {
   match value {
     "forbidden" => Some(Forbidden)

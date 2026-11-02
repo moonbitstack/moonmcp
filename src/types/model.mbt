@@ -556,6 +556,8 @@ pub fn Role::to_wire(self : Role) -> String {
 }
 
 ///|
+/// The author a message names, or `None` for one that is neither the client
+/// nor the server.
 pub fn role_from_wire(value : String) -> Role? {
   match value {
     "user" => Some(User)
@@ -565,6 +567,7 @@ pub fn role_from_wire(value : String) -> Role? {
 }
 
 ///|
+/// One message of a sampling conversation, as the client's model is shown it.
 pub(all) struct SamplingMessage {
   role : Role
   content : ContentBlock
@@ -602,6 +605,7 @@ pub(all) struct ModelHint {
 } derive(Debug, Eq)
 
 ///|
+/// What a client prefers of a model: named hints, and the weight it gives cost and speed.
 pub(all) struct ModelPreferences {
   hints : Array[ModelHint]?
   cost_priority : Double?

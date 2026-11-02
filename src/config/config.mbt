@@ -143,6 +143,7 @@ pub(all) struct ServerTransform {
 } derive(Debug, Eq)
 
 ///|
+/// The HTTP transports a client configuration may name.
 pub(all) enum RemoteTransport {
   Http
   StreamableHttp
@@ -170,6 +171,7 @@ pub(all) enum MCPServerKind {
 } derive(Debug, Eq)
 
 ///|
+/// One server in a client configuration: how to reach it, and what to hand it when it starts.
 pub(all) struct MCPServerEntry {
   kind : MCPServerKind
   /// Per-request timeout in milliseconds; zero disables it.
