@@ -39,10 +39,14 @@
       <div class="group">Capabilities</div>
       <a href="#resources">Resources &amp; templates</a>
       <a href="#prompts">Prompts</a>
+      <a href="#context">Request context</a>
       <div class="group">Run it</div>
       <a href="#transports">Transports</a>
+      <a href="#streams">Progress &amp; subscriptions</a>
+      <a href="#mrtr">Ask the client</a>
       <a href="#debug">Debug page</a>
       <a href="#client">Connect a client</a>
+      <a href="#reach">Reach a server from MoonBit</a>
     </nav>
     <div class="side-foot" style="margin-top:1.4rem">
       <a class="ghost" href="index.html">Home</a>
@@ -176,6 +180,34 @@ fn review(code : String, focus? : String) -> String {
       </div>
     </section>
 
+    <section class="section" id="context">
+      <h2>Request context</h2>
+      <p class="pdesc">A handler that needs to know who is calling, or to report while it works, is registered with <code>tool_context</code>. The <code>Context</code> is the request itself: its headers, the client's identity, its progress token, and the answers it sent back on a retry.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.tool_context(
+  "summarise",
+  async fn(args : Map[String, Json], context : @context.Context) {
+    let tenant = context.header("x-tenant").unwrap_or("public")
+    context.report_progress(progress=0.0, total=1.0, message="reading") catch {
+      _ =&gt; ()
+    }
+    let text = match args.get("text") {
+      Some(String(text)) =&gt; text
+      _ =&gt; ""
+    }
+    context.report_progress(progress=1.0, total=1.0) catch { _ =&gt; () }
+    @tools.ToolResult::new(content=[
+      @types.text_block("\{tenant}: \{text.length()} characters"),
+    ])
+  },
+)</code></pre><button class="copy" type="button">copy</button></div>
+      <p>Resources and prompts take the same shape through <code>resource_context</code>, <code>template_context</code> and <code>prompt_context</code>. A handler registered without them ignores the context, so the older calls keep working unchanged.</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">on a Context</div><div class="body"><code>header("x-tenant")</code> &middot; <code>client_info()</code> &middot; <code>progress_token()</code> &middot; <code>is_cancelled()</code> &middot; <code>input_responses()</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">sends</div><div class="body"><code>report_progress(progress=, total=, message=)</code> &middot; <code>log(level=, message=)</code> &middot; <code>info</code>, <code>warning</code>, <code>error</code></div></div>
+      </div>
+    </section>
+
     <section class="section" id="transports">
       <h2>Choose a transport</h2>
       <p class="pdesc">One server, two ways to speak. <code>to_asgi</code> gives an ASGI application to serve over Streamable HTTP; <code>run_stdio</code> speaks line-delimited JSON on standard input and output, and is built on <code>serve_lines</code>, which takes any pair of streams.</p>
@@ -198,6 +230,60 @@ fn review(code : String, focus? : String) -> String {
 }</code></pre></div>
           <p style="color:var(--sheet-muted);font-size:.92rem;margin:.6rem 0 0">Standard input and output, one JSON-RPC message per line &mdash; the shape every MCP client launches.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="streams">
+      <h2>Progress &amp; subscriptions</h2>
+      <p class="pdesc">A 2026&#8209;07&#8209;28 request that offers a progress token is answered with <code>text/event-stream</code>: what the handler reports arrives on that stream, and the reply ends it. The same stream carries a subscription, which stays open for the changes the client opted in to.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.tool_context("count", async fn(_args : Map[String, Json], context : @context.Context) {
+  context.report_progress(progress=1.0, total=2.0, message="half way") catch {
+    _ =&gt; ()
+  }
+  @tools.ToolResult::new(content=[@types.text_block("done")])
+})
+// a change, announced to whoever asked for it
+mcp.notify_tools_changed()
+mcp.notify_resource_updated("config://app")</code></pre><button class="copy" type="button">copy</button></div>
+      <p>Registering a tool, a resource or a prompt sends the matching list-changed notification by itself. A subscription names what it wants a notification for, and hears nothing else:</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">listen</div><div class="body"><code>subscriptions/listen &middot; { "notifications": { "toolsListChanged": true } }</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">stream</div><div class="body"><code>notifications/subscriptions/acknowledged</code> &middot; <code>notifications/tools/list_changed</code></div></div>
+      </div>
+      <p>Closing the stream on the HTTP side is the cancellation signal: a handler that is still working sees <code>is_cancelled()</code> answer the next time it reports. Over stdio the client says so with <code>notifications/cancelled</code>, naming the request.</p>
+    </section>
+
+    <section class="section" id="mrtr">
+      <h2>Ask the client</h2>
+      <p class="pdesc">A handler that cannot finish without something from the client says so instead of answering. The client answers, then sends the same call again with <code>inputResponses</code> and the <code>requestState</code> it was handed.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.tool_context("greet", async fn(_args : Map[String, Json], context : @context.Context) {
+  match context.input_responses().get("name") {
+    Some(String(name)) =&gt;
+      @tools.ToolResult::new(content=[@types.text_block("hello " + name)])
+    _ =&gt;
+      @tools.ToolResult::input_required({
+        input_requests: [
+          {
+            id: "name",
+            request: {
+              "method": Json::string("elicitation/create"),
+              "params": {
+                "message": Json::string("Your name?"),
+                "requestedSchema": { "type": "object" },
+              },
+            },
+          },
+        ],
+        request_state: Some("greeting"),
+        meta: None,
+      })
+  }
+})</code></pre><button class="copy" type="button">copy</button></div>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">first leg</div><div class="body"><code>{ "resultType": "input_required", "inputRequests": [ &hellip; ], "requestState": "greeting" }</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">retry</div><div class="body"><code>{ "name": "greet", "inputResponses": { "name": "Ada" }, "requestState": "greeting" }</code></div></div>
       </div>
     </section>
 
@@ -224,6 +310,26 @@ let plain = mcp.to_asgi(path="/mcp", theme=Plain)        // a neutral look</code
   }
 }</code></pre></div>
       <p>Point <code>command</code> at the binary produced by <code>moon build --target native</code> for an example that calls <code>run_stdio()</code>. The server speaks the 2025&#8209;11&#8209;25 handshake on stdio; over HTTP it also answers the 2026&#8209;07&#8209;28 stateless era when the client names it in <code>_meta</code>.</p>
+    </section>
+
+
+    <section class="section" id="reach">
+      <h2>Reach a server from MoonBit</h2>
+      <p class="pdesc">The client speaks the same protocol from the other end, over an in-memory server, a pair of line streams, or HTTP &mdash; and returns the same types the server takes.</p>
+      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
+mcp.tool("add", args =&gt; {
+  guard args.get("a") is Some(Number(a, ..)) else { raise @exceptions.Tool("a?") }
+  { "sum": Json(a) }
+})
+let client = @client.Client::connect(
+  @client.Memory::new(mcp),
+  protocol_version="2026-07-28",
+)
+let tools = client.list_tools()
+let reply = client.call_tool("add", arguments={ "a": 2 })
+let sum = reply.structured_content.unwrap().get("sum").unwrap()
+println("\{tools.length()} tools, sum \{sum.stringify()}")</code></pre><button class="copy" type="button">copy</button></div>
+      <p>A transport is four methods &mdash; <code>ask</code>, <code>tell</code>, <code>listen</code> and <code>close</code> &mdash; so a connection of your own plugs in without touching the client. The client fills in <code>_meta</code>, keeps the request ids, and runs the handshake when the revision it was given needs one.</p>
     </section>
 
     <footer class="site">

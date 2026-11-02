@@ -134,24 +134,194 @@ async fn main {
 | `template(uri_template, read)` | Every resource an RFC 6570 template names; `read` gets the matched parameters. |
 | `prompt(name, render, arguments=)` | A prompt rendered as one user message. |
 | `add_tool`, `add_resource`, `add_template`, `add_prompt` | A component built in full with `Tool::new`, `Resource::new`, `ResourceTemplate::new` or `Prompt::new`. |
+| `tool_context`, `resource_context`, `template_context`, `prompt_context` | The same, with the request handed to the handler as a `Context`. |
 
 Arguments are checked against the tool's input schema (JSON Schema 2020-12)
 before the handler runs. A wrong argument or an error the handler raises comes
 back as a result marked `isError`, which the model reads and can correct itself
 from; only a tool that does not exist is a protocol error.
 
+## Request context
+
+A handler that needs to know who is calling, or to report while it works, is
+registered with the context-taking call. The `Context` carries the request's
+headers, the client's identity and capabilities, its progress token, the
+answers it sent back on a retry, and whether it has withdrawn the request.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.tool_context(
+    "summarise",
+    async fn(args : Map[String, Json], context : @context.Context) {
+      let tenant = context.header("x-tenant").unwrap_or("public")
+      context.report_progress(progress=0.0, total=1.0, message="reading") catch {
+        _ => ()
+      }
+      let text = match args.get("text") {
+        Some(String(text)) => text
+        _ => ""
+      }
+      context.report_progress(progress=1.0, total=1.0) catch { _ => () }
+      @moonmcp.ToolResult::new(
+        content=[@moonmcp.text_block("\{tenant}: \{text.length()} characters")],
+      )
+    },
+  )
+}
+```
+
+| On a `Context` | Gives |
+|:--|:--|
+| `header(name)`, `headers()` | The request's headers, in lower case. Empty over stdio. |
+| `client_info()`, `client_capabilities()` | What the client says it is and can do, from `_meta`. Self-reported, never a permission. |
+| `protocol_version()`, `operation()`, `request_id()` | Which request this is and which revision it came in. |
+| `progress_token()` | The token the client offered, if any. |
+| `report_progress(progress=, total=, message=)` | A `notifications/progress` on the request's own stream. Silent when no token was given. |
+| `log(level=, message=)`, `debug`, `info`, `warning`, `error` | A `notifications/message`. |
+| `is_cancelled()` | Whether the client withdrew the request. A long handler should stop. |
+| `input_responses()`, `request_state()` | What came back with a retried request. |
+
 ## Transports
 
 | Transport | Call | Notes |
 |:--|:--|:--|
-| Streamable HTTP | `to_asgi(path="/mcp", origins=[])` | An ASGI application. One POST per message, answered with one JSON object or `202`. Version, method and name headers are checked against the body; a foreign `Origin` is refused with `403`. `debug_page?` names a path the debug page is served at. |
-| stdio | `run_stdio()` | One message per line on standard input and output. Native. |
+| Streamable HTTP | `to_asgi(path="/mcp", origins=[])` | An ASGI application. One POST per message, answered with one JSON object, one SSE stream, or `202`. Version, method and name headers are checked against the body; a foreign `Origin` is refused with `403`. `docs=` names the path the documentation page is served at. |
+| stdio | `run_stdio()` | One message per line on standard input and output, answered as they arrive. Native. |
 | Any line stream | `serve_lines(read, write)` | The stdio loop over streams of your own. |
-| In process | `handle(message)` | One JSON-RPC message in, the reply out; `None` for a notification. |
+| In process | `handle(message)` | One JSON-RPC message in, the reply out; `None` for a notification. `handle_with(message, channel=)` carries headers and somewhere to put notifications. |
 
 Under revision 2026-07-28 every result carries `resultType` and the server's
 identity; list results also carry `ttlMs` and `cacheScope`, set with
-`Server::new(ttl_ms=, scope=)`.
+`Server::new(ttl_ms=, scope=)`. A result that asks for input carries
+`resultType: "input_required"` instead.
+
+## Progress and subscriptions
+
+A 2026-07-28 request that offers a progress token, or that opens a
+subscription, is answered with `text/event-stream` when the client accepts one:
+what the handler reports arrives on that stream, and the reply ends it.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.tool_context("count", async fn(_args : Map[String, Json], context : @context.Context) {
+    context.report_progress(progress=1.0, total=2.0, message="half way") catch {
+      _ => ()
+    }
+    @moonmcp.ToolResult::new(content=[@moonmcp.text_block("done")])
+  })
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch { _ => () }
+}
+```
+
+A subscription keeps one stream open for the changes a client opted in to. The
+server advertises what changed; every subscription whose filter asked for it
+hears about it, and nothing else.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  // ... register the tools ...
+  mcp.notify_tools_changed()
+  mcp.notify_resource_updated("config://app")
+}
+```
+
+Registering a tool, a resource or a prompt sends the matching list-changed
+notification by itself; `notify_tools_changed`, `notify_resources_changed`,
+`notify_prompts_changed` and `notify_resource_updated` are for the times a
+server changes what it offers for reasons of its own.
+
+## Asking the client for input
+
+A handler that cannot finish without something from the client says so instead
+of answering. The client answers, then sends the same call again with the
+answers and the state it was handed.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.tool_context("greet", async fn(_args : Map[String, Json], context : @context.Context) {
+    match context.input_responses().get("name") {
+      Some(String(name)) =>
+        @moonmcp.ToolResult::new(content=[@moonmcp.text_block("hello " + name)])
+      _ =>
+        @moonmcp.ToolResult::input_required({
+          input_requests: [
+            {
+              id: "name",
+              request: {
+                "method": Json::string("elicitation/create"),
+                "params": {
+                  "message": Json::string("Your name?"),
+                  "requestedSchema": { "type": "object" },
+                },
+              },
+            },
+          ],
+          request_state: Some("greeting"),
+          meta: None,
+        })
+    }
+  })
+}
+```
+
+On stdio a client withdraws a request with `notifications/cancelled`; on
+Streamable HTTP it closes the response stream, which the server notices the
+next time it writes. Either way `Context::is_cancelled` answers.
+
+## Client
+
+The client speaks the same protocol from the other end, over an in-memory
+server, a pair of line streams, or HTTP.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.tool("add", args => {
+    let a = match args.get("a") {
+      Some(Number(value, ..)) => value
+      _ => 0.0
+    }
+    { "sum": Json(a) }
+  })
+  let client = @moonmcp.Client::connect(
+    @moonmcp.Memory::new(mcp),
+    protocol_version="2026-07-28",
+  )
+  let tools = client.list_tools()
+  println("\{tools.length()} tools")
+  let result = client.call_tool("add", arguments={ "a": 2, "b": 3 })
+  println(Json(result.structured_content.unwrap()).stringify())
+  client.close()
+}
+```
+
+Reaching a server over HTTP takes the transport from `moonbitstack/moonmcp/client/http`,
+which needs a socket and so is native only:
+
+```moonbit nocheck
+let client = @client.Client::connect(@http.Http::new("http://127.0.0.1:12000/mcp"))
+```
+
+`Lines` carries the same messages over any pair of line streams, which is what a
+server started as a child process speaks.
+
+| Call | Does |
+|:--|:--|
+| `Client::connect(transport, protocol_version=)` | Connects; on the revisions before 2026-07-28 it runs the handshake once and keeps the server's identity and capabilities. |
+| `list_tools`, `list_resources`, `list_prompts` | The three listings, as the library's own types. |
+| `call_tool(name, arguments=, progress_token=, on_notification=)` | A call, with the notifications it causes handed to the callback. |
+| `read_resource`, `get_prompt` | One read, one render. |
+| `listen(filter=, on_notification=)` | A subscription, until the server ends it. |
+| `request`, `exchange`, `notify` | Any method, with `_meta` filled in for you. |
+| `close()` | Lets the connection go. |
+
+A transport is anything implementing `Transport`: `ask`, `tell`, `listen` and
+`close`. `Memory`, `Lines` and `Http` ship here; a fourth is a hundred lines,
+and the client above it does not change.
 
 ## Debug page
 
@@ -214,6 +384,7 @@ writes the configuration above.
 | [`http`](src/examples/http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/http --target native` |
 | [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
 | [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
+| [`client`](src/examples/client/) | A client and a server in one program: list the tools, call one, print the progress it reports: `moon run src/examples/client --target native` |
 
 ## Packages
 
@@ -225,6 +396,9 @@ writes the configuration above.
 | `types` | The wire model: content blocks, tools, prompts, resources, capabilities, results |
 | `tools`, `resources`, `prompts` | The components a server offers |
 | `exceptions` | `FastMCPError` and the MCP error codes it maps to |
+| `context` | `Context` and `Facts`: what a handler is told about the request it serves |
+| `client` | `Client` and the `Transport` contract, with the in-memory and line transports |
+| `client/http` | The HTTP transport |
 | `component`, `tasks`, `settings`, `config`, `utilities` | Component metadata, task configuration, settings, the `mcp.json` client configuration, media helpers |
 
 ## Install

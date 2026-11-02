@@ -23,6 +23,8 @@ PACKAGES = [
     ("moonmcp", "moonmcp", "Facade", "The names a server is written with. Re-exports the server and the three capability types, plus argument decoding."),
     ("docs", "docs", "Documentation page", "The page a server serves beside its endpoint, listing what it offers and calling it, in two looks."),
     ("server", "server", "Server", "One server holds tools, resources, templates and prompts, and speaks both protocol eras over Streamable HTTP and stdio."),
+    ("context", "context", "Context", "The request a handler serves: who asked, with what, and the way back out while the answer is still being worked out."),
+    ("client", "client", "Client", "The protocol from the caller's side, over an in-memory server, a pair of line streams, or HTTP."),
     ("tools", "tools", "Tools", "A tool: a handler, an input schema, and a typed result."),
     ("resources", "resources", "Resources", "A resource: a URI and a reader. Templates fill a URI pattern from arguments."),
     ("prompts", "prompts", "Prompts", "A prompt: a renderer that turns arguments into messages."),
