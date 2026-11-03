@@ -33,13 +33,23 @@ jobs:
           persist-credentials: false
 
       # The API reference is generated from the committed pkg.generated.mbti
-      # files and the /// comments in source, so the docs build needs no MoonBit
-      # toolchain and never touches the module registry.
+      # files and the /// comments in source, so it needs no toolchain.
       - name: generate API reference
         run: python3 scripts/gen_api.py
 
       # The guide's code and recorded answers come from src/examples/guide, so
-      # the page is only deployed when it is what those packages write.
+      # the page is only deployed when it is what those packages write — which
+      # means running them.
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
       - name: generate the guide
         run: python3 scripts/gen_guide.py
 
