@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmcp"
 
-version = "0.1.7"
+version = "0.1.8"
 
 readme = "README.md"
 
@@ -10,7 +10,31 @@ repository = "https://github.com/moonbitstack/moonmcp"
 
 license = "Apache-2.0"
 
-keywords = [ "mcp", "llm", "agent" ]
+keywords = [
+  "mcp",
+  "model-context-protocol",
+  "llm",
+  "agent",
+  "ai",
+  "ai-agent",
+  "tools",
+  "tool-calling",
+  "prompts",
+  "resources",
+  "elicitation",
+  "server",
+  "client",
+  "json-rpc",
+  "jsonrpc",
+  "stdio",
+  "streamable-http",
+  "sse",
+  "oauth",
+  "asgi",
+  "annotations",
+  "fastmcp",
+  "moonbit",
+]
 
 description = "Model Context Protocol servers and clients for MoonBit."
 
