@@ -26,16 +26,14 @@ function argument(name) {
   return process.argv[at + 1];
 }
 
-// `moon build` writes `name` on Linux and `name.exe` on Windows. A relative
+// `moon build` writes the artifact as `name.exe` on every platform. A relative
 // path is resolved here: a bare name would be looked for on PATH instead.
 function binary(given) {
-  const found = process.platform === "win32" && !given.endsWith(".exe") ? given + ".exe" : given;
-  const full = path.resolve(found);
-  if (!existsSync(full)) {
-    console.error(`no such binary: ${full} (build it with moon build --target native)`);
-    process.exit(2);
+  for (const candidate of [given, given + ".exe"].map((one) => path.resolve(one))) {
+    if (existsSync(candidate)) return candidate;
   }
-  return full;
+  console.error(`no such binary: ${path.resolve(given)} (build it with moon build --target native)`);
+  process.exit(2);
 }
 
 const stdioServer = binary(argument("stdio"));
