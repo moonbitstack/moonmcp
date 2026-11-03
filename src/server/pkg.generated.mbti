@@ -10,9 +10,12 @@ import {
   "moonbitstack/moonmcp/auth",
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/docs",
+  "moonbitstack/moonmcp/layers",
   "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/providers",
   "moonbitstack/moonmcp/resources",
   "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/transforms",
   "moonbitstack/moonmcp/types",
 }
 
@@ -72,9 +75,11 @@ pub struct Server {
   // private fields
 }
 pub fn Server::add_prompt(Self, @prompts.Prompt) -> Unit
+pub fn Server::add_provider(Self, &@providers.Provider) -> Unit
 pub fn Server::add_resource(Self, @resources.Resource) -> Unit
 pub fn Server::add_template(Self, @resources.ResourceTemplate) -> Unit
 pub fn Server::add_tool(Self, @tools.Tool) -> Unit
+pub fn Server::add_transform(Self, &@transforms.Transform) -> Unit
 pub async fn Server::handle(Self, Json) -> Json?
 pub async fn Server::handle_with(Self, Json, channel~ : Channel) -> Json?
 pub fn Server::log_to(Self, logger~ : @moonlog.Logger) -> Unit
@@ -84,6 +89,10 @@ pub fn Server::notify_prompts_changed(Self) -> Unit
 pub fn Server::notify_resource_updated(Self, String) -> Unit
 pub fn Server::notify_resources_changed(Self) -> Unit
 pub fn Server::notify_tools_changed(Self) -> Unit
+pub fn Server::offered_prompts(Self) -> Array[@prompts.Prompt]
+pub fn Server::offered_resources(Self) -> Array[@resources.Resource]
+pub fn Server::offered_templates(Self) -> Array[@resources.ResourceTemplate]
+pub fn Server::offered_tools(Self) -> Array[@tools.Tool]
 pub fn Server::prompt(Self, String, async (Map[String, Json]) -> String, title? : String, description? : String, arguments? : Array[@types.PromptArgument]) -> Unit
 pub fn Server::prompt_context(Self, String, async (Map[String, Json], @context.Context) -> @prompts.RenderedPrompt, title? : String, description? : String, arguments? : Array[@types.PromptArgument]) -> Unit
 pub fn Server::resource(Self, String, async () -> String, name? : String, title? : String, description? : String, mime_type? : String) -> Unit
@@ -95,6 +104,7 @@ pub fn Server::template_context(Self, String, async (Map[String, Json], @context
 pub fn Server::to_asgi(Self, path? : String, origins? : Array[String], docs? : String?, theme? : @docs.Theme, auth? : @auth.Bearer?) -> async (@spec.Scope, async () -> @spec.Event, async (@spec.Event) -> Unit) -> Unit
 pub fn Server::tool(Self, String, async (Map[String, Json]) -> Json, input_schema? : Json, title? : String, description? : String, output_schema? : Json, annotations? : @types.ToolAnnotations) -> Unit
 pub fn Server::tool_context(Self, String, async (Map[String, Json], @context.Context) -> @tools.ToolResult, input_schema? : Json, title? : String, description? : String, output_schema? : Json, annotations? : @types.ToolAnnotations) -> Unit
+pub fn Server::use_layer(Self, @layers.Layer) -> Unit
 
 // Type aliases
 

@@ -348,42 +348,71 @@ async fn Server::dispatch(
     ("ping", Legacy) => Json::object(Map([]))
     ("tools/list", _) => {
       no_cursor(params)
-      {
-        "tools": Json(
-          self.tools.values().map(t => t.to_mcp_tool().to_json()).collect(),
-        ),
-      }
+      self.through_listing(@layers.ListTools, params, context, fn() {
+        {
+          "tools": Json(
+            self.offered_tools().map(t => t.to_mcp_tool().to_json()),
+          ),
+        }
+      })
     }
-    ("tools/call", _) => self.call_tool(params, context)
+    ("tools/call", _) => {
+      let name = match params.get("name") {
+        Some(String(name)) => name
+        _ => ""
+      }
+      self.through_call(@layers.CallTool, name, params, context, async fn() -> Json {
+        self.call_tool(params, context)
+      })
+    }
     ("resources/list", _) => {
       no_cursor(params)
-      {
-        "resources": Json(
-          self.resources
-          .values()
-          .map(r => r.to_mcp_resource().to_json())
-          .collect(),
-        ),
-      }
+      self.through_listing(@layers.ListResources, params, context, fn() {
+        {
+          "resources": Json(
+            self.offered_resources().map(r => r.to_mcp_resource().to_json()),
+          ),
+        }
+      })
     }
     ("resources/templates/list", _) => {
       no_cursor(params)
-      {
-        "resourceTemplates": Json(
-          self.templates.map(t => t.to_mcp_template().to_json()),
-        ),
-      }
+      self.through_listing(@layers.ListTemplates, params, context, fn() {
+        {
+          "resourceTemplates": Json(
+            self.offered_templates().map(t => t.to_mcp_template().to_json()),
+          ),
+        }
+      })
     }
-    ("resources/read", _) => self.read_resource(params, era, context)
+    ("resources/read", _) => {
+      let uri = match params.get("uri") {
+        Some(String(uri)) => uri
+        _ => ""
+      }
+      self.through_call(@layers.ReadResource, uri, params, context, async fn() -> Json {
+        self.read_resource(params, era, context)
+      })
+    }
     ("prompts/list", _) => {
       no_cursor(params)
-      {
-        "prompts": Json(
-          self.prompts.values().map(p => p.to_mcp_prompt().to_json()).collect(),
-        ),
-      }
+      self.through_listing(@layers.ListPrompts, params, context, fn() {
+        {
+          "prompts": Json(
+            self.offered_prompts().map(p => p.to_mcp_prompt().to_json()),
+          ),
+        }
+      })
     }
-    ("prompts/get", _) => self.get_prompt(params, context)
+    ("prompts/get", _) => {
+      let name = match params.get("name") {
+        Some(String(name)) => name
+        _ => ""
+      }
+      self.through_call(@layers.GetPrompt, name, params, context, async fn() -> Json {
+        self.get_prompt(params, context)
+      })
+    }
     _ => raise fail(method_not_found, "Method not found: \{op}")
   }
 }
@@ -459,7 +488,14 @@ async fn Server::call_tool(
   guard params.get("name") is Some(String(name)) else {
     raise fail(invalid_params, "tools/call needs a name")
   }
-  guard self.tools.get(name) is Some(tool) else {
+  let mut found : @tools.Tool? = None
+  for candidate in self.offered_tools() {
+    if candidate.component.name == name {
+      found = Some(candidate)
+      break
+    }
+  }
+  guard found is Some(tool) else {
     raise fail(invalid_params, "Unknown tool: \{name}")
   }
   let args = match params.get("arguments") {
@@ -467,7 +503,7 @@ async fn Server::call_tool(
     None | Some(Null) => Map([])
     Some(_) => raise fail(invalid_params, "arguments must be an object")
   }
-  if self.checks.get(name) is Some(check) {
+  if self.check_of(tool) is Some(check) {
     let faults = check.faults(Json(args))
     if !faults.is_empty() {
       let lines = faults.map(f => {
@@ -536,13 +572,19 @@ async fn Server::read_resource(
   guard params.get("uri") is Some(String(uri)) else {
     raise fail(invalid_params, "resources/read needs a uri")
   }
-  let result : @resources.ResourceResult = if self.resources.get(uri)
-    is Some(resource) {
+  let mut offered : @resources.Resource? = None
+  for candidate in self.offered_resources() {
+    if candidate.uri == uri {
+      offered = Some(candidate)
+      break
+    }
+  }
+  let result : @resources.ResourceResult = if offered is Some(resource) {
     let raw = resource.read_with(context) catch { e => raise as_fail(e) }
     resource.convert_result(raw)
   } else {
-    let mut found = None
-    for template in self.templates {
+    let mut found : (@resources.ResourceTemplate, Map[String, Json])? = None
+    for template in self.offered_templates() {
       let matched = template.matches(uri, None) catch {
         e => raise fail(invalid_params, text_of(e))
       }
@@ -576,7 +618,14 @@ async fn Server::get_prompt(
   guard params.get("name") is Some(String(name)) else {
     raise fail(invalid_params, "prompts/get needs a name")
   }
-  guard self.prompts.get(name) is Some(prompt) else {
+  let mut found : @prompts.Prompt? = None
+  for candidate in self.offered_prompts() {
+    if candidate.component.name == name {
+      found = Some(candidate)
+      break
+    }
+  }
+  guard found is Some(prompt) else {
     raise fail(invalid_params, "Unknown prompt: \{name}")
   }
   let args = match params.get("arguments") {
@@ -591,5 +640,94 @@ async fn Server::get_prompt(
   match result.input_required {
     Some(ask) => ask.to_json()
     None => result.to_mcp_prompt_result().to_json()
+  }
+}
+
+///|
+/// The layer chain around a call that runs a component. `end` answers as the
+/// server would; a layer may answer instead, or refuse the request.
+async fn Server::through_call(
+  self : Server,
+  operation : @layers.Operation,
+  name : String,
+  params : Map[String, Json],
+  context : @context.Context,
+  end : async () -> Json,
+) -> Json {
+  if self.layers.is_empty() {
+    return end()
+  }
+  let call = @layers.Call::new(
+    operation~,
+    name~,
+    arguments=arguments_of(params),
+    context~,
+  )
+  @layers.chain(self.layers, call, async fn(
+    _call,
+  ) -> Json raise @exceptions.FastMCPError {
+    carried(end)
+  }) catch {
+    e => raise as_fail(e)
+  }
+}
+
+///|
+/// The layer chain around a listing, which has no failure of its own.
+async fn Server::through_listing(
+  self : Server,
+  operation : @layers.Operation,
+  params : Map[String, Json],
+  context : @context.Context,
+  end : () -> Json,
+) -> Json {
+  if self.layers.is_empty() {
+    return end()
+  }
+  let call = @layers.Call::new(
+    operation~,
+    name="",
+    arguments=arguments_of(params),
+    context~,
+  )
+  @layers.chain(self.layers, call, async fn(
+    _call,
+  ) -> Json raise @exceptions.FastMCPError {
+    listed(end)
+  }) catch {
+    e => raise as_fail(e)
+  }
+}
+
+///|
+/// The innermost step of a call: the server's own answer, its refusal carried
+/// across as the error the chain speaks.
+async fn carried(end : async () -> Json) -> Json raise @exceptions.FastMCPError {
+  end() catch {
+    Fail(code~, message~, data~) =>
+      raise @exceptions.Mcp({ code, message, data, })
+    e =>
+      raise @exceptions.Mcp({
+        code: internal_error,
+        message: "\{e}",
+        data: None,
+      })
+  }
+}
+
+///|
+/// The innermost step of a listing: assembling one cannot fail, so the only
+/// error that can reach it is the chain's own refusal above.
+#warnings("-unused_async-unused_error_type")
+async fn listed(end : () -> Json) -> Json raise @exceptions.FastMCPError {
+  end()
+}
+
+///|
+/// The arguments of a request, as a layer sees them.
+fn arguments_of(params : Map[String, Json]) -> Map[String, Json] {
+  match params.get("arguments") {
+    Some(Object(arguments)) => arguments
+    _ => Map([])
   }
 }

@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/providers"
+
+import {
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/tools",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Listing {
+  tools : Array[@tools.Tool]
+  resources : Array[@resources.Resource]
+  templates : Array[@resources.ResourceTemplate]
+  prompts : Array[@prompts.Prompt]
+}
+pub fn Listing::new(tools? : Array[@tools.Tool], resources? : Array[@resources.Resource], templates? : Array[@resources.ResourceTemplate], prompts? : Array[@prompts.Prompt]) -> Self
+pub fn Listing::prompts(Self) -> Array[@prompts.Prompt]
+pub fn Listing::resources(Self) -> Array[@resources.Resource]
+pub fn Listing::templates(Self) -> Array[@resources.ResourceTemplate]
+pub fn Listing::tools(Self) -> Array[@tools.Tool]
+pub impl Provider for Listing
+
+// Type aliases
+
+// Traits
+pub(open) trait Provider {
+  fn tools(Self) -> Array[@tools.Tool] = _
+  fn resources(Self) -> Array[@resources.Resource] = _
+  fn templates(Self) -> Array[@resources.ResourceTemplate] = _
+  fn prompts(Self) -> Array[@prompts.Prompt] = _
+}

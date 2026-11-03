@@ -8,4 +8,7 @@ import {
   "moonbitstack/moonmcp/client",
   "moonbitstack/moonmcp/types",
   "moonbitstack/moonmcp/auth",
+  "moonbitstack/moonmcp/providers",
+  "moonbitstack/moonmcp/transforms",
+  "moonbitstack/moonmcp/layers",
 }

@@ -47,6 +47,9 @@ pub struct Server {
   priv prompts : Map[String, @prompts.Prompt]
   priv watchers : Map[String, Watcher]
   priv mut logger : @moonlog.Logger?
+  priv providers : Array[&@providers.Provider]
+  priv transforms : Array[&@transforms.Transform]
+  priv layers : Array[@layers.Layer]
 }
 
 ///|
@@ -70,6 +73,9 @@ pub fn Server::new(
     prompts: Map([]),
     watchers: Map([]),
     logger: None,
+    providers: [],
+    transforms: [],
+    layers: [],
   }
 }
 

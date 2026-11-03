@@ -1,0 +1,13 @@
+// Where a server's components come from: one contract, and the fixed listing a
+// program builds by hand.
+import {
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/prompts",
+}
+
+import {
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+} for "test"

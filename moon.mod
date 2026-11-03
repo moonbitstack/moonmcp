@@ -33,6 +33,13 @@ keywords = [
   "asgi",
   "annotations",
   "fastmcp",
+  "provider",
+  "transform",
+  "middleware",
+  "caching",
+  "rate-limiting",
+  "telemetry",
+  "observability",
   "moonbit",
 ]
 

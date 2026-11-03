@@ -1,0 +1,99 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/layers"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonmcp/context",
+  "moonbitstack/moonmcp/exceptions",
+}
+
+// Values
+pub async fn chain(Array[Layer], Call, async (Call) -> Json raise @exceptions.FastMCPError) -> Json raise @exceptions.FastMCPError
+
+pub let refused_code : Int32
+
+// Errors
+
+// Types and methods
+type Bucket
+
+pub struct Caching {
+  // private fields
+}
+pub fn Caching::clear(Self) -> Unit
+pub fn Caching::hits(Self) -> Int32
+pub fn Caching::layer(Self) -> Layer
+pub fn Caching::misses(Self) -> Int32
+pub fn Caching::new(ttl_ms? : Int32, capacity? : Int32, operations? : Array[Operation], shared? : Bool) -> Self
+pub fn Caching::size(Self) -> Int32
+
+pub(all) struct Call {
+  operation : Operation
+  name : String
+  arguments : Map[String, Json]
+  context : @context.Context
+}
+pub fn Call::fingerprint(Self) -> String
+pub fn Call::new(operation~ : Operation, name~ : String, arguments? : Map[String, Json], context~ : @context.Context) -> Self
+pub fn Call::subject(Self) -> String
+
+type Entry
+
+pub(all) struct Layer {
+  name : String
+  // private fields
+}
+pub fn Layer::new(name? : String, run~ : async (Call, Next) -> Json raise @exceptions.FastMCPError) -> Self
+pub async fn Layer::serve(Self, Call, Next) -> Json raise @exceptions.FastMCPError
+
+pub(all) struct Next {
+  // private fields
+}
+pub async fn Next::then(Self, Call) -> Json raise @exceptions.FastMCPError
+
+pub(all) enum Operation {
+  ListTools
+  ListResources
+  ListTemplates
+  ListPrompts
+  CallTool
+  ReadResource
+  GetPrompt
+} derive(Eq, @debug.Debug)
+pub fn Operation::code(Self) -> String
+pub fn Operation::equal(Self, Self) -> Bool
+pub fn Operation::is_list(Self) -> Bool
+pub fn Operation::not_equal(Self, Self) -> Bool
+pub fn Operation::to_repr(Self) -> @debug.Repr
+
+pub struct RateLimiting {
+  // private fields
+}
+pub fn RateLimiting::callers(Self) -> Int32
+pub fn RateLimiting::layer(Self) -> Layer
+pub fn RateLimiting::new(rate? : Int32, burst? : Int32, operations? : Array[Operation], key? : (Call) -> String, clock? : () -> Double) -> Self
+pub fn RateLimiting::refused(Self) -> Int32
+pub fn RateLimiting::reset(Self) -> Unit
+
+pub(all) struct Span {
+  operation : Operation
+  name : String
+  duration_us : Double
+  failed : Bool
+} derive(@debug.Debug)
+pub fn Span::to_repr(Self) -> @debug.Repr
+
+pub struct Telemetry {
+  // private fields
+}
+pub fn Telemetry::clear(Self) -> Unit
+pub fn Telemetry::count(Self, Operation) -> Int32
+pub fn Telemetry::failures(Self) -> Int32
+pub fn Telemetry::layer(Self) -> Layer
+pub fn Telemetry::new(capacity? : Int32, sink? : (Span) -> Unit) -> Self
+pub fn Telemetry::spans(Self) -> Array[Span]
+pub fn Telemetry::total(Self) -> Int32
+
+// Type aliases
+
+// Traits

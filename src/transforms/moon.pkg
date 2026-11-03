@@ -1,0 +1,16 @@
+// How components look to a client: one contract, and the renames and filters
+// that ship with it.
+import {
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitlang/core/set",
+}
+
+import {
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitlang/core/set",
+} for "test"

@@ -7,10 +7,13 @@ import {
   "moonbitstack/moonmcp/client",
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/layers",
   "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/providers",
   "moonbitstack/moonmcp/resources",
   "moonbitstack/moonmcp/server",
   "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/transforms",
   "moonbitstack/moonmcp/types",
 }
 
@@ -30,6 +33,10 @@ pub using @auth {type Bearer}
 
 pub using @types {type CacheScope}
 
+pub using @layers {type Caching}
+
+pub using @layers {type Call}
+
 pub using @server {type Cancellations}
 
 pub using @server {type Channel}
@@ -42,15 +49,29 @@ pub using @context {type Facts}
 
 pub using @exceptions {type FastMCPError}
 
+pub using @transforms {type Hidden}
+
+pub using @layers {type Layer}
+
 pub using @client {type Lines}
+
+pub using @providers {type Listing}
 
 pub using @client {type Memory}
 
 pub using @prompts {type Message}
 
+pub using @transforms {type Namespace}
+
+pub using @layers {type Next}
+
+pub using @layers {type Operation}
+
 pub using @auth {type Principal}
 
 pub using @prompts {type Prompt}
+
+pub using @layers {type RateLimiting}
 
 pub using @client {type Refused}
 
@@ -61,6 +82,12 @@ pub using @resources {type ResourceTemplate}
 pub using @server {type Scope}
 
 pub using @server {type Server}
+
+pub using @layers {type Span}
+
+pub using @transforms {type Tagged}
+
+pub using @layers {type Telemetry}
 
 pub using @tools {type Tool}
 

@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/transforms"
+
+import {
+  "moonbitlang/core/set",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/tools",
+}
+
+// Values
+pub fn apply(Array[&Transform], Array[@tools.Tool], Array[@resources.Resource], Array[@resources.ResourceTemplate], Array[@prompts.Prompt]) -> (Array[@tools.Tool], Array[@resources.Resource], Array[@resources.ResourceTemplate], Array[@prompts.Prompt])
+
+// Errors
+
+// Types and methods
+pub(all) struct Hidden {
+  names : @set.Set[String]
+}
+pub fn Hidden::hides(Self, String) -> Bool
+pub fn Hidden::new(names~ : Array[String]) -> Self
+pub fn Hidden::prompts(Self, Array[@prompts.Prompt]) -> Array[@prompts.Prompt]
+pub fn Hidden::resources(Self, Array[@resources.Resource]) -> Array[@resources.Resource]
+pub fn Hidden::templates(Self, Array[@resources.ResourceTemplate]) -> Array[@resources.ResourceTemplate]
+pub fn Hidden::tools(Self, Array[@tools.Tool]) -> Array[@tools.Tool]
+pub impl Transform for Hidden
+
+pub(all) struct Namespace {
+  prefix : String
+}
+pub fn Namespace::new(String) -> Self
+pub fn Namespace::prompts(Self, Array[@prompts.Prompt]) -> Array[@prompts.Prompt]
+pub fn Namespace::rename(Self, String) -> String
+pub fn Namespace::rename_uri(Self, String) -> String
+pub fn Namespace::resources(Self, Array[@resources.Resource]) -> Array[@resources.Resource]
+pub fn Namespace::templates(Self, Array[@resources.ResourceTemplate]) -> Array[@resources.ResourceTemplate]
+pub fn Namespace::tools(Self, Array[@tools.Tool]) -> Array[@tools.Tool]
+pub impl Transform for Namespace
+
+pub(all) struct Tagged {
+  any_of : @set.Set[String]
+}
+pub fn Tagged::keeps(Self, @set.Set[String]) -> Bool
+pub fn Tagged::new(any_of~ : Array[String]) -> Self
+pub fn Tagged::prompts(Self, Array[@prompts.Prompt]) -> Array[@prompts.Prompt]
+pub fn Tagged::resources(Self, Array[@resources.Resource]) -> Array[@resources.Resource]
+pub fn Tagged::templates(Self, Array[@resources.ResourceTemplate]) -> Array[@resources.ResourceTemplate]
+pub fn Tagged::tools(Self, Array[@tools.Tool]) -> Array[@tools.Tool]
+pub impl Transform for Tagged
+
+// Type aliases
+
+// Traits
+pub(open) trait Transform {
+  fn tools(Self, Array[@tools.Tool]) -> Array[@tools.Tool] = _
+  fn resources(Self, Array[@resources.Resource]) -> Array[@resources.Resource] = _
+  fn templates(Self, Array[@resources.ResourceTemplate]) -> Array[@resources.ResourceTemplate] = _
+  fn prompts(Self, Array[@prompts.Prompt]) -> Array[@prompts.Prompt] = _
+}
