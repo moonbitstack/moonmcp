@@ -9,6 +9,7 @@
 // the program exits non-zero when one of them fails.
 
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -25,10 +26,16 @@ function argument(name) {
   return process.argv[at + 1];
 }
 
-// `moon build` writes `name` on Linux and `name.exe` on Windows.
+// `moon build` writes `name` on Linux and `name.exe` on Windows. A relative
+// path is resolved here: a bare name would be looked for on PATH instead.
 function binary(given) {
-  if (process.platform === "win32" && !given.endsWith(".exe")) return given + ".exe";
-  return given;
+  const found = process.platform === "win32" && !given.endsWith(".exe") ? given + ".exe" : given;
+  const full = path.resolve(found);
+  if (!existsSync(full)) {
+    console.error(`no such binary: ${full} (build it with moon build --target native)`);
+    process.exit(2);
+  }
+  return full;
 }
 
 const stdioServer = binary(argument("stdio"));
