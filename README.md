@@ -532,7 +532,7 @@ async fn main {
 `Context::logger` hands a handler the same logger, scoped to its request, for
 lines of its own.
 
-## Debug page
+## The documentation page
 
 `to_asgi` serves a documentation page beside the endpoint, the way an API
 framework serves its interactive docs:

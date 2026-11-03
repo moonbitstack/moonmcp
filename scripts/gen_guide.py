@@ -45,8 +45,9 @@ CLS = snippets("cls/cls.mbt")
 NOTES = {
     "first": {
         "annotations": "The generator reads these annotations at build time and writes the "
-        "<code>register</code> call that makes each of them a tool. Wire it in once, as the "
-        "<code>moon.pkg</code> of an example does.",
+        "<code>register</code> call that makes each of them a tool. It is wired in once: a "
+        "rule in <code>moon.mod</code> and a <code>dev_build</code> line in the package's "
+        "<code>moon.pkg</code>.",
         "functions": "Each capability is one call on the server. This is what the annotations "
         "generate, and the form to reach for when a capability is decided at run time.",
         "classes": "The state lives in the struct and each method is the work of one tool; "
