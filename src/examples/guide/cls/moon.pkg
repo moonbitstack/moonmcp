@@ -1,0 +1,12 @@
+// The guide's server with every capability held by a type of its own.
+import {
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/providers",
+  "moonbitstack/moonmcp/transforms",
+  "moonbitstack/moonmcp/layers",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/resources",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/moonmcp/exceptions",
+}

@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/moonmcp/examples/annotations"
+package "moonbitstack/moonmcp/examples/guide/ann"
 
 import {
   "moonbitstack/moonmcp/server",
@@ -7,6 +7,8 @@ import {
 
 // Values
 pub fn register(@server.Server) -> Unit
+
+pub fn server() -> @server.Server
 
 // Errors
 

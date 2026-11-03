@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/gen_api.py'
+      - 'scripts/gen_guide.py'
       - 'src/**/*.mbt'
       - 'src/**/*.mbti'
       - '.github/workflows/docs.yml'
@@ -37,10 +38,16 @@ jobs:
       - name: generate API reference
         run: python3 scripts/gen_api.py
 
+      # The guide's code and recorded answers come from src/examples/guide, so
+      # the page is only deployed when it is what those packages write.
+      - name: generate the guide
+        run: python3 scripts/gen_guide.py
+
       - name: generated pages are reproducible
         run: |
           git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/api.html
           git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/index.html
+          git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code docs/guide.html
 
       - name: setup pages
         uses: actions/configure-pages@v6

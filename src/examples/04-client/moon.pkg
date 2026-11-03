@@ -1,5 +1,5 @@
 // A client and a server in one program, over the in-memory transport:
-// `moon run src/examples/client --target native`.
+// `moon run src/examples/04-client --target native`.
 supported_targets = "+native"
 
 import {

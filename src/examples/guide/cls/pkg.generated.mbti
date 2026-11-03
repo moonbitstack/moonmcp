@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/examples/guide/cls"
+
+import {
+  "moonbitstack/moonmcp/server",
+}
+
+// Values
+pub fn extended() -> @server.Server
+
+pub fn server() -> @server.Server
+
+pub fn with_counter() -> @server.Server
+
+pub fn with_counter_on(@server.Server) -> @server.Server
+
+pub fn with_extensions(@server.Server) -> @server.Server
+
+// Errors
+
+// Types and methods
+pub struct Arithmetic {
+  // private fields
+}
+pub fn Arithmetic::calls(Self) -> Int32
+pub fn Arithmetic::new() -> Self
+
+pub struct Catalog {
+}
+
+pub struct Counter {
+}
+
+pub struct Quiet {
+}
+
+pub struct Reviewer {
+}
+
+// Type aliases
+
+// Traits

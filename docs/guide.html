@@ -33,20 +33,19 @@
     <p class="side-title">The tavern · moonmcp</p>
     <nav class="side-nav">
       <div class="group">Start</div>
-      <a href="#install">Install</a>
-      <a href="#annotate">Annotate a function</a>
-      <a href="#register">Register by hand</a>
+      <a href="#install">Install, and one tool</a>
       <div class="group">Capabilities</div>
       <a href="#resources">Resources &amp; templates</a>
       <a href="#prompts">Prompts</a>
-      <a href="#context">Request context</a>
+      <a href="#context">A handler that sees its request</a>
+      <a href="#extend">Extending the server</a>
       <div class="group">Run it</div>
       <a href="#transports">Transports</a>
       <a href="#streams">Progress &amp; subscriptions</a>
       <a href="#mrtr">Ask the client</a>
       <a href="#auth">Authorization</a>
       <a href="#logging">Logging</a>
-      <a href="#debug">Debug page</a>
+      <a href="#debug">The documentation page</a>
       <a href="#client">Connect a client</a>
       <a href="#reach">Reach a server from MoonBit</a>
     </nav>
@@ -61,153 +60,509 @@
     <header>
       <div class="kicker">Guide</div>
       <h1 class="doc-h1">Build a server, step by step</h1>
-      <p class="lead">A short walk through moonmcp. Register a tool by hand, then write the same tool as an annotation. Add resources, prompts, pick a transport, and point a client at it.</p>
+      <p class="lead">A short walk through moonmcp. The same server, written three ways: annotated functions, one registration per capability, and a type that holds each of them. Add resources, prompts and layers, pick a transport, and point a client at it.</p>
       <p class="spec-line"><b>MCP</b> 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05 &middot; Streamable HTTP &middot; stdio</p>
     </header>
 
     <div class="rule"><span class="node"></span></div>
 
-    <section class="section" id="install">
-      <h2>Install</h2>
-      <p class="pdesc">moonmcp is a MoonBit package. Add it to a project, then build a server in the same language your tools are written in.</p>
-      <div class="code"><pre><code>moon add moonbitstack/moonmcp</code></pre><button class="copy" type="button">copy</button></div>
-      <p>The code below builds the two example servers in <code>src/examples/</code> &mdash; the demo one, and the annotated one &mdash; a capability at a time. Every MoonBit block on this page is compiled by <code>scripts/check_docs.py</code>, so none of them can drift from the package.</p>
-    </section>
+    <div class="style-bar">
+      <div class="style-switch" role="radiogroup" aria-label="How the server is written">
+        <span class="style-label">write it as</span>
+        <button type="button" role="radio" data-style-pick="annotations" aria-checked="true">Annotations</button>
+        <button type="button" role="radio" data-style-pick="functions" aria-checked="false">Functions</button>
+        <button type="button" role="radio" data-style-pick="classes" aria-checked="false">Classes</button>
+      </div>
+    </div>
 
-    <section class="section" id="annotate">
-      <h2>Annotate a function</h2>
-      <p class="pdesc"><code>#mcp.tool</code> reads the argument types and builds the input schema; the generator, wired into <code>moonx dev_build</code>, writes the registration you would otherwise write by hand.</p>
-      <div class="code"><pre><code class="language-moonbit">#mcp.tool(description="Add two numbers")
-fn add(a : Double, b : Double) -> Double {
+    <section class="section" id="install">
+      <h2>Install, and one tool</h2>
+      <p class="pdesc">moonmcp is a MoonBit package. A server is a value: the capabilities it offers, and who it says it is. A capability can be written three ways, and the switch above decides which one every example below shows.</p>
+      <div class="code"><pre><code>moon add moonbitstack/moonmcp</code></pre><button class="copy" type="button">copy</button></div>
+      <p>All three build the same server, and answer the same requests in the same way. The code on this page comes from the three packages of <code>src/examples/guide/</code>; a program there sends each request below to all three and fails if one of them differs.</p>
+      <!-- code:first -->
+        <div class="styles">
+        <div class="variant" data-style="annotations"><div class="code"><pre><code class="language-moonbit">///|
+/// Add two numbers.
+#mcp.tool(description="Add two numbers")
+fn add(a : Double, b : Double) -&gt; Double {
   a + b
 }
 
+///|
+/// Greet someone, in Chinese when asked. An optional parameter is left out of
+/// the schema's `required`, and a missing one arrives as `None`.
 #mcp.tool(description="Greet someone, in Chinese when asked")
-fn greet(name : String, language? : String) -> String {
+fn greet(name : String, language? : String) -&gt; String {
   match language {
-    Some("zh") => "你好，" + name
-    _ => "hello, " + name
+    Some("zh") =&gt; "你好，" + name
+    _ =&gt; "hello, " + name
   }
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The generator reads these annotations at build time and writes the <code>register</code> call that makes each of them a tool. Wire it in once, as the <code>moon.pkg</code> of an example does.</p></div>
+        <div class="variant" data-style="functions"><div class="code"><pre><code class="language-moonbit">///|
+/// Two tools, each one call on the server.
+pub fn add_tools(mcp : @moonmcp.Server) -&gt; Unit {
+  mcp.tool(
+    "add",
+    args =&gt; {
+      guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
+        args.get("b") is Some(Number(b, ..)) else {
+        raise @exceptions.Tool("a and b must be numbers")
+      }
+      Json(a + b)
+    },
+    description="Add two numbers",
+    input_schema={
+      "type": "object",
+      "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+      "required": ["a", "b"],
+    },
+  )
+  mcp.tool(
+    "greet",
+    args =&gt; {
+      let name = match args.get("name") {
+        Some(String(name)) =&gt; name
+        _ =&gt; "stranger"
+      }
+      let language = match args.get("language") {
+        Some(String(language)) =&gt; language
+        _ =&gt; ""
+      }
+      if language == "zh" {
+        Json("你好，" + name)
+      } else {
+        Json("hello, " + name)
+      }
+    },
+    description="Greet someone, in Chinese when asked",
+    input_schema={
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "language": { "type": "string" },
+      },
+      "required": ["name"],
+    },
+  )
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">Each capability is one call on the server. This is what the annotations generate, and the form to reach for when a capability is decided at run time.</p></div>
+        <div class="variant" data-style="classes"><div class="code"><pre><code class="language-moonbit">///|
+/// The arithmetic tools, and how many times they were used.
+pub struct Arithmetic {
+  priv mut calls : Int32
 }
 
-#mcp.tool(name="word_count", description="Count the words of a text")
-fn count(text : String, unique~ : Bool = false) -> Int32 {
-  let words = text
-    .split(" ")
-    .filter(w => !w.is_empty())
-    .map(w => w.to_owned())
-    .collect()
-  if unique {
-    let seen : Map[String, Bool] = Map([])
-    for w in words {
-      seen[w] = true
-    }
-    seen.length()
-  } else {
-    words.length()
-  }
-}</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Each parameter becomes a property of the schema, typed from its MoonBit type. An optional parameter (<code>language? : String</code>) and a labelled one with a default (<code>unique~ : Bool = false</code>) are left out of <code>required</code>, and a missing one arrives as <code>None</code>. The tool's name may differ from the function's.</p>
-      <p>A project wires the generator once. The package that holds the functions asks for the generated file:</p>
-      <div class="code"><pre><code>dev_build(rule: "mcp", input: "tools.mbt", output: "tools.g.mbt")
-formatter(ignore: [ "tools.g.mbt" ])</code></pre><button class="copy" type="button">copy</button></div>
-      <p>The rule itself goes in <code>moon.mod</code> next to the imports; the README shows the line. From then on <code>moon check</code>, <code>moon build</code> and <code>moon run</code> regenerate <code>tools.g.mbt</code> whenever <code>tools.mbt</code> changes, and that file holds the one <code>register(mcp)</code> the program calls before it serves.</p>
-    </section>
+///|
+/// A set of arithmetic tools that has not been used yet.
+pub fn Arithmetic::new() -&gt; Arithmetic {
+  { calls: 0, }
+}
 
-    <section class="section" id="register">
-      <h2>Register by hand</h2>
-      <p class="pdesc">A tool has a name, a handler that reads its arguments and returns JSON, and an input schema the client can show.</p>
-      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0",
-  instructions="Arithmetic and greetings, for trying a client out.")
-mcp.tool(
-  "add",
-  args => {
-    guard args.get("a") is Some(Number(a, ..)) &amp;&amp;
-      args.get("b") is Some(Number(b, ..)) else {
-      raise @exceptions.Tool("a and b must be numbers")
-    }
-    { "sum": Json(a + b) }
-  },
-  description="Add two numbers",
-  input_schema={
-    "type": "object",
-    "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
-    "required": ["a", "b"],
-  },
-)</code></pre><button class="copy" type="button">copy</button></div>
-      <p>The handler receives the call's arguments as a <code>Map[String, Json]</code>. Reading a number out of that map, and re-reading an optional one as a parameter's type, is what <code>decode</code> and <code>decode_option</code> do for you when you annotate instead. Raise <code>@exceptions.Tool</code> and the error returns as an <code>isError</code> result.</p>
-      <p>A call the client makes lands back as exactly the JSON you returned, wrapped and marked as a result:</p>
-      <div class="exchange glass" style="padding:1rem 1.1rem">
-        <div class="msg agent"><div class="who">call</div><div class="body">tools/call &middot; <code>{ "a": 2, "b": 3 }</code></div></div>
-        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "content": [ { "type": "text", "text": "{\"sum\":5}" } ], "structuredContent": { "sum": 5 }, "isError": false }</code></div></div>
-      </div>
+///|
+/// How many calls the tools have answered.
+pub fn Arithmetic::calls(self : Arithmetic) -&gt; Int32 {
+  self.calls
+}
+
+///|
+fn Arithmetic::add(
+  self : Arithmetic,
+  a : Double,
+  b : Double,
+) -&gt; @tools.ToolResult raise @exceptions.FastMCPError {
+  self.calls = self.calls + 1
+  @tools.ToolResult::new(content=[@types.text_block("\{a + b}")])
+}
+
+///|
+fn Arithmetic::greet(
+  self : Arithmetic,
+  name : String,
+  language : String,
+) -&gt; @tools.ToolResult raise @exceptions.FastMCPError {
+  self.calls = self.calls + 1
+  let greeting = if language == "zh" {
+    "你好，" + name
+  } else {
+    "hello, " + name
+  }
+  @tools.ToolResult::new(content=[@types.text_block(greeting)])
+}
+
+///|
+impl @providers.Provider for Arithmetic with fn tools(self) {
+  [
+    @tools.Tool::new(
+      "add",
+      parameters={
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"],
+      },
+      run_fn=args =&gt; {
+        let a = match args.get("a") {
+          Some(Number(value, ..)) =&gt; value
+          _ =&gt; 0.0
+        }
+        let b = match args.get("b") {
+          Some(Number(value, ..)) =&gt; value
+          _ =&gt; 0.0
+        }
+        self.add(a, b)
+      },
+    ) catch {
+      e =&gt; abort("add: \{e}")
+    },
+    @tools.Tool::new(
+      "greet",
+      parameters={
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "language": { "type": "string" },
+        },
+        "required": ["name"],
+      },
+      run_fn=args =&gt; {
+        let name = match args.get("name") {
+          Some(String(name)) =&gt; name
+          _ =&gt; "stranger"
+        }
+        let language = match args.get("language") {
+          Some(String(language)) =&gt; language
+          _ =&gt; ""
+        }
+        self.greet(name, language)
+      },
+    ) catch {
+      e =&gt; abort("greet: \{e}")
+    },
+  ]
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The state lives in the struct and each method is the work of one tool; <code>impl Provider</code> says which of them the server offers. The server is handed the object, and asks it again whenever the tools are listed.</p></div>
+        </div>
+        <!-- /code:first -->
+      <p>A tool has a name, a handler, and an input schema a client can show. A parameter left out of <code>required</code> may be omitted; a name the protocol does not allow is refused when the server is built, not when it is called. Here is what these requests come back with:</p>
+      <!-- out:first -->
+        <div class="session"><span class="row"><span class="say">tools/list</span><span class="arrow">-&gt;</span><span class="got">add,greet</span></span><span class="row"><span class="say">tools/call add {"a":2,"b":3}</span><span class="arrow">-&gt;</span><span class="got">5</span></span><span class="row"><span class="say">tools/call greet {"name":"leo","language":"zh"}</span><span class="arrow">-&gt;</span><span class="got">你好，leo</span></span><span class="row"><span class="say">tools/call unknown {"name":"nope"}</span><span class="arrow">-&gt;</span><span class="got">error -32602</span></span></div>
+        <!-- /out:first -->
+      <p>An unknown tool is a protocol error, <code>-32602</code>: the client asked for something the server never offered. A tool that raises is answered differently — its result carries <code>isError</code>, so the model reads the message and can correct itself.</p>
     </section>
 
     <section class="section" id="resources">
-      <h2>Resources &amp; templates</h2>
-      <p class="pdesc">A resource has a URI and a reader. A template puts <code>{id}</code> in the URI; each matching read runs the function with the variable read as its MoonBit type.</p>
-      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
-mcp.resource(
-  "config://app",
-  () => "{\"theme\":\"dark\"}",
-  name="app config",
-  mime_type="application/json",
-)
-mcp.template("users://{id}/profile", params => {
-  guard params.get("id") is Some(String(id)) else { "unknown" }
+      <h2>Resources and templates</h2>
+      <p class="pdesc">A resource has a URI and a reader. A template puts <code>{id}</code> in the URI, and every matching read runs the reader with the variable already read as its MoonBit type.</p>
+      <!-- code:resources -->
+        <div class="styles">
+        <div class="variant" data-style="annotations"><div class="code"><pre><code class="language-moonbit">///|
+/// The application's settings. A resource that answers something other than
+/// text is sent as JSON.
+#mcp.resource("config://app", description="The application settings")
+fn config() -&gt; Json {
+  { "theme": "dark", "language": "en" }
+}
+
+///|
+/// A profile per user: `{id}` makes a template, and the value it matched is
+/// read as an `Int`.
+#mcp.resource("users://{id}/profile")
+fn profile(id : Int32) -&gt; String {
+  "profile of user \{id}"
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The URI is the annotation's argument. A URI with <code>{id}</code> in it makes a template, and the value it matched is read as the parameter's type.</p></div>
+        <div class="variant" data-style="functions"><div class="code"><pre><code class="language-moonbit">///|
+/// A resource at a fixed URI, and a template for the ones with an id in them.
+pub fn add_resources(mcp : @moonmcp.Server) -&gt; Unit {
+  mcp.resource(
+    "config://app",
+    () =&gt; "{\"theme\":\"dark\",\"language\":\"en\"}",
+    description="The application settings",
+    mime_type="application/json",
+  )
+  mcp.template("users://{id}/profile", params =&gt; {
+    let id = match params.get("id") {
+      Some(String(id)) =&gt; id
+      _ =&gt; "?"
+    }
+    "profile of user " + id
+  })
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why"><code>resource</code> reads a fixed URI; <code>template</code> takes the parameters the URI matched.</p></div>
+        <div class="variant" data-style="classes"><div class="code"><pre><code class="language-moonbit">///|
+/// The application's settings, and one resource per user.
+pub struct Catalog {}
+
+///|
+fn Catalog::settings(self : Catalog) -&gt; String {
+  let _ = self
+  "{\"theme\":\"dark\",\"language\":\"en\"}"
+}
+
+///|
+fn Catalog::profile(self : Catalog, id : String) -&gt; String {
+  let _ = self
   "profile of user " + id
-})</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Reading either one returns the body, with the URI and mime type wrapped for the wire:</p>
-      <div class="exchange glass" style="padding:1rem 1.1rem">
-        <div class="msg agent"><div class="who">read</div><div class="body">resources/read &middot; <code>config://app</code></div></div>
-        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "contents": [ { "uri": "config://app", "mimeType": "application/json", "text": "{\"theme\":\"dark\"}" } ] }</code></div></div>
-      </div>
+}
+
+///|
+impl @providers.Provider for Catalog with fn resources(self) {
+  [
+    @resources.Resource::new(
+      "config://app",
+      read_fn=() =&gt; Text(self.settings()),
+      description="The application settings",
+      mime_type="application/json",
+    ),
+  ]
+}
+
+///|
+impl @providers.Provider for Catalog with fn templates(self) {
+  [
+    @resources.ResourceTemplate::new(
+      "users://{id}/profile",
+      parameters={
+        "type": "object",
+        "properties": { "id": { "type": "string" } },
+      },
+      read_fn=params =&gt; {
+        let id = match params.get("id") {
+          Some(String(id)) =&gt; id
+          _ =&gt; "?"
+        }
+        Text(self.profile(id))
+      },
+    ) catch {
+      e =&gt; abort("users://{id}/profile: \{e}")
+    },
+  ]
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">A resource and a template are two more methods of the object, offered through the same <code>impl</code>.</p></div>
+        </div>
+        <!-- /code:resources -->
+      <!-- out:resources -->
+        <div class="session"><span class="row"><span class="say">resources/list</span><span class="arrow">-&gt;</span><span class="got">config://app</span></span><span class="row"><span class="say">resources/templates/list</span><span class="arrow">-&gt;</span><span class="got">users://{id}/profile</span></span><span class="row"><span class="say">resources/read {"uri":"config://app"}</span><span class="arrow">-&gt;</span><span class="got">{"theme":"dark","language":"en"}</span></span><span class="row"><span class="say">resources/read {"uri":"users://7/profile"}</span><span class="arrow">-&gt;</span><span class="got">profile of user 7</span></span></div>
+        <!-- /out:resources -->
+      <p>A read that finds nothing is <code>-32602</code> under the 2026-07-28 revision; the revisions before it use <code>-32002</code> for the same case. The server knows which revision a request is in, so a client of either era gets the code it expects.</p>
     </section>
 
     <section class="section" id="prompts">
       <h2>Prompts</h2>
-      <p class="pdesc">A prompt is a renderer that turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments, and an optional one may be left out of the call.</p>
-      <div class="code"><pre><code class="language-moonbit">#mcp.prompt(description="Ask for a code review")
-fn review(code : String, focus? : String) -> String {
+      <p class="pdesc">A prompt turns arguments into the messages a client hands to its model. Its parameters become the prompt's arguments, which a client shows before it fills the form in.</p>
+      <!-- code:prompts -->
+        <div class="styles">
+        <div class="variant" data-style="annotations"><div class="code"><pre><code class="language-moonbit">///|
+/// Ask for a code review. The parameters become the prompt's arguments.
+#mcp.prompt(description="Ask for a code review")
+fn review(code : String, focus? : String) -&gt; String {
   let what = match focus {
-    Some(f) => " Focus on \{f}."
-    None => ""
+    Some(focus) =&gt; " Focus on \{focus}."
+    None =&gt; ""
   }
   "Review this code.\{what}\n\n\{code}"
-}</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Calling it returns the rendered messages:</p>
-      <div class="exchange glass" style="padding:1rem 1.1rem">
-        <div class="msg agent"><div class="who">get</div><div class="body">prompts/get &middot; <code>{ "code": "fn f() { 1 }" }</code></div></div>
-        <div class="msg" style="margin-top:-.2rem"><div class="who">result</div><div class="body"><code>{ "description": "Ask for a code review", "messages": [ { "role": "user", "content": { "type": "text", "text": "Review this code.\n\nfn f() { 1 }" } } ] }</code></div></div>
-      </div>
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The parameters of the annotated function become the prompt's arguments; an optional one may be left out of the call.</p></div>
+        <div class="variant" data-style="functions"><div class="code"><pre><code class="language-moonbit">///|
+/// A prompt whose arguments a client fills in.
+pub fn add_review(mcp : @moonmcp.Server) -&gt; Unit {
+  mcp.prompt(
+    "review",
+    args =&gt; {
+      let code = match args.get("code") {
+        Some(String(code)) =&gt; code
+        _ =&gt; ""
+      }
+      let what = match args.get("focus") {
+        Some(String(focus)) =&gt; " Focus on " + focus + "."
+        _ =&gt; ""
+      }
+      "Review this code." + what + "\n\n" + code
+    },
+    description="Ask for a code review",
+    arguments=[
+      { name: "code", title: None, description: None, required: Some(true), },
+      { name: "focus", title: None, description: None, required: Some(false), },
+    ],
+  )
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why"><code>prompt</code> takes the renderer and the argument list a client shows before it fills the form in.</p></div>
+        <div class="variant" data-style="classes"><div class="code"><pre><code class="language-moonbit">///|
+/// The reviewer: one method, one prompt.
+pub struct Reviewer {}
+
+///|
+fn Reviewer::review(self : Reviewer, code : String, focus : String) -&gt; String {
+  let _ = self
+  let what = if focus.is_empty() { "" } else { " Focus on " + focus + "." }
+  "Review this code." + what + "\n\n" + code
+}
+
+///|
+impl @providers.Provider for Reviewer with fn prompts(self) {
+  [
+    @prompts.Prompt::new(
+      "review",
+      render_fn=args =&gt; {
+        let code = match args.get("code") {
+          Some(String(code)) =&gt; code
+          _ =&gt; ""
+        }
+        let focus = match args.get("focus") {
+          Some(String(focus)) =&gt; focus
+          _ =&gt; ""
+        }
+        Text(self.review(code, focus))
+      },
+      description="Ask for a code review",
+      arguments=[
+        { name: "code", title: None, description: None, required: Some(true), },
+        {
+          name: "focus",
+          title: None,
+          description: None,
+          required: Some(false),
+        },
+      ],
+    ),
+  ]
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The reviewer is a type with a method, offered through <code>impl Provider</code>.</p></div>
+        </div>
+        <!-- /code:prompts -->
+      <!-- out:prompts -->
+        <div class="session"><span class="row"><span class="say">prompts/list</span><span class="arrow">-&gt;</span><span class="got">review</span></span><span class="row"><span class="say">prompts/get review {"code":"fn f() { 1 }"}</span><span class="arrow">-&gt;</span><span class="got">Review this code.\n\nfn f() { 1 }</span></span></div>
+        <!-- /out:prompts -->
     </section>
 
     <section class="section" id="context">
-      <h2>Request context</h2>
-      <p class="pdesc">A handler that needs to know who is calling, or to report while it works, is registered with <code>tool_context</code>. The <code>Context</code> is the request itself: its headers, the client's identity, its progress token, and the answers it sent back on a retry.</p>
-      <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
-mcp.tool_context(
-  "summarise",
-  async fn(args : Map[String, Json], context : @context.Context) {
-    let tenant = context.header("x-tenant").unwrap_or("public")
-    context.report_progress(progress=0.0, total=1.0, message="reading") catch {
-      _ =&gt; ()
-    }
-    let text = match args.get("text") {
-      Some(String(text)) =&gt; text
-      _ =&gt; ""
-    }
-    context.report_progress(progress=1.0, total=1.0) catch { _ =&gt; () }
-    @tools.ToolResult::new(content=[
-      @types.text_block("\{tenant}: \{text.length()} characters"),
-    ])
-  },
-)</code></pre><button class="copy" type="button">copy</button></div>
-      <p>Resources and prompts take the same shape through <code>resource_context</code>, <code>template_context</code> and <code>prompt_context</code>. A handler registered without them ignores the context, so the older calls keep working unchanged.</p>
+      <h2>A handler that sees its request</h2>
+      <p class="pdesc">A handler that needs to know who is calling, or to report while it works, is handed the request: its headers, the client's identity, the progress token it offered, and the answers it sent on a retry.</p>
+      <!-- code:context -->
+        <div class="styles">
+        <div class="variant" data-style="annotations"><p class="why">There is no annotation for a handler that wants the request: the generator registers the function it is given. Write these two forms instead — the annotation is the shorter way to say what they say.</p></div>
+        <div class="variant" data-style="functions"><div class="code"><pre><code class="language-moonbit">///|
+/// A tool that sees the request it serves, and reports on it while it works.
+pub fn add_counter(mcp : @moonmcp.Server) -&gt; Unit {
+  mcp.tool_context(
+    "count",
+    async fn(args : Map[String, Json], context : @context.Context) {
+      let up_to = match args.get("up_to") {
+        Some(Number(value, ..)) =&gt; value.to_int()
+        _ =&gt; 3
+      }
+      if up_to &lt; 0 {
+        raise @exceptions.Tool("up_to must not be negative")
+      }
+      for step in 0..&lt;up_to {
+        context.report_progress(
+          progress=(step + 1).to_double(),
+          total=up_to.to_double(),
+          message="step \{step + 1}",
+        ) catch {
+          _ =&gt; ()
+        }
+      }
+      @tools.ToolResult::new(content=[@types.text_block("counted to \{up_to}")])
+    },
+    description="Count to a number, reporting progress as it goes",
+    input_schema={
+      "type": "object",
+      "properties": { "up_to": { "type": "number" } },
+    },
+  )
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why"><code>tool_context</code> hands the handler the request it serves: its headers, the client's identity, its progress token, and the answers it sent back.</p></div>
+        <div class="variant" data-style="classes"><div class="code"><pre><code class="language-moonbit">///|
+/// A counter that reports how far it has got, through the request it serves.
+pub struct Counter {}
+
+///|
+impl @providers.Provider for Counter with fn tools(self) {
+  [
+    @tools.Tool::new(
+      "count",
+      parameters={
+        "type": "object",
+        "properties": { "up_to": { "type": "number" } },
+      },
+      run_fn=_ =&gt; {
+        let _ = self
+        abort("count is served with its request, through context_run_fn")
+      },
+      description="Count to a number, reporting progress as it goes",
+      context_run_fn=async fn(
+        args,
+        context,
+      ) -&gt; @tools.ToolResult raise @exceptions.FastMCPError {
+        let up_to = match args.get("up_to") {
+          Some(Number(value, ..)) =&gt; value.to_int()
+          _ =&gt; 3
+        }
+        if up_to &lt; 0 {
+          raise @exceptions.Tool("up_to must not be negative")
+        }
+        for step in 0..&lt;up_to {
+          context.report_progress(
+            progress=(step + 1).to_double(),
+            total=up_to.to_double(),
+            message="step \{step + 1}",
+          ) catch {
+            _ =&gt; ()
+          }
+        }
+        @tools.ToolResult::new(content=[
+          @types.text_block("counted to \{up_to}"),
+        ])
+      },
+    ) catch {
+      e =&gt; abort("count: \{e}")
+    },
+  ]
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">The tool is built with <code>context_run_fn</code>, so the object's tools see the request too.</p></div>
+        </div>
+        <!-- /code:context -->
+      <p>The reports travel to the client while the answer is still being worked out, so a client with a progress token sees <code>notifications/progress</code> as the counting happens, not after it:</p>
+      <!-- out:context -->
+        <div class="session"><span class="row"><span class="say">tools/call count {"up_to":2}</span><span class="arrow">-&gt;</span><span class="got">counted to 2</span></span></div>
+        <!-- /out:context -->
+      <p>The same shape reaches resources and prompts through <code>resource_context</code>, <code>template_context</code> and <code>prompt_context</code>. A handler registered without them ignores the request, so the shorter calls keep working unchanged.</p>
+    </section>
+
+    <section class="section" id="extend">
+      <h2>Extending the server</h2>
+      <p class="pdesc">Three things can sit between the program and the client: providers, which supply components from somewhere other than the registry; transforms, which rewrite what the client is shown; and layers, which see every request before it is served.</p>
+      <!-- code:extend -->
+        <div class="styles">
+        <div class="variant" data-style="annotations"><p class="why">Nothing here is a declaration, so no annotation covers it: a transform and a layer are values handed to the server, or types the server is given. The two forms beside this one differ only in which.</p></div>
+        <div class="variant" data-style="functions"><div class="code"><pre><code class="language-moonbit">///|
+/// Hold a capability back from the listing, and put a cache in front of every
+/// request.
+pub fn with_extensions(mcp : @moonmcp.Server) -&gt; @moonmcp.Server {
+  mcp.add_transform(@transforms.Hidden::new(names=["greet"]))
+  mcp.use_layer(@layers.Caching::new(ttl_ms=1_000).layer())
+  mcp
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">A transform and a layer are values: <code>add_transform</code> rewrites what the client is shown, <code>use_layer</code> puts code in front of every request.</p></div>
+        <div class="variant" data-style="classes"><div class="code"><pre><code class="language-moonbit">///|
+/// A filter is a contract, so holding the greeting back is a type of its own.
+pub struct Quiet {}
+
+///|
+impl @transforms.Transform for Quiet with fn tools(self, tools) {
+  let _ = self
+  tools.filter(tool =&gt; tool.component.name != "greet")
+}
+
+///|
+/// Hold a capability back from the listing, and put a cache in front of every
+/// request.
+pub fn with_extensions(mcp : @moonmcp.Server) -&gt; @moonmcp.Server {
+  mcp.add_transform(Quiet::{ })
+  mcp.use_layer(@layers.Caching::new(ttl_ms=1_000).layer())
+  mcp
+}</code></pre><button class="copy" type="button">copy</button></div><p class="why">A transform is a contract, so the filter is a type of its own. A layer is a value either way, since it wraps a call rather than describing a component.</p></div>
+        </div>
+        <!-- /code:extend -->
+      <!-- out:extend -->
+        <div class="session"><span class="row"><span class="say">tools/list</span><span class="arrow">-&gt;</span><span class="got">add</span></span><span class="row"><span class="say">tools/call add</span><span class="arrow">-&gt;</span><span class="got">5</span></span></div>
+        <!-- /out:extend -->
       <div class="exchange glass" style="padding:1rem 1.1rem">
-        <div class="msg agent"><div class="who">on a Context</div><div class="body"><code>header("x-tenant")</code> &middot; <code>client_info()</code> &middot; <code>progress_token()</code> &middot; <code>is_cancelled()</code> &middot; <code>input_responses()</code></div></div>
-        <div class="msg" style="margin-top:-.2rem"><div class="who">sends</div><div class="body"><code>report_progress(progress=, total=, message=)</code> &middot; <code>log(level=, message=)</code> &middot; <code>info</code>, <code>warning</code>, <code>error</code></div></div>
+        <div class="msg agent"><div class="who">transform</div><div class="body"><code>Namespace(prefix)</code> &middot; <code>Hidden(names)</code> &middot; <code>Tagged(any_of)</code> &middot; or a type implementing <code>Transform</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">layer</div><div class="body"><code>Caching</code> &middot; <code>RateLimiting</code> &middot; <code>Telemetry</code> &middot; or <code>Layer::new(run=)</code></div></div>
       </div>
+      <p>Transforms run in the order they were added, each on the last one's output, so <code>[Namespace, Hidden]</code> hides what is left of a name after the prefix and <code>[Hidden, Namespace]</code> hides it before. Layers nest the same way: the first one added is outermost, and a layer that answers without calling on to the next one answers for the server.</p>
+      <p>A cache keys on the operation, the name, the caller and the arguments, with object keys sorted, so the same call in another order hits the same entry. A rate limiter counts a token bucket per caller and refuses with <code>-32000</code>, saying when to try again. Telemetry records a span per request, answered or refused, and hands each one to whatever sink the program gave it.</p>
     </section>
 
     <section class="section" id="transports">

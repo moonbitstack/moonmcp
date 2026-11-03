@@ -1,0 +1,10 @@
+{
+  "name": "moonmcp-interop",
+  "private": true,
+  "type": "module",
+  "description": "The interoperability checks: the official TypeScript SDK and Inspector against moonmcp, and moonmcp's client against them.",
+  "dependencies": {
+    "@modelcontextprotocol/inspector": "2.13.0",
+    "@modelcontextprotocol/sdk": "1.32.2"
+  }
+}

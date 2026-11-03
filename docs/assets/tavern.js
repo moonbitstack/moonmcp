@@ -42,6 +42,42 @@
     });
   });
 
+  /* how the server is written: one style at a time across the whole guide */
+  var STYLES = ["annotations", "functions", "classes"];
+  var applyStyle = function (style) {
+    root.setAttribute("data-style", style);
+    document.querySelectorAll("[data-style-pick]").forEach(function (btn) {
+      var on = btn.getAttribute("data-style-pick") === style;
+      btn.setAttribute("aria-checked", on ? "true" : "false");
+      btn.tabIndex = on ? 0 : -1;
+    });
+  };
+  var pickStyle = function (style, focus) {
+    applyStyle(style);
+    try { localStorage.setItem("moonmcp-style", style); } catch (e) {}
+    if (focus) {
+      var btn = document.querySelector('[data-style-pick="' + style + '"]');
+      if (btn) btn.focus();
+    }
+  };
+  var savedStyle = null;
+  try { savedStyle = localStorage.getItem("moonmcp-style"); } catch (e) {}
+  if (document.querySelector("[data-style-pick]")) {
+    applyStyle(STYLES.indexOf(savedStyle) >= 0 ? savedStyle : "annotations");
+    document.querySelectorAll("[data-style-pick]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        pickStyle(btn.getAttribute("data-style-pick"), false);
+      });
+      btn.addEventListener("keydown", function (ev) {
+        if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+        var i = STYLES.indexOf(btn.getAttribute("data-style-pick"));
+        var step = ev.key === "ArrowRight" ? 1 : STYLES.length - 1;
+        pickStyle(STYLES[(i + step) % STYLES.length], true);
+        ev.preventDefault();
+      });
+    });
+  }
+
   /* active nav / sidebar link */
   var links = Array.prototype.slice.call(document.querySelectorAll(".side-nav a, .nav .links a"));
   if (links.length && "IntersectionObserver" in window) {

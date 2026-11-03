@@ -1,0 +1,20 @@
+// moonmcp's client against a server written with the official TypeScript SDK:
+// over Streamable HTTP, and over the stdio of a child process.
+// `moon run src/examples/06-interop --target native -- http <url>`
+// `moon run src/examples/06-interop --target native -- stdio node server.mjs stdio`
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/io",
+  "moonbitlang/async/process",
+  "moonbitlang/core/env",
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/client/http",
+  "moonbitstack/moonmcp/types",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "+native"
+
+warnings = "-29"

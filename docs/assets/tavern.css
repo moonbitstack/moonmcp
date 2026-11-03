@@ -537,3 +537,28 @@ footer.site .grow{margin-left:auto}
   .seat .candle{align-self:center;margin:0}
   .chandelier{display:none}
 }
+
+/* ---- how the server is written -----------------------------------------
+   The guide's switch: one style at a time, remembered between pages. The bar
+   sits under the nav and passes the wheel through to the page below it. */
+.style-bar{position:sticky;top:3.9rem;z-index:6;display:flex;justify-content:flex-end;margin:-.4rem 0 .8rem;pointer-events:none}
+.style-switch{pointer-events:auto;display:inline-flex;align-items:center;gap:.12rem;padding:.2rem;border-radius:6px;background:rgba(233,223,203,.86);border:1px solid var(--sheet-hair);box-shadow:0 7px 18px -14px rgba(0,0,0,.7);backdrop-filter:blur(6px)}
+.style-switch .style-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sheet-muted);padding:0 .45rem 0 .55rem}
+.style-switch button{font:inherit;font-size:.84rem;font-weight:500;color:var(--sheet-muted);background:transparent;border:0;border-radius:4px;cursor:pointer;padding:.32rem .68rem .26rem;line-height:1.2}
+.style-switch button:hover{color:var(--sheet-ink);background:rgba(139,90,60,.12)}
+.style-switch button[aria-checked="true"]{color:#FFF8E8;background:#8B3A1E}
+.style-switch button:focus-visible{outline:2px solid var(--copper);outline-offset:1px}
+.styles>.variant{display:none}
+html:not([data-style]) .styles>[data-style="annotations"],
+html[data-style="annotations"] .styles>[data-style="annotations"],
+html[data-style="functions"] .styles>[data-style="functions"],
+html[data-style="classes"] .styles>[data-style="classes"]{display:block}
+.styles .why{margin:.6rem 0 0;color:var(--sheet-muted);font-size:.94rem;max-width:70ch;border-left:2px solid rgba(139,90,60,.45);border-radius:0 4px 4px 0;padding:.1rem 0 .1rem .7rem}
+@media (width <= 560px){.style-switch .style-label{display:none}.style-switch button{padding:.32rem .5rem .26rem}}
+
+/* recorded answers: one request a line, the answer in the second column */
+.session{display:grid;grid-template-columns:max-content max-content minmax(0,1fr);column-gap:.7rem;row-gap:.1rem;background:#2b1f16;color:#E6D6B4;border:1px solid #42342a;border-radius:5px;padding:.9rem 1.05rem;box-shadow:inset 0 0 30px rgba(0,0,0,.5);font-family:"JetBrains Mono",monospace;font-size:.78rem;line-height:1.85;overflow-x:auto;margin:.9rem 0}
+.session .row{display:contents}
+.session .say{color:#C9BBA4;white-space:nowrap}
+.session .arrow{color:var(--copper-hi)}
+.session .got{color:#EFC08A;white-space:pre-wrap;overflow-wrap:anywhere}

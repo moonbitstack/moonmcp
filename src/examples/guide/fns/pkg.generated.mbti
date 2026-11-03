@@ -1,0 +1,31 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/examples/guide/fns"
+
+import {
+  "moonbitstack/moonmcp/server",
+}
+
+// Values
+pub fn add_counter(@server.Server) -> Unit
+
+pub fn add_resources(@server.Server) -> Unit
+
+pub fn add_review(@server.Server) -> Unit
+
+pub fn add_tools(@server.Server) -> Unit
+
+pub fn extended() -> @server.Server
+
+pub fn server() -> @server.Server
+
+pub fn with_counter() -> @server.Server
+
+pub fn with_extensions(@server.Server) -> @server.Server
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

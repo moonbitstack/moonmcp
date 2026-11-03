@@ -1,0 +1,25 @@
+// The extension points in one runnable server: a provider supplies the tools,
+// a namespace presents them, a cache answers repeats, a limiter counts calls.
+// `moon run src/examples/05-extensions --target native` serves it over stdio.
+import {
+  "moonbitlang/async",
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/providers",
+  "moonbitstack/moonmcp/transforms",
+  "moonbitstack/moonmcp/layers",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/types",
+}
+
+pkgtype(kind: "executable")
+
+warnings = "-29"
+
+options(
+  targets: {
+    "main.mbt": [ "native" ],
+    "elsewhere.mbt": [ "wasm", "js", "wasm-gc" ],
+  },
+)

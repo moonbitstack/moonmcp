@@ -1,0 +1,20 @@
+// Runs the guide's requests against the three ways of writing the same server
+// and reports a difference: `moon run src/examples/guide/check --target native`.
+import {
+  "moonbitlang/async",
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/examples/guide/ann",
+  "moonbitstack/moonmcp/examples/guide/fns",
+  "moonbitstack/moonmcp/examples/guide/cls",
+}
+
+pkgtype(kind: "executable")
+
+warnings = "-29"
+
+options(
+  targets: {
+    "main.mbt": [ "native" ],
+    "elsewhere.mbt": [ "wasm", "js", "wasm-gc" ],
+  },
+)

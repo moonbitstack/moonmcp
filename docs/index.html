@@ -51,7 +51,7 @@
     <div class="signboard">
       <h1>moonmcp</h1>
       <p class="sign-kind">Model Context Protocol &middot; MoonBit</p>
-      <p class="say">A server framework for MoonBit. One server answers both eras of the protocol, speaks Streamable HTTP or stdio, and its tools are registered by hand or written as <code>#mcp</code> annotations.</p>
+      <p class="say">A server framework for MoonBit. One server answers both eras of the protocol and speaks Streamable HTTP or stdio. Its capabilities are written as <code>#mcp</code> annotations, registered by hand, or held by a type of their own &mdash; and providers, transforms and layers sit around them.</p>
     </div>
 
     <div class="scene-grid">
@@ -61,7 +61,7 @@
           <div class="shelf"><i></i><i></i><i></i><i></i></div>
         </div>
         <div class="seats">
-          <button class="seat" type="button" data-title="Tools" data-tag="jade &middot; #mcp.tool" data-desc="A tool is a handler that reads its arguments and returns JSON, with an input schema the client can show. A wrong argument or an error the handler raises comes back as an isError result the model can correct from." data-link="guide.html#register" data-linktext="Open the guide &middot; Register a tool">
+          <button class="seat" type="button" data-title="Tools" data-tag="jade &middot; #mcp.tool" data-desc="A tool is a handler that reads its arguments and returns JSON, with an input schema the client can show. It can be written as an annotation, registered by hand, or held by a type of its own. A wrong argument or an error the handler raises comes back as an isError result the model can correct from." data-link="guide.html#install" data-linktext="Open the guide &middot; Install, and one tool">
             <span class="plaque">Tools</span>
             <span class="menu">A handler, an input schema, and a typed result.</span>
             <span class="candle" data-state="fire" aria-hidden="true"><i class="flame"></i></span>
@@ -103,16 +103,16 @@
     <div class="board">
       <h2>The board</h2>
       <ul>
-        <li><a href="guide.html#install">Install</a></li>
-        <li><a href="guide.html#register">Register a tool</a></li>
-        <li><a href="guide.html#annotate">Annotate</a></li>
+        <li><a href="guide.html#install">Install, and one tool</a></li>
         <li><a href="guide.html#resources">Resources</a></li>
         <li><a href="guide.html#prompts">Prompts</a></li>
+        <li><a href="guide.html#context">Request context</a></li>
+        <li><a href="guide.html#extend">Extending the server</a></li>
         <li><a href="guide.html#transports">Transports</a></li>
-        <li><a href="guide.html#debug">Debug page</a></li>
+        <li><a href="guide.html#debug">Documentation page</a></li>
         <li><a href="guide.html#client">Connect a client</a></li>
       </ul>
-      <p class="tally"><!--numbers-->964 public items from 16 packages<!--/numbers--></p>
+      <p class="tally"><!--numbers-->1046 public items from 19 packages<!--/numbers--></p>
       <p class="tally-sub">MCP 2026-07-28 &middot; 2025-11-25 &middot; 2024-11-05</p>
     </div>
   </section>

@@ -1,0 +1,11 @@
+// The guide's server registered one capability at a time; what the annotations
+// generate, written out.
+import {
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/context",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/transforms",
+  "moonbitstack/moonmcp/layers",
+  "moonbitstack/moonmcp/types",
+}

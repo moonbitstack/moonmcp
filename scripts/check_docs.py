@@ -115,6 +115,10 @@ def main():
         return
     known = aliases()
     _, source, _ = manifest(ROOT / "moon.mod")
+    # A package left behind by an interrupted run would make the next one fail
+    # on the same name.
+    for stale in (ROOT / source).glob("_doc*"):
+        shutil.rmtree(stale, ignore_errors=True)
     made = []
     try:
         for i, (origin, code) in enumerate(found):

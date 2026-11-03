@@ -3,7 +3,7 @@
 /// listed, one is called, and the progress a handler reports is printed as it
 /// arrives.
 ///
-///     moon run src/examples/client --target native
+///     moon run src/examples/04-client --target native
 async fn main {
   let mcp = @moonmcp.Server::new("client demo", version="1.0.0")
   mcp.tool_context("count", async fn(

@@ -93,4 +93,8 @@ pub using @tools {type Tool}
 
 pub using @tools {type ToolResult}
 
+pub using @providers {trait Provider}
+
+pub using @transforms {trait Transform}
+
 // Traits

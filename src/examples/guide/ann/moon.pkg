@@ -1,0 +1,8 @@
+// The guide's server written as annotations; `server()` is what the guide's
+// check program builds beside the two other styles.
+// `tools.g.mbt` comes from `cmd/mcp`, wired as a dev_build rule.
+import {
+  "moonbitstack/moonmcp",
+}
+
+formatter(ignore: [ "tools.g.mbt" ])

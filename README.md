@@ -96,9 +96,15 @@ formatter(ignore: [ "tools.g.mbt" ])
 `tools.mbt` changes. It holds `register(mcp)`, which the program calls once
 before serving.
 
-## Registering by hand
+## Without annotations
 
-Annotations generate these calls, and a tool built at run time is written the same way:
+Annotations are one of three ways to say the same thing. The other two are one
+registration per capability, and a type that holds a capability of its own.
+
+### One call per capability
+
+Annotations generate exactly these calls, and a capability decided at run time
+is written the same way:
 
 ```moonbit
 async fn main {
@@ -140,6 +146,140 @@ Arguments are checked against the tool's input schema (JSON Schema 2020-12)
 before the handler runs. A wrong argument or an error the handler raises comes
 back as a result marked `isError`, which the model reads and can correct itself
 from; only a tool that does not exist is a protocol error.
+
+### A type per capability
+
+A set of capabilities can also live in a type: the state in its fields, the
+work in its methods, and one `impl Provider` saying which of them the server
+offers. The server is handed the object and asks it again whenever the tools
+are listed, so what it offers may change between two listings.
+
+```moonbit
+///|
+struct Arithmetic {
+  priv mut calls : Int
+}
+
+///|
+fn Arithmetic::add(
+  self : Arithmetic,
+  a : Double,
+  b : Double,
+) -> @moonmcp.ToolResult raise @moonmcp.FastMCPError {
+  self.calls = self.calls + 1
+  @moonmcp.ToolResult::new(content=[@moonmcp.text_block("\{a + b}")])
+}
+
+///|
+impl @moonmcp.Provider for Arithmetic with fn tools(self) {
+  [
+    @moonmcp.Tool::new(
+      "add",
+      parameters={
+        "type": "object",
+        "properties": { "a": { "type": "number" }, "b": { "type": "number" } },
+        "required": ["a", "b"],
+      },
+      run_fn=args => {
+        let a = match args.get("a") {
+          Some(Number(value, ..)) => value
+          _ => 0.0
+        }
+        let b = match args.get("b") {
+          Some(Number(value, ..)) => value
+          _ => 0.0
+        }
+        self.add(a, b)
+      },
+    ) catch {
+      e => abort("add: \{e}")
+    },
+  ]
+}
+
+///|
+async fn main {
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.add_provider(Arithmetic::{ calls: 0 })
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
+    e => println("stopped: \{e}")
+  }
+}
+```
+
+## Extending the server
+
+Three things can sit between the program and the client. A **provider** supplies
+capabilities from somewhere other than the registry — a file, another server, a
+type of your own. A **transform** rewrites what the client is shown. A **layer**
+sees every request before it is served, and may answer it, refuse it, or let it
+go on.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool("add", args => Json("added"), description="Add two numbers")
+  mcp.add_transform(@moonmcp.Namespace::new("bench"))
+  mcp.use_layer(@moonmcp.RateLimiting::new(rate=10, burst=20).layer())
+  mcp.use_layer(@moonmcp.Caching::new(ttl_ms=5_000).layer())
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
+    e => println("stopped: \{e}")
+  }
+}
+```
+
+The tool is now listed as `bench_add`, ten calls a second are allowed per caller
+with twenty in a burst, and a repeated call is answered from memory for five
+seconds.
+
+| Call | Does |
+|:--|:--|
+| `add_provider(provider)` | Takes capabilities from an object implementing `Provider`, asked again on every listing. A name the server already answers is not taken over. |
+| `add_transform(transform)` | Rewrites the offered set: `Namespace(prefix)`, `Hidden(names)`, `Tagged(any_of)`, or a type implementing `Transform`. They run in the order they were added. |
+| `use_layer(layer)` | Puts a `Layer` in front of every request: `Caching`, `RateLimiting`, `Telemetry`, or `Layer::new(run=)`. The first one added is outermost. |
+
+A cached answer is keyed on the operation, the name, the caller and the
+arguments, with object keys sorted, so the same call with its arguments in
+another order hits the same entry. Errors and asks for client input are never
+cached, and one caller's answer is not handed to another unless the cache was
+built with `shared=true`.
+
+## Extending the server
+
+Three things can sit between the program and the client. A **provider** supplies
+capabilities from somewhere other than the registry — a file, another server, a
+type of your own. A **transform** rewrites what the client is shown. A **layer**
+sees every request before it is served, and may answer it, refuse it, or let it
+go on.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool("add", args => Json("added"), description="Add two numbers")
+  mcp.add_transform(@moonmcp.Namespace::new("bench"))
+  mcp.use_layer(@moonmcp.RateLimiting::new(rate=10, burst=20).layer())
+  mcp.use_layer(@moonmcp.Caching::new(ttl_ms=5_000).layer())
+  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
+    e => println("stopped: \{e}")
+  }
+}
+```
+
+The tool is now listed as `bench_add`, ten calls a second are allowed per caller
+with twenty in a burst, and a repeated call is answered from memory for five
+seconds.
+
+| Call | Does |
+|:--|:--|
+| `add_provider(provider)` | Takes capabilities from an object implementing `Provider`, asked again on every listing. A name the server already answers is not taken over. |
+| `add_transform(transform)` | Rewrites the offered set: `Namespace(prefix)`, `Hidden(names)`, `Tagged(any_of)`, or a type implementing `Transform`. They run in the order they were added. |
+| `use_layer(layer)` | Puts a `Layer` in front of every request: `Caching`, `RateLimiting`, `Telemetry`, or `Layer::new(run=)`. The first one added is outermost. |
+
+A cached answer is keyed on the operation, the name, the caller and the
+arguments, with object keys sorted, so the same call with its arguments in
+another order hits the same entry. Errors and asks for client input are never
+cached, and one caller's answer is not handed to another unless the cache was
+built with `shared=true`.
 
 ## Request context
 
@@ -450,10 +590,13 @@ writes the configuration above.
 | Example | Shows |
 |:--|:--|
 | [`demo`](src/examples/demo/) | One server with three tools, a resource, a resource template and a prompt; one tool reports progress |
-| [`http`](src/examples/http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/http --target native` |
-| [`stdio`](src/examples/stdio/) | That server over stdio: `moon run src/examples/stdio --target native` |
-| [`annotations`](src/examples/annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
-| [`client`](src/examples/client/) | A client and a server in one program: list the tools, call one, print the progress it reports: `moon run src/examples/client --target native` |
+| [`01-annotations`](src/examples/01-annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
+| [`02-http`](src/examples/02-http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/02-http --target native` |
+| [`03-stdio`](src/examples/03-stdio/) | That server over stdio: `moon run src/examples/03-stdio --target native` |
+| [`04-client`](src/examples/04-client/) | A client and a server in one program: list the tools, call one, print the progress it reports: `moon run src/examples/04-client --target native` |
+| [`05-extensions`](src/examples/05-extensions/) | A provider, a namespace, a cache and a rate limiter on one server: `moon run src/examples/05-extensions --target native` |
+| [`06-interop`](src/examples/06-interop/) | The client against a server written with the official TypeScript SDK, over Streamable HTTP and over a child's stdio: `moon run src/examples/06-interop --target native -- http <url>` |
+| [`guide/ann`](src/examples/guide/ann/), [`guide/fns`](src/examples/guide/fns/), [`guide/cls`](src/examples/guide/cls/) | The same server written three ways; `guide/check` sends each request to all three and fails if one of them answers differently |
 
 ## Packages
 
@@ -469,6 +612,9 @@ writes the configuration above.
 | `client` | `Client` and the `Transport` contract, with the in-memory and line transports |
 | `client/http` | The HTTP transport |
 | `auth` | `Bearer` and `Principal`: the token an HTTP endpoint checks, verified through `mooncred` |
+| `providers` | `Provider`: where capabilities come from when they are not registered one at a time, and `Listing` |
+| `transforms` | `Transform`: what the client is shown, with `Namespace`, `Hidden` and `Tagged` |
+| `layers` | `Layer`: the code every request passes through, with `Caching`, `RateLimiting` and `Telemetry` |
 | `component`, `tasks`, `settings`, `config`, `utilities` | Component metadata, task configuration, settings, the `mcp.json` client configuration, media helpers |
 
 ## Install
