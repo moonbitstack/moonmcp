@@ -105,3 +105,37 @@ jobs:
         run: |
           moon info --target all && git -c core.autocrlf=false diff --ignore-cr-at-eol --exit-code
 
+  interop:
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: install the interoperability packages
+        run: npm install --prefix scripts/interop --no-audit --no-fund
+
+      - name: build the two servers and the client
+        run: |
+          moon build src/examples/03-stdio --target native
+          moon build src/examples/02-http --target native
+          moon build src/examples/06-interop --target native
+
+      - name: the typescript sdk and the inspector, both ways
+        run: |
+          node scripts/interop/run.mjs \
+            --stdio _build/native/debug/build/examples/03-stdio/03-stdio \
+            --http _build/native/debug/build/examples/02-http/02-http \
+            --client _build/native/debug/build/examples/06-interop/06-interop
