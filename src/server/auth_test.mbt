@@ -65,7 +65,7 @@ async fn post_whoami(
 
 ///|
 async test "http: a request without a token is challenged" {
-  let app = auth_demo().to_asgi(auth=Some(auth_bearer(fn() { 1_000L })))
+  let app = auth_demo().to_asgi(auth=auth_bearer(fn() { 1_000L }))
   let client = @testing.Client::new(app)
   let response = post_whoami(client, None) catch {
     _ => fail("the request raised")
@@ -78,7 +78,7 @@ async test "http: a request without a token is challenged" {
 
 ///|
 async test "http: a token that does not verify is challenged" {
-  let app = auth_demo().to_asgi(auth=Some(auth_bearer(fn() { 1_000L })))
+  let app = auth_demo().to_asgi(auth=auth_bearer(fn() { 1_000L }))
   let client = @testing.Client::new(app)
   let expired = mint({ "sub": Json::string("alice"), "exp": Json::number(10.0) })
   let response = post_whoami(client, Some("Bearer " + expired)) catch {
@@ -95,7 +95,7 @@ async test "http: a token that does not verify is challenged" {
 
 ///|
 async test "http: a valid token names the caller its handler sees" {
-  let app = auth_demo().to_asgi(auth=Some(auth_bearer(fn() { 1_000L })))
+  let app = auth_demo().to_asgi(auth=auth_bearer(fn() { 1_000L }))
   let client = @testing.Client::new(app)
   let token = mint({
     "sub": Json::string("alice"),

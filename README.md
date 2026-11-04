@@ -473,7 +473,7 @@ the `WWW-Authenticate` challenge the specification asks for.
 async fn main {
   let mcp = @moonmcp.Server::new("demo")
   let bearer = @moonmcp.Bearer::hmac(secret="s3cret")
-  @mooncat.serve(mcp.to_asgi(auth=Some(bearer)), port=12000) catch {
+  @mooncat.serve(mcp.to_asgi(auth=bearer), port=12000) catch {
     _ => ()
   }
 }

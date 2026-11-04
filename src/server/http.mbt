@@ -39,7 +39,7 @@ pub fn Server::to_asgi(
   origins~ : Array[String] = [],
   docs~ : String? = Some("/docs"),
   theme~ : @docs.Theme = @docs.theme,
-  auth~ : @auth.Bearer? = None,
+  auth? : @auth.Bearer,
 ) -> @moonasgi.AsgiApp {
   (scope, receive, send) => {
     match scope {
