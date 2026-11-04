@@ -3,12 +3,13 @@ package "moonbitstack/moonmcp/context"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitstack/moonlog",
   "moonbitstack/moonmcp/types",
 }
 
 // Values
-pub fn notification(String, Map[String, Json]) -> Json
+pub fn notification(String, Map[String, @json.Json]) -> @json.Json
 
 // Errors
 
@@ -16,7 +17,7 @@ pub fn notification(String, Map[String, Json]) -> Json
 pub struct Context {
   // private fields
 }
-pub fn Context::claims(Self) -> Map[String, Json]
+pub fn Context::claims(Self) -> Map[String, @json.Json]
 pub fn Context::client_capabilities(Self) -> @types.ClientCapabilities?
 pub fn Context::client_info(Self) -> @types.Implementation?
 pub async fn Context::debug(Self, String) -> Unit
@@ -25,36 +26,37 @@ pub fn Context::facts(Self) -> Facts
 pub fn Context::header(Self, String) -> String?
 pub fn Context::headers(Self) -> Map[String, String]
 pub async fn Context::info(Self, String) -> Unit
-pub fn Context::input_responses(Self) -> Map[String, Json]
+pub fn Context::input_responses(Self) -> Map[String, @json.Json]
 pub fn Context::is_cancelled(Self) -> Bool
-pub async fn Context::log(Self, level~ : @types.LoggingLevel, message~ : String, logger? : String, data? : Json) -> Unit
+pub async fn Context::log(Self, level~ : @types.LoggingLevel, message~ : String, logger? : String, data? : @json.Json) -> Unit
 pub fn Context::logger(Self) -> @moonlog.Logger?
-pub fn Context::new(facts~ : Facts, emit? : async (Json) -> Unit, gone? : () -> Bool, logger? : @moonlog.Logger) -> Self
+pub fn Context::new(facts~ : Facts, emit? : async (@json.Json) -> Unit, gone? : () -> Bool, logger? : @moonlog.Logger) -> Self
 pub fn Context::operation(Self) -> String
-pub fn Context::progress_token(Self) -> Json?
+pub fn Context::progress_token(Self) -> @json.Json?
 pub fn Context::protocol_version(Self) -> String
 pub fn Context::quiet() -> Self
 pub async fn Context::report_progress(Self, progress~ : Double, total? : Double, message? : String) -> Unit
-pub fn Context::request_id(Self) -> Json
+pub fn Context::request_id(Self) -> @json.Json
 pub fn Context::request_state(Self) -> String?
 pub fn Context::subject(Self) -> String?
 pub async fn Context::warning(Self, String) -> Unit
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Facts {
   protocol_version : String
   operation : String
-  request_id : Json
+  request_id : @json.Json
   client_info : @types.Implementation?
   client_capabilities : @types.ClientCapabilities?
-  progress_token : Json?
+  progress_token : @json.Json?
   headers : Map[String, String]
-  input_responses : Map[String, Json]
+  input_responses : Map[String, @json.Json]
   request_state : String?
   subject : String?
-  claims : Map[String, Json]
-} derive(Eq, @debug.Debug)
+  claims : Map[String, @json.Json]
+}
 pub fn Facts::equal(Self, Self) -> Bool
-pub fn Facts::new(operation? : String, request_id? : Json, protocol_version? : String, client_info? : @types.Implementation, client_capabilities? : @types.ClientCapabilities, progress_token? : Json, headers? : Map[String, String], input_responses? : Map[String, Json], request_state? : String, subject? : String, claims? : Map[String, Json]) -> Self
+pub fn Facts::new(operation? : String, request_id? : @json.Json, protocol_version? : String, client_info? : @types.Implementation, client_capabilities? : @types.ClientCapabilities, progress_token? : @json.Json, headers? : Map[String, String], input_responses? : Map[String, @json.Json], request_state? : String, subject? : String, claims? : Map[String, @json.Json]) -> Self
 pub fn Facts::not_equal(Self, Self) -> Bool
 pub fn Facts::to_repr(Self) -> @debug.Repr
 

@@ -5,12 +5,13 @@
 
 ///|
 /// The two looks the page comes in.
+#derive(Eq, Debug)
 pub(all) enum Theme {
   /// The moonmcp website's: parchment, ink and copper.
   Site
   /// The page as it first shipped: neutral, with violet accents.
   Plain
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Theme with Eq::{equal, not_equal}

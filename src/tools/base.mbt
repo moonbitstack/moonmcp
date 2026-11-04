@@ -49,6 +49,7 @@ pub fn is_valid_tool_name(name : String) -> Bool {
 
 ///|
 /// The canonical result of running a tool.
+#derive(Debug, Eq)
 pub(all) struct ToolResult {
   content : Array[@types.ContentBlock]
   structured_content : Map[String, Json]?
@@ -59,7 +60,7 @@ pub(all) struct ToolResult {
   /// The client-input request when this leg resolved to an input ask
   /// (SEP-2322); `content` is always empty in that case.
   input_required : @types.InputRequiredResult?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Create a tool result from explicit parts; content or structured content

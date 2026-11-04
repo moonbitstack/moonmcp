@@ -2,10 +2,11 @@
 
 ///|
 /// Audience and priority hints attached to content.
+#derive(Debug, Eq)
 pub(all) struct Annotations {
   audience : Array[String]?
   priority : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Annotations with fn to_json(self : Annotations) -> Json {
@@ -35,10 +36,11 @@ pub impl FromJson for Annotations with fn from_json(
 
 ///|
 /// The contents of a resource, either inline text or base64-encoded bytes.
+#derive(Debug, Eq)
 pub(all) enum ResourceContents {
   Text(uri~ : String, mime_type~ : String?, text~ : String)
   Blob(uri~ : String, mime_type~ : String?, blob~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn ResourceContents::uri(self : ResourceContents) -> String {
@@ -85,6 +87,7 @@ pub impl FromJson for ResourceContents with fn from_json(
 
 ///|
 /// A block of content in a tool result, sampling message or prompt message.
+#derive(Debug, Eq)
 pub(all) enum ContentBlock {
   /// Plain text content.
   Text(text~ : String, annotations~ : Annotations?, meta~ : Map[String, Json]?)
@@ -119,7 +122,7 @@ pub(all) enum ContentBlock {
     annotations~ : Annotations?,
     meta~ : Map[String, Json]?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// Shorthand for a plain text block without annotations.

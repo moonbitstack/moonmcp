@@ -6,6 +6,7 @@
 /// What one request says about itself: the revision it was sent under, the
 /// client's identity and capabilities, the progress token it offered, the
 /// headers that carried it, and the answers it brings back to an earlier leg.
+#derive(Debug, Eq)
 pub(all) struct Facts {
   protocol_version : String
   operation : String
@@ -20,7 +21,7 @@ pub(all) struct Facts {
   subject : String?
   /// Every claim that token carried; empty when there was no token.
   claims : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 /// The facts of a request that carries nothing but its own name, which is what

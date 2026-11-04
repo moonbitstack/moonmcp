@@ -3,6 +3,7 @@ package "moonbitstack/moonmcp/auth"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitstack/mooncred/jwt",
 }
 
@@ -18,10 +19,11 @@ pub fn Bearer::check(Self, String) -> Result[Principal, String]
 pub fn Bearer::hmac(secret~ : String, alg? : @jwt.Alg, issuer? : String, audience? : Array[String], leeway? : Int64, clock? : () -> Int64) -> Self
 pub fn Bearer::own(check~ : (String) -> Result[Principal, String]) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Principal {
   subject : String?
-  claims : Map[String, Json]
-} derive(Eq, @debug.Debug)
+  claims : Map[String, @json.Json]
+}
 pub fn Principal::equal(Self, Self) -> Bool
 pub fn Principal::has_scope(Self, String) -> Bool
 pub fn Principal::not_equal(Self, Self) -> Bool

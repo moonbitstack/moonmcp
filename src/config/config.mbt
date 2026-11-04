@@ -135,23 +135,26 @@ pub fn infer_transport_type_from_url(url : String) -> Result[String, String] {
 
 ///|
 /// FastMCP-specific tool transforms and tag filters for a proxied server.
+#derive(Debug, Eq)
 pub(all) struct ServerTransform {
   /// Tool transform configs keyed by tool name.
   tools : Map[String, Json]
   include_tags : @set.Set[String]?
   exclude_tags : @set.Set[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// The HTTP transports a client configuration may name.
+#derive(Debug, Eq)
 pub(all) enum RemoteTransport {
   Http
   StreamableHttp
   Sse
-} derive(Debug, Eq)
+}
 
 ///|
 /// One server entry: either a stdio command or a remote URL.
+#derive(Debug, Eq)
 pub(all) enum MCPServerKind {
   Stdio(
     command~ : String,
@@ -168,10 +171,11 @@ pub(all) enum MCPServerKind {
     auth~ : String?,
     sse_read_timeout_ms~ : Int32?
   )
-} derive(Debug, Eq)
+}
 
 ///|
 /// One server in a client configuration: how to reach it, and what to hand it when it starts.
+#derive(Debug, Eq)
 pub(all) struct MCPServerEntry {
   kind : MCPServerKind
   /// Per-request timeout in milliseconds; zero disables it.
@@ -180,7 +184,7 @@ pub(all) struct MCPServerEntry {
   icon : String?
   authentication : Map[String, Json]?
   transform : ServerTransform?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for MCPServerEntry with fn to_json(self : MCPServerEntry) -> Json {
@@ -321,9 +325,10 @@ pub impl FromJson for MCPServerEntry with fn from_json(
 
 ///|
 /// A configuration object for MCP servers.
+#derive(Debug, Eq)
 pub(all) struct MCPConfig {
   mcp_servers : Map[String, MCPServerEntry]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn MCPConfig::new() -> MCPConfig {

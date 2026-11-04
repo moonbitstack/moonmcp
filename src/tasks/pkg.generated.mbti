@@ -17,10 +17,11 @@ pub let tasks_extension_id : String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct TaskConfig {
   mode : TaskMode
   poll_interval_ms : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn TaskConfig::equal(Self, Self) -> Bool
 pub fn TaskConfig::from_bool(Bool) -> Self
 pub fn TaskConfig::new(mode? : TaskMode, poll_interval_ms? : Int32) -> Self
@@ -28,19 +29,21 @@ pub fn TaskConfig::not_equal(Self, Self) -> Bool
 pub fn TaskConfig::supports_tasks(Self) -> Bool
 pub fn TaskConfig::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct TaskMeta {
   ttl : Int32?
   fn_key : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn TaskMeta::equal(Self, Self) -> Bool
 pub fn TaskMeta::not_equal(Self, Self) -> Bool
 pub fn TaskMeta::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TaskMode {
   Forbidden
   Optional
   Required
-} derive(Eq, @debug.Debug)
+}
 pub fn TaskMode::equal(Self, Self) -> Bool
 pub fn TaskMode::not_equal(Self, Self) -> Bool
 pub fn TaskMode::to_repr(Self) -> @debug.Repr

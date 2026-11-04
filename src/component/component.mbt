@@ -3,11 +3,12 @@
 
 ///|
 /// FastMCP-namespaced metadata carried in a component's `_meta`.
+#derive(Debug, Eq)
 pub(all) struct FastMCPMeta {
   tags : Array[String]
   version : String?
   versions : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// No tags and no versions: what a component without metadata of its own

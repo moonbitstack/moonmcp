@@ -2,13 +2,14 @@
 
 ///|
 /// `initialize` result: capabilities and server description.
+#derive(Debug, Eq)
 pub(all) struct InitializeResult {
   protocol_version : String
   capabilities : ServerCapabilities
   server_info : Implementation
   instructions : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InitializeResult with fn to_json(self : InitializeResult) -> Json {
@@ -40,13 +41,14 @@ pub impl FromJson for InitializeResult with fn from_json(
 
 ///|
 /// The result of a `tools/list` call.
+#derive(Debug, Eq)
 pub(all) struct ListToolsResult {
   tools : Array[Tool]
   next_cursor : String?
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ListToolsResult with fn to_json(self : ListToolsResult) -> Json {
@@ -78,12 +80,13 @@ pub impl FromJson for ListToolsResult with fn from_json(
 
 ///|
 /// The result of a `tools/call` call.
+#derive(Debug, Eq)
 pub(all) struct CallToolResult {
   content : Array[ContentBlock]
   structured_content : Map[String, Json]?
   is_error : Bool
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn CallToolResult::new(content : Array[ContentBlock]) -> CallToolResult {
@@ -128,13 +131,14 @@ pub impl FromJson for CallToolResult with fn from_json(
 
 ///|
 /// The result of a `prompts/list` call.
+#derive(Debug, Eq)
 pub(all) struct ListPromptsResult {
   prompts : Array[Prompt]
   next_cursor : String?
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ListPromptsResult with fn to_json(self : ListPromptsResult) -> Json {
@@ -166,10 +170,11 @@ pub impl FromJson for ListPromptsResult with fn from_json(
 
 ///|
 /// One message in a rendered prompt.
+#derive(Debug, Eq)
 pub(all) struct PromptMessage {
   role : Role
   content : ContentBlock
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for PromptMessage with fn to_json(self : PromptMessage) -> Json {
@@ -197,11 +202,12 @@ pub impl FromJson for PromptMessage with fn from_json(
 
 ///|
 /// The result of a `prompts/get` call.
+#derive(Debug, Eq)
 pub(all) struct GetPromptResult {
   description : String?
   messages : Array[PromptMessage]
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for GetPromptResult with fn to_json(self : GetPromptResult) -> Json {
@@ -233,13 +239,14 @@ pub impl FromJson for GetPromptResult with fn from_json(
 
 ///|
 /// The result of a `resources/list` call.
+#derive(Debug, Eq)
 pub(all) struct ListResourcesResult {
   resources : Array[Resource]
   next_cursor : String?
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ListResourcesResult with fn to_json(
@@ -273,12 +280,13 @@ pub impl FromJson for ListResourcesResult with fn from_json(
 
 ///|
 /// The result of a `resources/read` call.
+#derive(Debug, Eq)
 pub(all) struct ReadResourceResult {
   contents : Array[ResourceContents]
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ReadResourceResult with fn to_json(
@@ -314,13 +322,14 @@ pub impl FromJson for ReadResourceResult with fn from_json(
 
 ///|
 /// The result of a `resources/templates/list` call.
+#derive(Debug, Eq)
 pub(all) struct ListResourceTemplatesResult {
   resource_templates : Array[ResourceTemplate]
   next_cursor : String?
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ListResourceTemplatesResult with fn to_json(
@@ -358,11 +367,12 @@ pub impl FromJson for ListResourceTemplatesResult with fn from_json(
 
 ///|
 /// Completion values returned by `completion/complete`.
+#derive(Debug, Eq)
 pub(all) struct Completion {
   values : Array[String]
   total : Int32?
   has_more : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Completion with fn to_json(self : Completion) -> Json {
@@ -388,10 +398,11 @@ pub impl FromJson for Completion with fn from_json(
 
 ///|
 /// The result of a `completion/complete` call.
+#derive(Debug, Eq)
 pub(all) struct CompleteResult {
   completion : Completion
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CompleteResult with fn to_json(self : CompleteResult) -> Json {
@@ -415,9 +426,10 @@ pub impl FromJson for CompleteResult with fn from_json(
 
 ///|
 /// A bare result with no payload.
+#derive(Debug, Eq)
 pub(all) struct EmptyResult {
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for EmptyResult with fn to_json(self : EmptyResult) -> Json {
@@ -437,13 +449,14 @@ pub impl FromJson for EmptyResult with fn from_json(
 
 ///|
 /// The result of a `sampling/createMessage` call.
+#derive(Debug, Eq)
 pub(all) struct CreateMessageResult {
   model : String
   stop_reason : String?
   role : Role
   content : ContentBlock
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CreateMessageResult with fn to_json(
@@ -480,11 +493,12 @@ pub impl FromJson for CreateMessageResult with fn from_json(
 
 ///|
 /// The result of an elicitation round trip.
+#derive(Debug, Eq)
 pub(all) struct ElicitResult {
   action : String
   content : Map[String, Json]?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn ElicitResult::accept(content : Map[String, Json]) -> ElicitResult {
@@ -525,10 +539,11 @@ pub impl FromJson for ElicitResult with fn from_json(
 
 ///|
 /// The result of a `roots/list` call.
+#derive(Debug, Eq)
 pub(all) struct ListRootsResult {
   roots : Array[Root]
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ListRootsResult with fn to_json(self : ListRootsResult) -> Json {
@@ -554,10 +569,11 @@ pub impl FromJson for ListRootsResult with fn from_json(
 
 ///|
 /// One guard-channel request a client must answer (SEP-2322).
+#derive(Debug, Eq)
 pub(all) struct InputRequest {
   id : String
   request : Json
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InputRequest with fn to_json(self : InputRequest) -> Json {
@@ -581,11 +597,12 @@ pub impl FromJson for InputRequest with fn from_json(
 
 ///|
 /// Tells the client to answer the carried requests and re-issue the call.
+#derive(Debug, Eq)
 pub(all) struct InputRequiredResult {
   input_requests : Array[InputRequest]
   request_state : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InputRequiredResult with fn to_json(
@@ -620,10 +637,11 @@ pub impl FromJson for InputRequiredResult with fn from_json(
 
 ///|
 /// A task handle minted for task-augmented execution (SEP-2663).
+#derive(Debug, Eq)
 pub(all) struct CreateTaskResult {
   task : Json
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CreateTaskResult with fn to_json(self : CreateTaskResult) -> Json {
@@ -647,13 +665,14 @@ pub impl FromJson for CreateTaskResult with fn from_json(
 
 ///|
 /// A discovery reply wrapping any core result, tagged with its type.
+#derive(Debug, Eq)
 pub(all) struct DiscoverResult {
   result_type : String
   result : Json
   ttl_ms : Int32?
   cache_scope : CacheScope?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for DiscoverResult with fn to_json(self : DiscoverResult) -> Json {

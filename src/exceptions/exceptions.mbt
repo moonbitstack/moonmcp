@@ -1,5 +1,6 @@
 ///|
 /// Custom errors for moonmcp, mirroring fastmcp/exceptions.py.
+#derive(Debug, Eq)
 pub(all) suberror FastMCPError {
   /// A wire-format protocol error, already carrying a JSON-RPC code.
   Mcp(@types.ErrorData)
@@ -28,7 +29,7 @@ pub(all) suberror FastMCPError {
   Authorisation(String)
   /// Authorisation failed because the token is missing required scopes.
   InsufficientScope(required_scopes~ : Array[String], message~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Construct an `InsufficientScope` error with the standard message.

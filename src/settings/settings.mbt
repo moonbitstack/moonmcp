@@ -23,13 +23,14 @@ pub let ten_mb_in_bytes : Int32 = 1024 * 1024 * 10
 
 ///|
 /// How much a server says about its own work, from debug to critical.
+#derive(Debug, Eq)
 pub(all) enum LogLevel {
   Debug
   Info
   Warning
   Error
   Critical
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn LogLevel::to_wire(self : LogLevel) -> String {
@@ -57,11 +58,12 @@ pub fn log_level_from_wire(value : String) -> LogLevel? {
 
 ///|
 /// How moonmcp's native telemetry behaves.
+#derive(Debug, Eq)
 pub(all) enum TelemetryMode {
   Native
   PropagationOnly
   Off
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn TelemetryMode::to_wire(self : TelemetryMode) -> String {
@@ -85,12 +87,13 @@ pub fn telemetry_mode_from_wire(value : String) -> TelemetryMode? {
 
 ///|
 /// The transport a client configuration names for a server.
+#derive(Debug, Eq)
 pub(all) enum TransportKind {
   Stdio
   Http
   Sse
   StreamableHttp
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn TransportKind::to_wire(self : TransportKind) -> String {
@@ -117,19 +120,21 @@ pub fn transport_kind_from_wire(value : String) -> TransportKind? {
 
 ///|
 /// When the tool looks for a newer version of itself.
+#derive(Debug, Eq)
 pub(all) enum CheckForUpdates {
   Stable
   Prerelease
   Off
-} derive(Debug, Eq)
+}
 
 ///|
 /// How long an idle session is kept: the server's choice, never, or a number of seconds.
+#derive(Debug, Eq)
 pub(all) enum SessionIdleTimeout {
   Auto
   Never
   Seconds(Double)
-} derive(Debug, Eq)
+}
 
 ///|
 /// The `http_session_idle_timeout` wire forms: `"auto"`, `"none"`, or a number.
@@ -161,6 +166,7 @@ pub fn session_idle_timeout_from_wire(value : String) -> SessionIdleTimeout? {
 
 ///|
 /// Everything the framework reads from `FASTMCP_*` environment variables.
+#derive(Debug, Eq)
 pub(all) struct Settings {
   home : String
   oauth_encryption_key : String?
@@ -194,7 +200,7 @@ pub(all) struct Settings {
   mounted_components_raise_on_load_error : Bool
   show_server_banner : Bool
   check_for_updates : CheckForUpdates
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Settings::new() -> Settings {

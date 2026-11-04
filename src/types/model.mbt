@@ -2,11 +2,12 @@
 
 ///|
 /// The name and version of an MCP implementation.
+#derive(Debug, Eq)
 pub(all) struct Implementation {
   name : String
   title : String?
   version : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Implementation with fn to_json(self : Implementation) -> Json {
@@ -32,25 +33,29 @@ pub impl FromJson for Implementation with fn from_json(
 
 ///|
 /// Tool listings only need list-change notifications.
+#derive(Debug, Eq)
 pub(all) struct ToolCapabilities {
   list_changed : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Resource capability flags.
+#derive(Debug, Eq)
 pub(all) struct ResourcesCapabilities {
   subscribe : Bool?
   list_changed : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Prompt listings only need list-change notifications.
+#derive(Debug, Eq)
 pub(all) struct PromptsCapabilities {
   list_changed : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// What a server supports; absent groups mean the feature is off.
+#derive(Debug, Eq)
 pub(all) struct ServerCapabilities {
   experimental : Map[String, Json]?
   extensions : Map[String, Json]?
@@ -60,7 +65,7 @@ pub(all) struct ServerCapabilities {
   resources : ResourcesCapabilities?
   tools : ToolCapabilities?
   tasks : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn ServerCapabilities::new() -> ServerCapabilities {
@@ -158,6 +163,7 @@ pub impl FromJson for ServerCapabilities with fn from_json(
 
 ///|
 /// What a client supports.
+#derive(Debug, Eq)
 pub(all) struct ClientCapabilities {
   experimental : Map[String, Json]?
   extensions : Map[String, Json]?
@@ -165,7 +171,7 @@ pub(all) struct ClientCapabilities {
   sampling : Bool?
   elicitation : Bool?
   tasks : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A client that asks for nothing beyond the core protocol.
@@ -225,13 +231,14 @@ pub impl FromJson for ClientCapabilities with fn from_json(
 
 ///|
 /// UI hints for a tool.
+#derive(Debug, Eq)
 pub(all) struct ToolAnnotations {
   title : String?
   read_only_hint : Bool?
   destructive_hint : Bool?
   idempotent_hint : Bool?
   open_world_hint : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ToolAnnotations with fn to_json(self : ToolAnnotations) -> Json {
@@ -261,9 +268,10 @@ pub impl FromJson for ToolAnnotations with fn from_json(
 
 ///|
 /// Task execution configuration advertised on a tool (SEP-1686).
+#derive(Debug, Eq)
 pub(all) struct ToolExecution {
   task_support : @tasks.TaskMode
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ToolExecution with fn to_json(self : ToolExecution) -> Json {
@@ -290,6 +298,7 @@ pub impl FromJson for ToolExecution with fn from_json(
 
 ///|
 /// A tool exposed to the client.
+#derive(Debug, Eq)
 pub(all) struct Tool {
   name : String
   title : String?
@@ -300,7 +309,7 @@ pub(all) struct Tool {
   annotations : ToolAnnotations?
   execution : ToolExecution?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Tool with fn to_json(self : Tool) -> Json {
@@ -352,12 +361,13 @@ pub impl FromJson for Tool with fn from_json(json : Json, path : @json.JsonPath)
 
 ///|
 /// One argument of a prompt template.
+#derive(Debug, Eq)
 pub(all) struct PromptArgument {
   name : String
   title : String?
   description : String?
   required : Bool?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for PromptArgument with fn to_json(self : PromptArgument) -> Json {
@@ -385,13 +395,14 @@ pub impl FromJson for PromptArgument with fn from_json(
 
 ///|
 /// A prompt template exposed to the client.
+#derive(Debug, Eq)
 pub(all) struct Prompt {
   name : String
   title : String?
   description : String?
   arguments : Array[PromptArgument]?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Prompt with fn to_json(self : Prompt) -> Json {
@@ -428,6 +439,7 @@ pub impl FromJson for Prompt with fn from_json(
 
 ///|
 /// A resource exposed for reading.
+#derive(Debug, Eq)
 pub(all) struct Resource {
   uri : String
   name : String
@@ -437,7 +449,7 @@ pub(all) struct Resource {
   size : Int32?
   annotations : Annotations?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Resource with fn to_json(self : Resource) -> Json {
@@ -476,6 +488,7 @@ pub impl FromJson for Resource with fn from_json(
 
 ///|
 /// A parameterised resource address pattern.
+#derive(Debug, Eq)
 pub(all) struct ResourceTemplate {
   uri_template : String
   name : String
@@ -484,7 +497,7 @@ pub(all) struct ResourceTemplate {
   mime_type : String?
   annotations : Annotations?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ResourceTemplate with fn to_json(self : ResourceTemplate) -> Json {
@@ -521,10 +534,11 @@ pub impl FromJson for ResourceTemplate with fn from_json(
 
 ///|
 /// A filesystem root the client exposes to the server.
+#derive(Debug, Eq)
 pub(all) struct Root {
   uri : String
   name : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Root with fn to_json(self : Root) -> Json {
@@ -542,10 +556,11 @@ pub impl FromJson for Root with fn from_json(json : Json, path : @json.JsonPath)
 
 ///|
 /// One message in a sampling round trip.
+#derive(Debug, Eq)
 pub(all) enum Role {
   User
   Assistant
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Role::to_wire(self : Role) -> String {
@@ -568,10 +583,11 @@ pub fn role_from_wire(value : String) -> Role? {
 
 ///|
 /// One message of a sampling conversation, as the client's model is shown it.
+#derive(Debug, Eq)
 pub(all) struct SamplingMessage {
   role : Role
   content : ContentBlock
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for SamplingMessage with fn to_json(self : SamplingMessage) -> Json {
@@ -600,18 +616,20 @@ pub impl FromJson for SamplingMessage with fn from_json(
 
 ///|
 /// Client hints steering server-side model selection.
+#derive(Debug, Eq)
 pub(all) struct ModelHint {
   name : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// What a client prefers of a model: named hints, and the weight it gives cost and speed.
+#derive(Debug, Eq)
 pub(all) struct ModelPreferences {
   hints : Array[ModelHint]?
   cost_priority : Double?
   speed_priority : Double?
   intelligence_priority : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ModelPreferences with fn to_json(self : ModelPreferences) -> Json {
@@ -862,12 +880,13 @@ pub extend ToolExecution with ToJson::{to_json}
 /// The notifications a client opts in to on a `subscriptions/listen` stream.
 /// Every field is off unless asked for, so a server that honours this sends
 /// only what the client named.
+#derive(Debug, Eq)
 pub(all) struct SubscriptionFilter {
   tools_list_changed : Bool?
   prompts_list_changed : Bool?
   resources_list_changed : Bool?
   resource_subscriptions : Array[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// A filter that asks for nothing, which is what an empty object decodes to.

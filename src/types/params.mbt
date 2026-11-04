@@ -2,10 +2,11 @@
 
 ///|
 /// A prompt reference used for completion.
+#derive(Debug, Eq)
 pub(all) enum Reference {
   PromptReference(name~ : String)
   ResourceTemplateReference(uri~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Reference with fn to_json(self : Reference) -> Json {
@@ -40,10 +41,11 @@ pub impl FromJson for Reference with fn from_json(
 
 ///|
 /// One argument offered for completion: which argument it is, and the value to complete.
+#derive(Debug, Eq)
 pub(all) struct CompletionArgument {
   name : String
   value : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CompletionArgument with fn to_json(
@@ -69,10 +71,11 @@ pub impl FromJson for CompletionArgument with fn from_json(
 
 ///|
 /// What the completion request is about: the argument being completed and the text around it.
+#derive(Debug, Eq)
 pub(all) struct CompletionContext {
   reference : Reference
   argument : CompletionArgument
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CompletionContext with fn to_json(self : CompletionContext) -> Json {
@@ -96,9 +99,10 @@ pub impl FromJson for CompletionContext with fn from_json(
 
 ///|
 /// Parameters common to every request; `_meta.progressToken` drives progress.
+#derive(Debug, Eq)
 pub(all) struct RequestParamsMeta {
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn RequestParamsMeta::progress_token(self : RequestParamsMeta) -> String? {
@@ -123,12 +127,13 @@ pub impl FromJson for RequestParamsMeta with fn from_json(
 
 ///|
 /// `initialize` request parameters.
+#derive(Debug, Eq)
 pub(all) struct InitializeRequestParams {
   protocol_version : String
   capabilities : ClientCapabilities
   client_info : Implementation
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InitializeRequestParams with fn to_json(
@@ -162,10 +167,11 @@ pub impl FromJson for InitializeRequestParams with fn from_json(
 
 ///|
 /// List requests with cursor-based pagination.
+#derive(Debug, Eq)
 pub(all) struct PaginatedRequestParams {
   cursor : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn PaginatedRequestParams::progress_token(
@@ -195,11 +201,12 @@ pub impl FromJson for PaginatedRequestParams with fn from_json(
 
 ///|
 /// `tools/call` request parameters.
+#derive(Debug, Eq)
 pub(all) struct CallToolRequestParams {
   name : String
   arguments : Map[String, Json]?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn CallToolRequestParams::progress_token(
@@ -234,10 +241,11 @@ pub impl FromJson for CallToolRequestParams with fn from_json(
 
 ///|
 /// `resources/read` request parameters.
+#derive(Debug, Eq)
 pub(all) struct ReadResourceRequestParams {
   uri : String
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ReadResourceRequestParams with fn to_json(
@@ -263,10 +271,11 @@ pub impl FromJson for ReadResourceRequestParams with fn from_json(
 
 ///|
 /// `resources/subscribe` request parameters.
+#derive(Debug, Eq)
 pub(all) struct SubscribeRequestParams {
   uri : String
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for SubscribeRequestParams with fn to_json(
@@ -292,11 +301,12 @@ pub impl FromJson for SubscribeRequestParams with fn from_json(
 
 ///|
 /// `prompts/get` request parameters.
+#derive(Debug, Eq)
 pub(all) struct GetPromptRequestParams {
   name : String
   arguments : Map[String, Json]?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for GetPromptRequestParams with fn to_json(
@@ -324,10 +334,11 @@ pub impl FromJson for GetPromptRequestParams with fn from_json(
 
 ///|
 /// `completion/complete` request parameters.
+#derive(Debug, Eq)
 pub(all) struct CompleteRequestParams {
   context : CompletionContext
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CompleteRequestParams with fn to_json(
@@ -353,10 +364,11 @@ pub impl FromJson for CompleteRequestParams with fn from_json(
 
 ///|
 /// `logging/setLevel` request parameters.
+#derive(Debug, Eq)
 pub(all) struct SetLevelRequestParams {
   level : LoggingLevel
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for SetLevelRequestParams with fn to_json(
@@ -386,6 +398,7 @@ pub impl FromJson for SetLevelRequestParams with fn from_json(
 
 ///|
 /// `sampling/createMessage` request parameters.
+#derive(Debug, Eq)
 pub(all) struct CreateMessageRequestParams {
   messages : Array[SamplingMessage]
   system_message : String?
@@ -395,7 +408,7 @@ pub(all) struct CreateMessageRequestParams {
   stop_sequences : Array[String]?
   model_preferences : ModelPreferences?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CreateMessageRequestParams with fn to_json(
@@ -450,12 +463,13 @@ pub impl FromJson for CreateMessageRequestParams with fn from_json(
 ///|
 /// `elicitation/create` request parameters, covering both the form- and
 /// URL-based variants.
+#derive(Debug, Eq)
 pub(all) struct ElicitRequestParams {
   message : String
   requested_schema : Map[String, Json]?
   url : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ElicitRequestParams with fn to_json(
@@ -485,11 +499,12 @@ pub impl FromJson for ElicitRequestParams with fn from_json(
 
 ///|
 /// A client answer to a guard-channel input request (SEP-2322).
+#derive(Debug, Eq)
 pub(all) struct InputResponse {
   request_id : String
   action : String
   content : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InputResponse with fn to_json(self : InputResponse) -> Json {
@@ -515,11 +530,12 @@ pub impl FromJson for InputResponse with fn from_json(
 
 ///|
 /// `input/response` request parameters: answers keyed by request id.
+#derive(Debug, Eq)
 pub(all) struct InputResponseRequestParams {
   input_responses : Map[String, Json]
   request_state : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for InputResponseRequestParams with fn to_json(

@@ -5,6 +5,7 @@
 ///|
 /// The request kinds a layer is asked about: the three that run a component,
 /// and the four that list them.
+#derive(Eq, Debug)
 pub(all) enum Operation {
   ListTools
   ListResources
@@ -13,7 +14,7 @@ pub(all) enum Operation {
   CallTool
   ReadResource
   GetPrompt
-} derive(Eq, Debug)
+}
 
 ///|
 /// The JSON-RPC method an operation answers.

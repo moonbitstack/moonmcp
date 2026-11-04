@@ -20,37 +20,41 @@ pub fn transport_kind_from_wire(String) -> TransportKind?
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum CheckForUpdates {
   Stable
   Prerelease
   Off
-} derive(Eq, @debug.Debug)
+}
 pub fn CheckForUpdates::equal(Self, Self) -> Bool
 pub fn CheckForUpdates::not_equal(Self, Self) -> Bool
 pub fn CheckForUpdates::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum LogLevel {
   Debug
   Info
   Warning
   Error
   Critical
-} derive(Eq, @debug.Debug)
+}
 pub fn LogLevel::equal(Self, Self) -> Bool
 pub fn LogLevel::not_equal(Self, Self) -> Bool
 pub fn LogLevel::to_repr(Self) -> @debug.Repr
 pub fn LogLevel::to_wire(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum SessionIdleTimeout {
   Auto
   Never
   Seconds(Double)
-} derive(Eq, @debug.Debug)
+}
 pub fn SessionIdleTimeout::equal(Self, Self) -> Bool
 pub fn SessionIdleTimeout::not_equal(Self, Self) -> Bool
 pub fn SessionIdleTimeout::to_repr(Self) -> @debug.Repr
 pub fn SessionIdleTimeout::to_wire(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Settings {
   home : String
   oauth_encryption_key : String?
@@ -84,29 +88,31 @@ pub(all) struct Settings {
   mounted_components_raise_on_load_error : Bool
   show_server_banner : Bool
   check_for_updates : CheckForUpdates
-} derive(Eq, @debug.Debug)
+}
 pub fn Settings::equal(Self, Self) -> Bool
 pub fn Settings::from_env() -> Self
 pub fn Settings::new() -> Self
 pub fn Settings::not_equal(Self, Self) -> Bool
 pub fn Settings::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TelemetryMode {
   Native
   PropagationOnly
   Off
-} derive(Eq, @debug.Debug)
+}
 pub fn TelemetryMode::equal(Self, Self) -> Bool
 pub fn TelemetryMode::not_equal(Self, Self) -> Bool
 pub fn TelemetryMode::to_repr(Self) -> @debug.Repr
 pub fn TelemetryMode::to_wire(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TransportKind {
   Stdio
   Http
   Sse
   StreamableHttp
-} derive(Eq, @debug.Debug)
+}
 pub fn TransportKind::equal(Self, Self) -> Bool
 pub fn TransportKind::not_equal(Self, Self) -> Bool
 pub fn TransportKind::to_repr(Self) -> @debug.Repr

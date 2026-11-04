@@ -15,11 +15,12 @@ pub let default_ttl_ms : Int32 = 60000
 
 ///|
 /// How a component handles task-augmented execution requests.
+#derive(Debug, Eq)
 pub(all) enum TaskMode {
   Forbidden
   Optional
   Required
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn TaskMode::to_wire(self : TaskMode) -> String {
@@ -44,19 +45,21 @@ pub fn task_mode_from_wire(value : String) -> TaskMode? {
 
 ///|
 /// Metadata for task-augmented execution requests.
+#derive(Debug, Eq)
 pub(all) struct TaskMeta {
   /// Client-requested TTL in milliseconds; `None` uses the server default.
   ttl : Int32?
   /// Routing key; derived from the component name when `None`.
   fn_key : String?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Configuration for MCP background task execution.
+#derive(Debug, Eq)
 pub(all) struct TaskConfig {
   mode : TaskMode
   poll_interval_ms : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn TaskConfig::new(

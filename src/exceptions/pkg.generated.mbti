@@ -12,6 +12,7 @@ pub fn insufficient_scope(Array[String]) -> FastMCPError
 pub fn to_mcp_error(FastMCPError, default_code? : Int32) -> @types.ErrorData
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror FastMCPError {
   Mcp(@types.ErrorData)
   Validation(String)
@@ -25,7 +26,7 @@ pub(all) suberror FastMCPError {
   ResourceSecurity(String)
   Authorisation(String)
   InsufficientScope(required_scopes~ : Array[String], message~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn FastMCPError::equal(Self, Self) -> Bool
 pub fn FastMCPError::message(Self) -> String
 pub fn FastMCPError::not_equal(Self, Self) -> Bool

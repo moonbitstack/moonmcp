@@ -45,6 +45,7 @@ pub fn is_absolute_path(value : String) -> Bool {
 /// values have been extracted and percent-decoded; they catch
 /// path-traversal and absolute-path injection regardless of how the value
 /// was encoded in the URI.
+#derive(Debug, Eq)
 pub(all) struct ResourceSecurity {
   /// Reject values containing `..` as a path component.
   reject_path_traversal : Bool
@@ -55,7 +56,7 @@ pub(all) struct ResourceSecurity {
   /// Parameter names to skip all checks for. Hyphenated URI-template
   /// spellings are accepted.
   exempt_params : @set.Set[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Secure-by-default policy: traversal, absolute paths and null bytes
@@ -126,11 +127,12 @@ pub fn ResourceSecurity::validate(
 ///|
 /// Per-component security setting: inherit the server-wide default,
 /// apply an explicit policy, or disable screening.
+#derive(Debug, Eq)
 pub(all) enum ResourceSecuritySetting {
   Inherit
   Explicit(ResourceSecurity)
   Disabled
-} derive(Debug, Eq)
+}
 
 ///|
 /// Resolve the effective policy for a component.

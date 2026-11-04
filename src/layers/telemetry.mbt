@@ -3,6 +3,7 @@
 
 ///|
 /// One served request, as the telemetry layer saw it.
+#derive(Debug)
 pub(all) struct Span {
   operation : Operation
   /// The tool or prompt name, the resource URI, or the empty string for a
@@ -12,7 +13,7 @@ pub(all) struct Span {
   duration_us : Double
   /// Whether the request ended in an error rather than an answer.
   failed : Bool
-} derive(Debug)
+}
 
 ///|
 /// Timing and counting for every request that passes through (← FastMCP's

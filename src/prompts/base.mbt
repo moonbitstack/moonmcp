@@ -2,10 +2,11 @@
 
 ///|
 /// A wrapper for a prompt message with a role.
+#derive(Debug, Eq)
 pub(all) struct Message {
   role : @types.Role
   content : @types.ContentBlock
-} derive(Debug, Eq)
+}
 
 ///|
 /// Create a message from plain text, user role by default.
@@ -33,6 +34,7 @@ pub fn Message::to_mcp_prompt_message(self : Message) -> @types.PromptMessage {
 
 ///|
 /// The canonical result of rendering a prompt.
+#derive(Debug, Eq)
 pub(all) struct PromptResult {
   messages : Array[Message]
   description : String?
@@ -40,7 +42,7 @@ pub(all) struct PromptResult {
   /// The client-input request when this leg resolved to an input ask
   /// (SEP-2322); `messages` is always empty in that case.
   input_required : @types.InputRequiredResult?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Create a prompt result from a list of messages.

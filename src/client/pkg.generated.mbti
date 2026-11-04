@@ -3,6 +3,7 @@ package "moonbitstack/moonmcp/client"
 
 import {
   "moonbitlang/async",
+  "moonbitlang/core/json",
   "moonbitstack/moonmcp/server",
   "moonbitstack/moonmcp/types",
 }
@@ -11,7 +12,7 @@ import {
 
 // Errors
 pub suberror Refused {
-  Refused(code~ : Int32, message~ : String, data~ : Json?)
+  Refused(code~ : Int32, message~ : String, data~ : @json.Json?)
 }
 
 // Types and methods
@@ -20,21 +21,21 @@ pub struct Client {
   capabilities : @types.ClientCapabilities
   // private fields
 }
-pub async fn Client::call_tool(Self, String, arguments? : Map[String, Json], on_notification? : async (Json) -> Unit, progress_token? : Json) -> @types.CallToolResult
+pub async fn Client::call_tool(Self, String, arguments? : Map[String, @json.Json], on_notification? : async (@json.Json) -> Unit, progress_token? : @json.Json) -> @types.CallToolResult
 pub async fn Client::close(Self) -> Unit
 pub async fn Client::connect(&Transport, name? : String, version? : String, protocol_version? : String, capabilities? : @types.ClientCapabilities) -> Self
-pub async fn Client::discover(Self) -> Map[String, Json]
-pub async fn Client::exchange(Self, String, params? : Map[String, Json], on_notification? : async (Json) -> Unit, progress_token? : Json) -> Map[String, Json]
-pub async fn Client::get_prompt(Self, String, arguments? : Map[String, Json]) -> @types.GetPromptResult
+pub async fn Client::discover(Self) -> Map[String, @json.Json]
+pub async fn Client::exchange(Self, String, params? : Map[String, @json.Json], on_notification? : async (@json.Json) -> Unit, progress_token? : @json.Json) -> Map[String, @json.Json]
+pub async fn Client::get_prompt(Self, String, arguments? : Map[String, @json.Json]) -> @types.GetPromptResult
 pub async fn Client::list_prompts(Self) -> Array[@types.Prompt]
 pub async fn Client::list_resources(Self) -> Array[@types.Resource]
 pub async fn Client::list_tools(Self) -> Array[@types.Tool]
-pub async fn Client::listen(Self, filter~ : @types.SubscriptionFilter, on_notification~ : async (Json) -> Unit) -> Unit
-pub async fn Client::notify(Self, String, params? : Map[String, Json]) -> Unit
+pub async fn Client::listen(Self, filter~ : @types.SubscriptionFilter, on_notification~ : async (@json.Json) -> Unit) -> Unit
+pub async fn Client::notify(Self, String, params? : Map[String, @json.Json]) -> Unit
 pub async fn Client::ping(Self) -> Unit
 pub fn Client::protocol_version(Self) -> String
 pub async fn Client::read_resource(Self, String) -> @types.ReadResourceResult
-pub async fn Client::request(Self, String, params? : Map[String, Json]) -> Map[String, Json]
+pub async fn Client::request(Self, String, params? : Map[String, @json.Json]) -> Map[String, @json.Json]
 pub fn Client::server_capabilities(Self) -> @types.ServerCapabilities?
 pub fn Client::server_info(Self) -> @types.Implementation?
 
@@ -43,29 +44,29 @@ pub struct Lines {
   write : async (String) -> Unit
   lock : @async.Mutex
 }
-pub async fn Lines::ask(Self, Json, async (Json) -> Unit) -> Json
+pub async fn Lines::ask(Self, @json.Json, async (@json.Json) -> Unit) -> @json.Json
 pub async fn Lines::close(Self) -> Unit
-pub async fn Lines::listen(Self, Json, async (Json) -> Unit) -> Unit
+pub async fn Lines::listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
 pub fn Lines::new(read~ : async () -> String?, write~ : async (String) -> Unit) -> Self
-pub async fn Lines::tell(Self, Json) -> Unit
+pub async fn Lines::tell(Self, @json.Json) -> Unit
 pub impl Transport for Lines
 
 pub struct Memory {
   server : @server.Server
 }
-pub async fn Memory::ask(Self, Json, async (Json) -> Unit) -> Json
+pub async fn Memory::ask(Self, @json.Json, async (@json.Json) -> Unit) -> @json.Json
 pub async fn Memory::close(Self) -> Unit
-pub async fn Memory::listen(Self, Json, async (Json) -> Unit) -> Unit
+pub async fn Memory::listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
 pub fn Memory::new(@server.Server) -> Self
-pub async fn Memory::tell(Self, Json) -> Unit
+pub async fn Memory::tell(Self, @json.Json) -> Unit
 pub impl Transport for Memory
 
 // Type aliases
 
 // Traits
 pub(open) trait Transport {
-  async fn ask(Self, Json, async (Json) -> Unit) -> Json
-  async fn tell(Self, Json) -> Unit
-  async fn listen(Self, Json, async (Json) -> Unit) -> Unit
+  async fn ask(Self, @json.Json, async (@json.Json) -> Unit) -> @json.Json
+  async fn tell(Self, @json.Json) -> Unit
+  async fn listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
   async fn close(Self) -> Unit
 }

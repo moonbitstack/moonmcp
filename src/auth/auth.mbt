@@ -10,10 +10,11 @@
 ///
 /// A claim is whatever the issuer put there — a scope list, a tenant, a role.
 /// Nothing here interprets them; a handler reads what it needs.
+#derive(Debug, Eq)
 pub(all) struct Principal {
   subject : String?
   claims : Map[String, Json]
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Principal with Debug::{to_repr}

@@ -2,18 +2,20 @@
 
 ///|
 /// The payload of a resource content item: inline text or raw bytes.
+#derive(Debug, Eq)
 pub(all) enum ContentPayload {
   Text(String)
   Blob(Bytes)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A single resource content item with optional MIME type and metadata.
+#derive(Debug, Eq)
 pub(all) struct ResourceContent {
   content : ContentPayload
   mime_type : String?
   meta : Map[String, Json]?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Create a resource content item, defaulting the MIME type by payload:
@@ -45,13 +47,14 @@ pub fn ResourceContent::to_mcp_resource_contents(
 
 ///|
 /// The canonical result of a resource read.
+#derive(Debug, Eq)
 pub(all) struct ResourceResult {
   contents : Array[ResourceContent]
   meta : Map[String, Json]?
   /// The client-input request when this read resolved to an input ask
   /// (SEP-2322); `contents` is always empty in that case.
   input_required : @types.InputRequiredResult?
-} derive(Debug, Eq)
+}
 
 ///|
 /// Create a resource result from content items.

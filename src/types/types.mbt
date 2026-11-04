@@ -61,10 +61,11 @@ pub let client_capabilities_meta_key : String = "io.modelcontextprotocol/clientC
 /// who may keep the reply. `Public` says it holds nothing tied to one caller;
 /// `Private` says a cache must belong to the authorisation context it was
 /// fetched in.
+#derive(Debug, Eq)
 pub(all) enum CacheScope {
   Public
   Private
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn CacheScope::to_wire(self : CacheScope) -> String {
@@ -87,6 +88,7 @@ pub fn cache_scope_of_wire(value : String) -> CacheScope? {
 
 ///|
 /// Verbosity levels for `notifications/message`, ordered debug → emergency.
+#derive(Debug, Eq)
 pub(all) enum LoggingLevel {
   Debug
   Info
@@ -96,7 +98,7 @@ pub(all) enum LoggingLevel {
   Critical
   Alert
   Emergency
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn LoggingLevel::to_wire(self : LoggingLevel) -> String {
@@ -261,19 +263,21 @@ pub fn core_result_types() -> Array[String] {
 
 ///|
 /// Wire-format error payload carried by JSON-RPC error responses.
+#derive(ToJson, FromJson, Debug, Eq)
 pub(all) struct ErrorData {
   code : Int32
   message : String
   data : Json?
-} derive(ToJson, FromJson, Debug, Eq)
+}
 
 ///|
 /// An icon for display in user interfaces.
+#derive(Debug, Eq)
 pub(all) struct Icon {
   src : String
   mime_type : String?
   sizes : Array[String]?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for Icon with fn to_json(self : Icon) -> Json {

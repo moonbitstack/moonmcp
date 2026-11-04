@@ -2,10 +2,11 @@
 
 ///|
 /// A JSON-RPC request id: either a number or a string.
+#derive(Debug, Eq)
 pub(all) enum RequestId {
   Number(id~ : Int32)
   Text(id~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for RequestId with fn to_json(self : RequestId) -> Json {
@@ -32,12 +33,13 @@ pub impl FromJson for RequestId with fn from_json(
 
 ///|
 /// Any message frame on the wire.
+#derive(Debug, Eq)
 pub(all) enum JSONRPCMessage {
   Request(id~ : RequestId, verb~ : String, params~ : Json?)
   Notification(verb~ : String, params~ : Json?)
   Response(id~ : RequestId, result~ : Json)
   Error(id~ : RequestId, error~ : ErrorData)
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for JSONRPCMessage with fn to_json(self : JSONRPCMessage) -> Json {
@@ -98,12 +100,13 @@ pub fn parse_message(json : Json) -> JSONRPCMessage raise @json.JsonDecodeError 
 
 ///|
 /// Progress reported for an in-flight request.
+#derive(Debug, Eq)
 pub(all) struct ProgressNotificationParams {
   progress_token : String
   progress : Double
   message : String?
   total : Double?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ProgressNotificationParams with fn to_json(
@@ -137,10 +140,11 @@ pub impl FromJson for ProgressNotificationParams with fn from_json(
 
 ///|
 /// A cancelled request, sent by the side that issued it.
+#derive(Debug, Eq)
 pub(all) struct CancelledNotificationParams {
   request_id : RequestId
   reason : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for CancelledNotificationParams with fn to_json(
@@ -166,11 +170,12 @@ pub impl FromJson for CancelledNotificationParams with fn from_json(
 
 ///|
 /// A log entry streamed by the server.
+#derive(Debug, Eq)
 pub(all) struct LoggingMessageNotificationParams {
   level : LoggingLevel
   logger : String?
   data : Json
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for LoggingMessageNotificationParams with fn to_json(
@@ -208,6 +213,7 @@ pub impl FromJson for LoggingMessageNotificationParams with fn from_json(
 
 ///|
 /// A notification frame the server can send to a client.
+#derive(Debug, Eq)
 pub(all) enum ServerNotification {
   Cancelled(CancelledNotificationParams)
   Progress(ProgressNotificationParams)
@@ -218,7 +224,7 @@ pub(all) enum ServerNotification {
   PromptListChanged
   Initialized
   RootsListChanged
-} derive(Debug, Eq)
+}
 
 ///|
 pub impl ToJson for ServerNotification with fn to_json(
@@ -256,6 +262,7 @@ pub impl ToJson for ServerNotification with fn to_json(
 
 ///|
 /// A typed request a client can send to a server.
+#derive(Debug, Eq)
 pub(all) enum ClientRequest {
   Initialize(InitializeRequestParams)
   Ping(meta~ : Map[String, Json]?)
@@ -270,16 +277,17 @@ pub(all) enum ClientRequest {
   Complete(CompleteRequestParams)
   SetLevel(SetLevelRequestParams)
   InputResponse(InputResponseRequestParams)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A typed request a server can send to a client.
+#derive(Debug, Eq)
 pub(all) enum ServerRequest {
   Ping(meta~ : Map[String, Json]?)
   CreateMessage(CreateMessageRequestParams)
   Elicit(ElicitRequestParams)
   ListRoots(meta~ : Map[String, Json]?)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Wrap a client request into a wire frame.

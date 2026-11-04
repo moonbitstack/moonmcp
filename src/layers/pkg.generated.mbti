@@ -3,12 +3,13 @@ package "moonbitstack/moonmcp/layers"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",
 }
 
 // Values
-pub async fn chain(Array[Layer], Call, async (Call) -> Json raise @exceptions.FastMCPError) -> Json raise @exceptions.FastMCPError
+pub async fn chain(Array[Layer], Call, async (Call) -> @json.Json raise @exceptions.FastMCPError) -> @json.Json raise @exceptions.FastMCPError
 
 pub let refused_code : Int32
 
@@ -30,11 +31,11 @@ pub fn Caching::size(Self) -> Int32
 pub(all) struct Call {
   operation : Operation
   name : String
-  arguments : Map[String, Json]
+  arguments : Map[String, @json.Json]
   context : @context.Context
 }
 pub fn Call::fingerprint(Self) -> String
-pub fn Call::new(operation~ : Operation, name~ : String, arguments? : Map[String, Json], context~ : @context.Context) -> Self
+pub fn Call::new(operation~ : Operation, name~ : String, arguments? : Map[String, @json.Json], context~ : @context.Context) -> Self
 pub fn Call::subject(Self) -> String
 
 type Entry
@@ -43,14 +44,15 @@ pub(all) struct Layer {
   name : String
   // private fields
 }
-pub fn Layer::new(name? : String, run~ : async (Call, Next) -> Json raise @exceptions.FastMCPError) -> Self
-pub async fn Layer::serve(Self, Call, Next) -> Json raise @exceptions.FastMCPError
+pub fn Layer::new(name? : String, run~ : async (Call, Next) -> @json.Json raise @exceptions.FastMCPError) -> Self
+pub async fn Layer::serve(Self, Call, Next) -> @json.Json raise @exceptions.FastMCPError
 
 pub(all) struct Next {
   // private fields
 }
-pub async fn Next::then(Self, Call) -> Json raise @exceptions.FastMCPError
+pub async fn Next::then(Self, Call) -> @json.Json raise @exceptions.FastMCPError
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Operation {
   ListTools
   ListResources
@@ -59,7 +61,7 @@ pub(all) enum Operation {
   CallTool
   ReadResource
   GetPrompt
-} derive(Eq, @debug.Debug)
+}
 pub fn Operation::code(Self) -> String
 pub fn Operation::equal(Self, Self) -> Bool
 pub fn Operation::is_list(Self) -> Bool
@@ -75,12 +77,13 @@ pub fn RateLimiting::new(rate? : Int32, burst? : Int32, operations? : Array[Oper
 pub fn RateLimiting::refused(Self) -> Int32
 pub fn RateLimiting::reset(Self) -> Unit
 
+#derive(@debug.Debug)
 pub(all) struct Span {
   operation : Operation
   name : String
   duration_us : Double
   failed : Bool
-} derive(@debug.Debug)
+}
 pub fn Span::to_repr(Self) -> @debug.Repr
 
 pub struct Telemetry {

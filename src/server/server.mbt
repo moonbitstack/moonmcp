@@ -1,10 +1,11 @@
 ///|
 /// Who may keep a cached list result: any intermediary, or only caches inside
 /// the same authorisation context (the `cacheScope` of a cacheable result).
+#derive(Eq, Debug)
 pub(all) enum Scope {
   Public
   Private
-} derive(Eq, Debug)
+}
 
 ///|
 /// The same scope as the wire names it.
