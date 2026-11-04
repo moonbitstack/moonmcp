@@ -648,7 +648,7 @@ mcp.tool_context("greet", async fn(_args : Map[String, Json], context : @context
       <h2>Authorization</h2>
       <p class="pdesc">An endpoint that should not be open takes a bearer token. The header is checked before the body is read; a request without a good one is answered <code>401</code> with the <code>WWW-Authenticate</code> challenge the specification asks for.</p>
       <div class="code"><pre><code class="language-moonbit">let mcp = @server.Server::new("demo", version="1.0.0")
-let app = mcp.to_asgi(auth=Some(@auth.Bearer::hmac(secret="s3cret")))
+let app = mcp.to_asgi(auth=@auth.Bearer::hmac(secret="s3cret"))
 // anywhere else: a check of your own
 let own = @auth.Bearer::own(check=fn(token) {
   if token == "let-me-in" {
