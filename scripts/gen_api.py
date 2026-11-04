@@ -171,6 +171,9 @@ def parse_source_comments(path):
                 doc.append(s[3:].strip())
             i += 1
             continue
+        if s.startswith("#"):
+            i += 1
+            continue
         if s.startswith("pub") or s.startswith("pub("):
             # Gather the signature up to its opening brace. A signature already
             # closed on its first line must not swallow the body's braces, or
@@ -278,7 +281,7 @@ def auto_desc(kind, name, sig):
         return AUTO[name]
     found = IMPL.search(sig)
     if found:
-        return "The `%s` implementation for `%s`." % (found.group(1), found.group(2))
+        return "The `%s` implementation for `%s`." % (found.group(1).split(".")[-1], found.group(2))
     found = TRAIT_ITEM.match(sig)
     if found:
         return "A contract a transport implements to carry the client's messages."
