@@ -11,6 +11,9 @@
 priv struct Watcher {
   filter : @types.SubscriptionFilter
   queue : @aqueue.Queue[Json]
+  /// A stream of the revisions before 2026-07-28: it asked for nothing in particular, and hears
+  /// every list change and the updates to whatever `resources/subscribe` named.
+  legacy : Bool
 }
 
 ///|
@@ -51,7 +54,19 @@ fn Server::watch(
   filter : @types.SubscriptionFilter,
 ) -> @aqueue.Queue[Json] {
   let queue = @aqueue.Queue::Queue(kind=@aqueue.Kind::Unbounded)
-  self.watchers[key] = { filter, queue, }
+  self.watchers[key] = { filter, queue, legacy: false, }
+  queue
+}
+
+///|
+/// Take out a stream of the revisions before 2026-07-28 under `key`.
+fn Server::watch_legacy(self : Server, key : String) -> @aqueue.Queue[Json] {
+  let queue = @aqueue.Queue::Queue(kind=@aqueue.Kind::Unbounded)
+  self.watchers[key] = {
+    filter: @types.SubscriptionFilter::new(),
+    queue,
+    legacy: true,
+  }
   queue
 }
 
@@ -70,7 +85,19 @@ pub fn Server::notify(self : Server, message : Json) -> Unit {
   guard message is Object(obj) && obj.get("method") is Some(String(op)) else {
     return
   }
+  let uri = match obj.get("params") {
+    Some(Object({ "uri": String(uri), .. })) => Some(uri)
+    _ => None
+  }
   for _, watcher in self.watchers {
+    if watcher.legacy {
+      if op == "notifications/resources/updated" &&
+        !(uri is Some(uri) && self.subscribed.contains(uri)) {
+        continue
+      }
+      ignore(watcher.queue.try_put(message) catch { _ => false })
+      continue
+    }
     guard watcher.filter.wants(op) else { continue }
     if op == "notifications/resources/updated" &&
       watcher.filter.resource_subscriptions is Some(uris) &&
@@ -144,7 +171,7 @@ pub async fn Server::serve_subscription(
   let key = id_key(id)
   let queue = match queue {
     Some(queue) => {
-      self.watchers[key] = { filter, queue, }
+      self.watchers[key] = { filter, queue, legacy: false, }
       queue
     }
     None => self.watch(key, filter)

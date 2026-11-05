@@ -105,6 +105,10 @@ async fn Server::answer(
   message : Json,
   channel~ : Channel,
 ) -> (Int32?, Json)? {
+  if is_reply(message) {
+    self.settle(message)
+    return None
+  }
   guard message is Object(m) &&
     m.get("jsonrpc") is Some(String("2.0")) &&
     m.get("method") is Some(String(op)) else {
@@ -136,8 +140,7 @@ async fn Server::answer(
   }
   let era = era_of(params)
   let log = self.request_logger(op, id)
-  let context = context_of(op, id, params, channel, log)
-  let result = self.dispatch(op, params, era, context) catch {
+  let result = self.legs(op, id, params, era, channel, log) catch {
     Fail(_) as f => {
       log_failure(log, op, f.code, f.message)
       return Some(refusal(id, f))
@@ -156,8 +159,51 @@ async fn Server::answer(
 }
 
 ///|
+/// Serve a request. A handler that needs something from the client ends its leg with an ask; a
+/// 2026-07-28 client answers it and sends the call again, while a client of the revisions before
+/// knows nothing of that, so the server asks in its place and runs the next leg itself. The handler
+/// is written the same way for both.
+async fn Server::legs(
+  self : Server,
+  op : String,
+  id : Json,
+  params : Map[String, Json],
+  era : Era,
+  channel : Channel,
+  log : @moonlog.Logger?,
+) -> Json {
+  let mut params = params
+  let mut result = self.dispatch(
+    op,
+    params,
+    era,
+    self.context_of(op, id, params, channel, log),
+  )
+  guard era is Legacy else { return result }
+  let mut round = 0
+  while is_input_ask(result) {
+    if round >= self.ask_rounds {
+      raise fail(
+        internal_error,
+        "a handler asked the client for input \{round} times",
+      )
+    }
+    round += 1
+    params = self.asked_again(params, result, channel)
+    result = self.dispatch(
+      op,
+      params,
+      era,
+      self.context_of(op, id, params, channel, log),
+    )
+  }
+  result
+}
+
+///|
 /// The request's facts, as its handler will see them.
-fn context_of(
+fn Server::context_of(
+  self : Server,
   op : String,
   id : Json,
   params : Map[String, Json],
@@ -206,6 +252,7 @@ fn context_of(
     emit=channel.emit,
     gone=channel.gone,
     logger?,
+    level=fn() { self.log_level },
   )
 }
 
@@ -346,6 +393,32 @@ async fn Server::dispatch(
     ("server/discover", _) => self.discover()
     ("initialize", _) => self.initialize(params)
     ("ping", Legacy) => Json::object(Map([]))
+    ("logging/setLevel", Legacy) => {
+      guard params.get("level") is Some(String(word)) &&
+        @types.logging_level_from_wire(word) is Some(level) else {
+        raise fail(invalid_params, "logging/setLevel needs a known level")
+      }
+      self.log_level = Some(level)
+      Json::object(Map([]))
+    }
+    ("resources/subscribe", Legacy) => {
+      self.subscribed[uri_of(params)] = ()
+      Json::object(Map([]))
+    }
+    ("resources/unsubscribe", Legacy) => {
+      self.subscribed.remove(uri_of(params))
+      Json::object(Map([]))
+    }
+    ("completion/complete", _) => {
+      guard self.completer is Some(run) else {
+        raise fail(method_not_found, "Method not found: \{op}")
+      }
+      let request : @types.CompleteRequestParams = @json.from_json(Json(params)) catch {
+        e => raise fail(invalid_params, "\{e}")
+      }
+      let completion = run(request, context) catch { e => raise as_fail(e) }
+      ({ completion, meta: None, } : @types.CompleteResult).to_json()
+    }
     ("tools/list", _) => {
       no_cursor(params)
       self.through_listing(@layers.ListTools, params, context, fn() {
@@ -418,6 +491,15 @@ async fn Server::dispatch(
 }
 
 ///|
+/// The `uri` a subscription names.
+fn uri_of(params : Map[String, Json]) -> String raise {
+  guard params.get("uri") is Some(String(uri)) else {
+    raise fail(invalid_params, "needs a uri")
+  }
+  uri
+}
+
+///|
 /// Every list comes back whole, so no cursor is ever issued and one sent
 /// back is not one of ours.
 fn no_cursor(params : Map[String, Json]) -> Unit raise {
@@ -432,7 +514,7 @@ fn Server::discover(self : Server) -> Json {
     "supportedVersions": Json(
       [..modern_versions, ..legacy_versions].map(Json::string),
     ),
-    "capabilities": capabilities(),
+    "capabilities": self.capabilities(),
   }
   if self.instructions is Some(text) {
     out["instructions"] = Json(text)
@@ -454,7 +536,7 @@ fn Server::initialize(self : Server, params : Map[String, Json]) -> Json raise {
   }
   let out : Map[String, Json] = {
     "protocolVersion": Json(version),
-    "capabilities": capabilities(),
+    "capabilities": self.capabilities(),
     "serverInfo": self.info.to_json(),
   }
   if self.instructions is Some(text) {
@@ -464,12 +546,17 @@ fn Server::initialize(self : Server, params : Map[String, Json]) -> Json raise {
 }
 
 ///|
-fn capabilities() -> Json {
-  {
+fn Server::capabilities(self : Server) -> Json {
+  let out : Map[String, Json] = {
     "tools": { "listChanged": true },
     "resources": { "subscribe": true, "listChanged": true },
     "prompts": { "listChanged": true },
+    "logging": Json::object(Map([])),
   }
+  if self.completer is Some(_) {
+    out["completions"] = Json::object(Map([]))
+  }
+  Json(out)
 }
 
 ///|

@@ -226,7 +226,9 @@ pub impl @json.FromJson for ClientRequest
 
 #derive(Eq, @debug.Debug)
 pub(all) struct CompleteRequestParams {
-  context : CompletionContext
+  reference : Reference
+  argument : CompletionArgument
+  arguments : Map[String, String]?
   meta : Map[String, @json.Json]?
 }
 pub fn CompleteRequestParams::equal(Self, Self) -> Bool
@@ -276,19 +278,6 @@ pub fn CompletionArgument::to_json(Self) -> @json.Json
 pub fn CompletionArgument::to_repr(Self) -> @debug.Repr
 pub impl @json.FromJson for CompletionArgument
 pub impl @json.ToJson for CompletionArgument
-
-#derive(Eq, @debug.Debug)
-pub(all) struct CompletionContext {
-  reference : Reference
-  argument : CompletionArgument
-}
-pub fn CompletionContext::equal(Self, Self) -> Bool
-pub fn CompletionContext::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
-pub fn CompletionContext::not_equal(Self, Self) -> Bool
-pub fn CompletionContext::to_json(Self) -> @json.Json
-pub fn CompletionContext::to_repr(Self) -> @debug.Repr
-pub impl @json.FromJson for CompletionContext
-pub impl @json.ToJson for CompletionContext
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ContentBlock {
@@ -673,6 +662,7 @@ pub(all) enum LoggingLevel {
 }
 pub fn LoggingLevel::equal(Self, Self) -> Bool
 pub fn LoggingLevel::not_equal(Self, Self) -> Bool
+pub fn LoggingLevel::rank(Self) -> Int32
 pub fn LoggingLevel::to_repr(Self) -> @debug.Repr
 pub fn LoggingLevel::to_wire(Self) -> String
 

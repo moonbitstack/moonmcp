@@ -1,0 +1,16 @@
+// The server the MCP conformance suite tests, for `scripts/interop/check_conformance.sh`.
+supported_targets = "+native"
+
+import {
+  "moonbitlang/async",
+  "moonbitstack/mooncat",
+  "moonbitstack/moonbase/base64",
+  "moonbitstack/moonmcp/context",
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/prompts",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
+}
+
+pkgtype(kind: "executable")

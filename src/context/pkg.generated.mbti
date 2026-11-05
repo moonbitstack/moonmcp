@@ -30,7 +30,7 @@ pub fn Context::input_responses(Self) -> Map[String, @json.Json]
 pub fn Context::is_cancelled(Self) -> Bool
 pub async fn Context::log(Self, level~ : @types.LoggingLevel, message~ : String, logger? : String, data? : @json.Json) -> Unit
 pub fn Context::logger(Self) -> @moonlog.Logger?
-pub fn Context::new(facts~ : Facts, emit? : async (@json.Json) -> Unit, gone? : () -> Bool, logger? : @moonlog.Logger) -> Self
+pub fn Context::new(facts~ : Facts, emit? : async (@json.Json) -> Unit, gone? : () -> Bool, logger? : @moonlog.Logger, level? : () -> @types.LoggingLevel?) -> Self
 pub fn Context::operation(Self) -> String
 pub fn Context::progress_token(Self) -> @json.Json?
 pub fn Context::protocol_version(Self) -> String

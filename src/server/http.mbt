@@ -14,18 +14,28 @@
 /// app.
 ///
 /// Every message is its own POST, answered with one JSON object, or `202` for a
-/// notification. Sessions, the `GET` stream and `DELETE` belong to the
-/// revisions before 2026-07-28 and are optional there; this server keeps no
-/// session, so `GET` and `DELETE` answer `405`.
+/// notification. This server keeps no session, so `DELETE` answers `405`.
 ///
 /// A 2026-07-28 request that offers a progress token, or that opens a
 /// subscription, is answered with `text/event-stream` when the client accepts
 /// it: the notifications the handler sends arrive on that stream, and the
 /// reply ends it.
 ///
+/// Under the revisions before, a request becomes a stream the moment its handler
+/// has something to send, and stays one JSON object when it has nothing. A `GET`
+/// that accepts `text/event-stream` opens the stream those revisions hear list
+/// changes and subscribed resources on; with no session to tie it to, every such
+/// stream hears the updates to anything a client has subscribed to.
+///
 /// A request whose `Origin` header names another site is refused with `403`, as
 /// the transport requires against DNS rebinding. An origin passes when its host
 /// is the request's own `Host`, a loopback address, or one listed in `origins`.
+///
+/// `Host` is checked as well, since a rebound name reaches a local server with a
+/// `Host` that is not its own. `hosts` lists the names this server answers to; left
+/// out, a server listening on a loopback address answers to loopback names only,
+/// and one listening anywhere else takes any. A reverse proxy in front of a
+/// loopback listener has to name the public host here.
 ///
 /// `docs` names the path the documentation page is served at, beside the
 /// endpoint: a browser opened on it lists what the server offers and calls it,
@@ -37,6 +47,7 @@ pub fn Server::to_asgi(
   self : Server,
   path~ : String = "/mcp",
   origins~ : Array[String] = [],
+  hosts? : Array[String],
   docs~ : String? = Some("/docs"),
   theme~ : @docs.Theme = @docs.theme,
   auth? : @auth.Bearer,
@@ -58,7 +69,8 @@ pub fn Server::to_asgi(
             send(HttpResponseStart(status~, headers~, trailers=false))
             send(HttpResponseBody(body=payload, more_body=false))
           }
-          None => self.over_http(hs, body, path, origins, send, auth)
+          None =>
+            self.over_http(hs, body, path, origins, hosts, send, receive, auth)
         }
       }
       WebSocket(_) => send(WebSocketClose(code=1000, reason=""))
@@ -132,7 +144,9 @@ async fn Server::over_http(
   body : Bytes,
   path : String,
   origins : Array[String],
+  hosts : Array[String]?,
   send : @moonasgi.Send,
+  receive : @moonasgi.Receive,
   auth : @auth.Bearer?,
 ) -> Unit {
   let plain = [("content-type", "text/plain; charset=utf-8")]
@@ -143,17 +157,26 @@ async fn Server::over_http(
     !allowed(origin, header(hs.headers, "host"), origins) {
     return reply_json(send, 403, plain, b"Forbidden")
   }
-  if hs.http_method != "POST" {
+  if !host_allowed(header(hs.headers, "host"), hosts, hs.server) {
+    return reply_json(send, 403, plain, b"Forbidden")
+  }
+  let listening = hs.http_method == "GET" &&
+    accepts_event_stream(hs.headers) &&
+    !(header(hs.headers, "mcp-protocol-version") is Some(version) &&
+    modern_versions.contains(version))
+  if hs.http_method != "POST" && !listening {
     return reply_json(
       send,
       405,
-      [("allow", "POST"), ..plain],
+      [("allow", "GET, POST"), ..plain],
       b"Method Not Allowed",
     )
   }
-  guard header(hs.headers, "content-type") is Some(kind) &&
-    kind.to_lower().has_prefix("application/json") else {
-    return reply_json(send, 415, plain, b"Unsupported Media Type")
+  if !listening {
+    guard header(hs.headers, "content-type") is Some(kind) &&
+      kind.to_lower().has_prefix("application/json") else {
+      return reply_json(send, 415, plain, b"Unsupported Media Type")
+    }
   }
   // The token is checked before the body is read: a caller who is not allowed
   // in learns nothing about the request, not even whether it parses.
@@ -168,6 +191,9 @@ async fn Server::over_http(
         None => return challenge(send, "a bearer token is required")
       }
     None => None
+  }
+  if listening {
+    return self.listen_http(send, receive)
   }
   let message = @json.parse(@utf8.decode_lossy(body[:])) catch {
     _ =>
@@ -200,28 +226,17 @@ async fn Server::over_http(
   if refused is Some(f) {
     return json_reply(send, 400, refusal(id, f).1)
   }
-  if modern && accepts_event_stream(hs.headers) && streams(message) {
-    return self.stream_http(hs, message, send, principal)
-  }
-  let channel = Channel::new(
-    emit=fn(_) { () },
-    headers=header_map(hs.headers),
-    gone=fn() { false },
-    subject?=principal.bind(principal => principal.subject),
-    claims=principal.map(principal => principal.claims).unwrap_or(Map([])),
-  )
-  match self.answer(message, channel~) {
-    None => reply_json(send, 202, [], b"")
-    Some((code, reply)) => {
-      let status = match code {
-        Some(c) if c == parse_error || c == invalid_request => 400
-        Some(c) if modern && c >= unsupported_version && c <= header_mismatch =>
-          400
-        Some(c) if modern && c == method_not_found => 404
-        _ => 200
-      }
-      json_reply(send, status, reply)
-    }
+  self.serve_http(hs, message, send, principal, modern)
+}
+
+///|
+/// The status of a reply that goes out as one JSON object.
+fn status_of(code : Int32?, modern : Bool) -> Int32 {
+  match code {
+    Some(c) if c == parse_error || c == invalid_request => 400
+    Some(c) if modern && c >= unsupported_version && c <= header_mismatch => 400
+    Some(c) if modern && c == method_not_found => 404
+    _ => 200
   }
 }
 
@@ -249,29 +264,53 @@ fn accepts_event_stream(headers : Array[(String, String)]) -> Bool {
 }
 
 ///|
-/// Serve one request as an SSE stream: the notifications its handler sends,
-/// then the reply, then the end of the stream.
+let sse_headers : Array[(String, String)] = [
+  ("content-type", "text/event-stream"),
+  ("cache-control", "no-store"),
+  ("x-accel-buffering", "no"),
+]
+
+///|
+/// Serve one request and send its reply: as one JSON object, or as an SSE stream of the messages its
+/// handler sends and then the reply.
 ///
-/// A write that fails means the client has gone; the handler sees that through
-/// the context's own notice, which is what closes the connection in this
-/// revision, rather than any cancellation message.
-async fn Server::stream_http(
+/// A 2026-07-28 request says in advance which it wants. A request of the revisions before does not,
+/// so its stream starts at the first thing there is to send, and one with nothing to send stays a
+/// plain reply with a proper status.
+///
+/// A write that fails means the client has gone; the handler sees that through the context's own
+/// notice, which is what closes the connection in this revision, rather than any cancellation message.
+async fn Server::serve_http(
   self : Server,
   hs : @moonasgi.HttpScope,
   message : Json,
   send : @moonasgi.Send,
   principal : @auth.Principal?,
+  modern : Bool,
 ) -> Unit {
-  let headers = [
-    ("content-type", "text/event-stream"),
-    ("cache-control", "no-store"),
-    ("x-accel-buffering", "no"),
-  ]
-  send(HttpResponseStart(status=200, headers~, trailers=false))
+  let accepts = accepts_event_stream(hs.headers)
+  let eager = modern && accepts && streams(message)
+  let can_stream = eager || (accepts && !modern)
+  let mut started = false
   let mut alive = true
+  let begin = async fn() {
+    if !started {
+      started = true
+      send(HttpResponseStart(status=200, headers=sse_headers, trailers=false))
+    }
+  }
+  if eager {
+    begin()
+  }
   let frame = async fn(out : Json) {
-    if !alive {
+    if !can_stream || !alive {
       return
+    }
+    begin() catch {
+      _ => {
+        alive = false
+        return
+      }
     }
     send(HttpResponseBody(body=@utf8.encode(sse_frame(out)), more_body=true)) catch {
       _ => alive = false
@@ -283,9 +322,10 @@ async fn Server::stream_http(
     gone=fn() { !alive },
     subject?=principal.bind(principal => principal.subject),
     claims=principal.map(principal => principal.claims).unwrap_or(Map([])),
+    asks=can_stream && !modern,
   )
-  match method_of(message) {
-    Some(op) if op == @types.method_subscriptions_listen =>
+  let answer : (Int32?, Json)? = match method_of(message) {
+    Some(op) if eager && op == @types.method_subscriptions_listen =>
       match request_id_of(message) {
         Some(id) => {
           self.serve_subscription(id, params_of(message), channel) catch {
@@ -296,18 +336,56 @@ async fn Server::stream_http(
             "id": id,
             "result": subscription_closed_result(id),
           }
-          frame(closed) catch {
-            _ => ()
-          }
+          Some((None, closed))
         }
-        None => ()
+        None => None
       }
-    _ =>
-      match self.answer(message, channel~) {
-        Some((_, reply)) => frame(reply) catch { _ => () }
-        None => ()
-      }
+    _ => self.answer(message, channel~)
   }
+  if started {
+    if answer is Some((_, reply)) {
+      frame(reply) catch {
+        _ => ()
+      }
+    }
+    send(HttpResponseBody(body=b"", more_body=false)) catch {
+      _ => ()
+    }
+  } else {
+    match answer {
+      None => reply_json(send, 202, [], b"")
+      Some((code, reply)) => json_reply(send, status_of(code, modern), reply)
+    }
+  }
+}
+
+///|
+/// The `GET` stream of the revisions before 2026-07-28: every list change, and updates to subscribed
+/// resources, until the client goes away. Only that going away ends it, so a task sits waiting for
+/// the transport to say so.
+async fn Server::listen_http(
+  self : Server,
+  send : @moonasgi.Send,
+  receive : @moonasgi.Receive,
+) -> Unit {
+  send(HttpResponseStart(status=200, headers=sse_headers, trailers=false))
+  self.asks_made += 1
+  let key = "listen-\{self.asks_made}"
+  let queue = self.watch_legacy(key)
+  defer self.unwatch(key)
+  @async.with_task_group(async fn(group : @async.TaskGroup[Unit]) {
+    group.spawn_bg(no_wait=true, allow_failure=true, async fn() {
+      while !(receive() is HttpDisconnect) {
+
+      }
+      ignore(queue.try_put(Json::null()) catch { _ => false })
+    })
+    while queue.get() is (Object(_) as out) {
+      send(HttpResponseBody(body=@utf8.encode(sse_frame(out)), more_body=true)) catch {
+        _ => break
+      }
+    }
+  })
   send(HttpResponseBody(body=b"", more_body=false)) catch {
     _ => ()
   }
@@ -402,6 +480,46 @@ fn allowed(origin : String, host : String?, origins : Array[String]) -> Bool {
     _ => rest
   }
   name is ("localhost" | "127.0.0.1" | "[::1]")
+}
+
+///|
+/// A `Host` value without its port.
+fn host_name(host : String) -> String {
+  if host.has_prefix("[") {
+    return match host.find("]") {
+      Some(k) => host.exact_view(end=k + 1).to_owned()
+      None => host
+    }
+  }
+  match host.rev_find(":") {
+    Some(k) => host.exact_view(end=k).to_owned()
+    None => host
+  }
+}
+
+///|
+fn is_loopback(name : String) -> Bool {
+  name is ("localhost" | "127.0.0.1" | "[::1]" | "::1")
+}
+
+///|
+/// Whether a request's `Host` is one this server answers to: one of `hosts`, or with none named, any
+/// loopback name when it listens on a loopback address and anything when it does not.
+fn host_allowed(
+  host : String?,
+  hosts : Array[String]?,
+  bound : (String, Int32?)?,
+) -> Bool {
+  guard host is Some(host) else { return true }
+  let name = host_name(host)
+  match hosts {
+    Some(hosts) => hosts.contains(name) || hosts.contains(host)
+    None =>
+      match bound {
+        Some((address, _)) if is_loopback(address) => is_loopback(name)
+        _ => true
+      }
+  }
 }
 
 ///|

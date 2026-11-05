@@ -66,6 +66,7 @@ pub struct Context {
   priv emit : async (Json) -> Unit
   priv gone : () -> Bool
   priv logger : @moonlog.Logger?
+  priv level : () -> @types.LoggingLevel?
 }
 
 ///|
@@ -77,8 +78,9 @@ pub fn Context::new(
   emit~ : async (Json) -> Unit = fn(_) { () },
   gone~ : () -> Bool = fn() { false },
   logger? : @moonlog.Logger,
+  level~ : () -> @types.LoggingLevel? = fn() { None },
 ) -> Context {
-  { facts, emit, gone, logger, }
+  { facts, emit, gone, logger, level, }
 }
 
 ///|
@@ -242,6 +244,10 @@ pub async fn Context::log(
       fields.push(("data", @moonlog.Value::of_str(value.stringify())))
     }
     log.log(severity(level), message, fields~)
+  }
+  // What the client asked for with `logging/setLevel` governs what it is sent, not what is kept.
+  if (self.level)() is Some(least) && level.rank() < least.rank() {
+    return
   }
   let params : Map[String, Json] = {
     "level": Json::string(level.to_wire()),

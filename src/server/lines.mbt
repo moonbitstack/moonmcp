@@ -2,6 +2,9 @@
 // written once so a socket, a pipe or a test can carry the same messages.
 
 ///|
+let stdio_stream = "stdio"
+
+///|
 /// Serve newline-delimited JSON-RPC: read a line with `read` until it gives
 /// `None`, answer it, and `write` the reply as one line (← the stdio
 /// transport, over any pair of streams). A line that is not JSON is answered
@@ -35,6 +38,7 @@ pub async fn Server::serve_lines(
   // waits on a queue nobody will feed would otherwise hold the process open.
   let subscriptions : Array[@aqueue.Queue[Json]] = []
   let listening : Array[@async.Task[Unit]] = []
+  let mut told = false
   @async.with_task_group(async fn(group : @async.TaskGroup[Unit]) {
     ignore(group.spawn(async fn() { drain(outbox, send) }))
     let tasks : Array[@async.Task[Unit]] = []
@@ -59,7 +63,25 @@ pub async fn Server::serve_lines(
           }
           seq += 1
         }
-        Some(message) =>
+        Some(message) => {
+          // `initialize` says this client is of the revisions before 2026-07-28, which hear about
+          // changes on the connection they already have, without asking.
+          if method_of(message) is Some("initialize") && !told {
+            told = true
+            let queue = self.watch_legacy(stdio_stream)
+            subscriptions.push(queue)
+            listening.push(
+              group.spawn(
+                async fn() {
+                  defer self.unwatch(stdio_stream)
+                  while queue.get() is (Object(_) as out) {
+                    send(out.stringify())
+                  }
+                },
+                allow_failure=true,
+              ),
+            )
+          }
           match method_of(message) {
             Some("notifications/cancelled") =>
               // Not an answer to give: the request it names stops instead.
@@ -82,7 +104,8 @@ pub async fn Server::serve_lines(
               )
             }
             _ => {
-              let answered = request_id_of(message) is Some(_)
+              let answered = !is_reply(message) &&
+                request_id_of(message) is Some(_)
               let turn = seq
               if answered {
                 seq += 1
@@ -106,8 +129,11 @@ pub async fn Server::serve_lines(
               )
             }
           }
+        }
       }
     }
+    // Nobody is left to answer what the server asked.
+    self.give_up_asks()
     // Every answer still being worked out is settled before the stream closes,
     // and the sentinel goes last, so the writer drains in order.
     for task in tasks {
@@ -162,6 +188,7 @@ async fn serve_one(
   let channel = Channel::new(
     emit=async fn(out : Json) { send(out.stringify()) },
     headers~,
+    asks=true,
     gone=fn() {
       match id {
         Some(id) => withdrawn.has(id)

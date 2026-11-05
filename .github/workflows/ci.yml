@@ -133,6 +133,9 @@ jobs:
           moon build src/examples/02-http --target native
           moon build src/examples/06-interop --target native
 
+      - name: the official conformance suite
+        run: sh scripts/interop/check_conformance.sh
+
       - name: the typescript sdk and the inspector, both ways
         run: |
           node scripts/interop/run.mjs \

@@ -101,6 +101,21 @@ pub(all) enum LoggingLevel {
 }
 
 ///|
+/// How severe a level is, for comparing two: RFC 5424's order, least severe first.
+pub fn LoggingLevel::rank(self : LoggingLevel) -> Int32 {
+  match self {
+    Debug => 0
+    Info => 1
+    Notice => 2
+    Warning => 3
+    Error => 4
+    Critical => 5
+    Alert => 6
+    Emergency => 7
+  }
+}
+
+///|
 pub fn LoggingLevel::to_wire(self : LoggingLevel) -> String {
   match self {
     Debug => "debug"

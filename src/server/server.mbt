@@ -51,6 +51,13 @@ pub struct Server {
   priv providers : Array[&@providers.Provider]
   priv transforms : Array[&@transforms.Transform]
   priv layers : Array[@layers.Layer]
+  priv mut log_level : @types.LoggingLevel?
+  priv mut completer : (async (@types.CompleteRequestParams, @context.Context) -> @types.Completion)?
+  priv subscribed : Map[String, Unit]
+  priv asked : Map[String, @aqueue.Queue[Json]]
+  priv mut asks_made : Int32
+  priv ask_timeout_ms : Int32
+  priv ask_rounds : Int32
 }
 
 ///|
@@ -61,6 +68,8 @@ pub fn Server::new(
   instructions? : String,
   ttl_ms~ : Int32 = 0,
   scope~ : Scope = Private,
+  ask_timeout_ms~ : Int32 = ask_timeout_ms,
+  ask_rounds~ : Int32 = ask_rounds,
 ) -> Server {
   {
     info: { name, title, version, },
@@ -77,7 +86,24 @@ pub fn Server::new(
     providers: [],
     transforms: [],
     layers: [],
+    log_level: None,
+    completer: None,
+    subscribed: Map([]),
+    asked: Map([]),
+    asks_made: 0,
+    ask_timeout_ms,
+    ask_rounds,
   }
+}
+
+///|
+/// Answer `completion/complete`: what to offer for the argument a client is filling in. Registering
+/// this is what makes the server declare the `completions` capability.
+pub fn Server::completion(
+  self : Server,
+  run : async (@types.CompleteRequestParams, @context.Context) -> @types.Completion,
+) -> Unit {
+  self.completer = Some(run)
 }
 
 ///|

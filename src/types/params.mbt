@@ -70,34 +70,6 @@ pub impl FromJson for CompletionArgument with fn from_json(
 }
 
 ///|
-/// What the completion request is about: the argument being completed and the text around it.
-#derive(Debug, Eq)
-pub(all) struct CompletionContext {
-  reference : Reference
-  argument : CompletionArgument
-}
-
-///|
-pub impl ToJson for CompletionContext with fn to_json(self : CompletionContext) -> Json {
-  let obj : Map[String, Json] = Map([])
-  put_opt_json(obj, "ref", Some(Reference::to_json(self.reference)))
-  put_opt_json(obj, "argument", Some(self.argument.to_json()))
-  Json(obj)
-}
-
-///|
-pub impl FromJson for CompletionContext with fn from_json(
-  json : Json,
-  path : @json.JsonPath,
-) -> CompletionContext raise @json.JsonDecodeError {
-  let obj = expect_obj(json, path, "CompletionContext")
-  {
-    reference: @json.from_json(obj.get("ref").unwrap_or(Json::null())),
-    argument: @json.from_json(obj.get("argument").unwrap_or(Json::null())),
-  }
-}
-
-///|
 /// Parameters common to every request; `_meta.progressToken` drives progress.
 #derive(Debug, Eq)
 pub(all) struct RequestParamsMeta {
@@ -336,7 +308,10 @@ pub impl FromJson for GetPromptRequestParams with fn from_json(
 /// `completion/complete` request parameters.
 #derive(Debug, Eq)
 pub(all) struct CompleteRequestParams {
-  context : CompletionContext
+  reference : Reference
+  argument : CompletionArgument
+  /// The other arguments the client already has values for, which a completion may depend on.
+  arguments : Map[String, String]?
   meta : Map[String, Json]?
 }
 
@@ -345,7 +320,15 @@ pub impl ToJson for CompleteRequestParams with fn to_json(
   self : CompleteRequestParams,
 ) -> Json {
   let obj : Map[String, Json] = Map([])
-  put_opt_json(obj, "context", Some(self.context.to_json()))
+  put_opt_json(obj, "ref", Some(Reference::to_json(self.reference)))
+  put_opt_json(obj, "argument", Some(self.argument.to_json()))
+  if self.arguments is Some(arguments) {
+    let values : Map[String, Json] = Map([])
+    for name, value in arguments {
+      values[name] = Json::string(value)
+    }
+    obj["context"] = { "arguments": Json(values) }
+  }
   put_opt_map(obj, "_meta", self.meta)
   Json(obj)
 }
@@ -356,8 +339,22 @@ pub impl FromJson for CompleteRequestParams with fn from_json(
   path : @json.JsonPath,
 ) -> CompleteRequestParams raise @json.JsonDecodeError {
   let obj = expect_obj(json, path, "CompleteRequestParams")
+  let arguments = match obj.get("context") {
+    Some(Object({ "arguments": Object(values), .. })) => {
+      let out : Map[String, String] = Map([])
+      for name, value in values {
+        if value is String(text) {
+          out[name] = text
+        }
+      }
+      Some(out)
+    }
+    _ => None
+  }
   {
-    context: @json.from_json(obj.get("context").unwrap_or(Json::null())),
+    reference: @json.from_json(obj.get("ref").unwrap_or(Json::null())),
+    argument: @json.from_json(obj.get("argument").unwrap_or(Json::null())),
+    arguments,
     meta: opt_obj(obj, path, "_meta"),
   }
 }
@@ -596,18 +593,6 @@ pub extend CompletionArgument with Eq::{not_equal, equal}
 
 ///|
 pub extend CompletionArgument with ToJson::{to_json}
-
-///|
-pub extend CompletionContext with @json.FromJson::{from_json}
-
-///|
-pub extend CompletionContext with Debug::{to_repr}
-
-///|
-pub extend CompletionContext with Eq::{not_equal, equal}
-
-///|
-pub extend CompletionContext with ToJson::{to_json}
 
 ///|
 pub extend CreateMessageRequestParams with @json.FromJson::{from_json}

@@ -408,9 +408,40 @@ async fn main {
 }
 ```
 
+A client of the revisions before 2026-07-28 knows nothing of this, so the server
+asks in its place: the request goes out on the response stream, the reply comes
+back as a POST or a line of its own, and the handler runs again with the answer.
+The handler is written the same way for both. `Server::new` takes `ask_timeout_ms`
+and `ask_rounds`, which bound the wait and the number of times one call may ask.
+
 On stdio a client withdraws a request with `notifications/cancelled`; on
 Streamable HTTP it closes the response stream, which the server notices the
 next time it writes. Either way `Context::is_cancelled` answers.
+
+## Completion
+
+`Server::completion` answers `completion/complete`, and registering it is what
+declares the capability.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  mcp.completion((request, _) => {
+    {
+      values: ["en", "fr"].filter(lang => lang.has_prefix(request.argument.value)),
+      total: None,
+      has_more: None,
+    }
+  })
+}
+```
+
+## Conformance
+
+`scripts/interop/check_conformance.sh` runs the official
+[MCP conformance suite](https://github.com/modelcontextprotocol/conformance) on
+`src/examples/07-conformance`, in CI, with its pending scenarios included. Every
+server scenario passes.
 
 ## Client
 
@@ -507,6 +538,9 @@ async fn main {
 ```
 
 ## Logging
+
+A client's `logging/setLevel` holds back what is sent to it. It has no effect on
+the server's own log, which keeps everything.
 
 The server keeps no log of its own unless it is handed one. Given a structured
 logger, it writes every request it served, every one it refused, and the lines a

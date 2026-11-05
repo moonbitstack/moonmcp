@@ -16,6 +16,9 @@ pub(all) struct Channel {
   subject : String?
   /// Every claim that token carried.
   claims : Map[String, Json]
+  /// Whether a request sent through `emit` can reach the client and its reply come back. A
+  /// response stream or a pair of lines can; a single JSON reply cannot.
+  asks : Bool
 }
 
 ///|
@@ -26,8 +29,9 @@ pub fn Channel::new(
   gone~ : () -> Bool,
   subject? : String,
   claims~ : Map[String, Json] = Map([]),
+  asks~ : Bool = false,
 ) -> Channel {
-  { emit, headers, gone, subject, claims, }
+  { emit, headers, gone, subject, claims, asks, }
 }
 
 ///|
@@ -39,6 +43,7 @@ pub fn Channel::quiet() -> Channel {
     gone: fn() { false },
     subject: None,
     claims: Map([]),
+    asks: false,
   }
 }
 
