@@ -1,6 +1,6 @@
 name = "moonbitstack/moonmcp"
 
-version = "0.1.8"
+version = "0.1.9"
 
 readme = "README.md"
 
@@ -47,13 +47,13 @@ description = "Model Context Protocol servers and clients for MoonBit."
 
 import {
   "moonbitlang/async@0.22.5",
-  "moonbitstack/moonschema@0.2.2",
-  "moonbitstack/moonasgi@0.10.4",
-  "moonbitstack/moonbase@0.4.2",
-  "moonbitstack/mooncat@0.19.2",
-  "moonbitstack/moonast@0.2.3",
-  "moonbitstack/moonlog@0.1.3",
-  "moonbitstack/mooncred@0.6.7",
-  "moonbitstack/mooncrypt@0.4.8",
+  "moonbitstack/moonschema@0.2.4",
+  "moonbitstack/moonasgi@0.10.6",
+  "moonbitstack/moonbase@0.4.3",
+  "moonbitstack/mooncat@0.19.5",
+  "moonbitstack/moonast@0.2.6",
+  "moonbitstack/moonlog@0.1.6",
+  "moonbitstack/mooncred@0.6.9",
+  "moonbitstack/mooncrypt@0.4.11",
   "moonbitlang/parser@0.4.6",
 }
