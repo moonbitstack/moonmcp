@@ -304,3 +304,95 @@ test "an origin is compared without its case and nothing else" {
   assert_eq(@auth.path_of("https://example.com"), "/")
   assert_eq(@auth.target_of("https://example.com/a?b=1"), "/a?b=1")
 }
+
+///|
+test "a scope is within another only when every piece of it is" {
+  assert_eq(
+    @auth.scope_within(Some("mcp:basic"), Some("mcp:basic mcp:read")),
+    true,
+  )
+  assert_eq(
+    @auth.scope_within(Some("mcp:basic mcp:read"), Some("mcp:read mcp:basic")),
+    true,
+  )
+  // A challenge that names nothing asks nothing new.
+  assert_eq(@auth.scope_within(None, Some("mcp:basic")), true)
+  assert_eq(@auth.scope_within(None, None), true)
+  // A scope this client was never granted is a step up, and an unknown grant
+  // cannot promise anything.
+  assert_eq(@auth.scope_within(Some("mcp:write"), Some("mcp:basic")), false)
+  assert_eq(@auth.scope_within(Some("mcp:basic"), None), false)
+  // Empty pieces are the double spaces a join can leave, not scopes.
+  assert_eq(@auth.scope_within(Some("mcp:basic"), Some(" mcp:basic  ")), true)
+}
+
+///|
+test "offline_access is asked for only where the server offers it" {
+  let offering = @auth.Server::parse({
+    "issuer": "https://as.example.com",
+    "token_endpoint": "https://as.example.com/token",
+    "scopes_supported": ["mcp:basic", "offline_access"],
+  }) catch {
+    @auth.Refused(message~) => fail(message)
+  }
+  let plain = @auth.Server::parse({
+    "issuer": "https://as.example.com",
+    "token_endpoint": "https://as.example.com/token",
+    "scopes_supported": ["mcp:basic"],
+  }) catch {
+    @auth.Refused(message~) => fail(message)
+  }
+  // A server that lists it is asked; one that does not must not be (SEP-2207).
+  assert_eq(
+    @auth.with_offline_access(Some("mcp:basic"), offering, AuthorizationCode),
+    Some("mcp:basic offline_access"),
+  )
+  assert_eq(
+    @auth.with_offline_access(Some("mcp:basic"), plain, AuthorizationCode),
+    Some("mcp:basic"),
+  )
+  // Nothing to widen, and nothing to add it to.
+  assert_eq(
+    @auth.with_offline_access(None, offering, AuthorizationCode),
+    Some("offline_access"),
+  )
+  assert_eq(@auth.with_offline_access(None, plain, AuthorizationCode), None)
+  // The client-credentials grant gets no refresh token, so it asks for no
+  // offline_access (RFC 6749 §4.4.3).
+  assert_eq(
+    @auth.with_offline_access(Some("mcp:basic"), offering, ClientCredentials),
+    Some("mcp:basic"),
+  )
+}
+
+///|
+test "a refreshed token keeps what the response leaves out" {
+  let held = @auth.Tokens::parse({
+    "access_token": "a-1",
+    "expires_in": 3600,
+    "refresh_token": "r-1",
+    "scope": "mcp:basic",
+  }) catch {
+    @auth.Refused(message~) => fail(message)
+  }
+  // A server that rotates the refresh token hands out the new one.
+  let rotated = held.renewed(
+    @auth.Tokens::parse({ "access_token": "a-2", "refresh_token": "r-2" }) catch {
+      @auth.Refused(message~) => fail(message)
+    },
+  )
+  assert_eq(rotated.access_token, "a-2")
+  assert_eq(rotated.refresh_token, Some("r-2"))
+  // A response that names no scope is the scope that was asked for, which is
+  // the one this client had.
+  assert_eq(rotated.scope, Some("mcp:basic"))
+  // And one that names no refresh token does not take the only key away.
+  let kept = held.renewed(
+    @auth.Tokens::parse({ "access_token": "a-3", "expires_in": 60 }) catch {
+      @auth.Refused(message~) => fail(message)
+    },
+  )
+  assert_eq(kept.refresh_token, Some("r-1"))
+  assert_eq(kept.scope, Some("mcp:basic"))
+  assert_eq(kept.expires_in, Some(60L))
+}

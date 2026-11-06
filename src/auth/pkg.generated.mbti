@@ -34,11 +34,15 @@ pub fn same_origin(String, String) -> Bool
 
 pub fn scope_for(Challenge?, Resource?, String?) -> String?
 
+pub fn scope_within(String?, String?) -> Bool
+
 pub fn target_of(String) -> String
 
 pub fn trimmed_path_of(String) -> String
 
 pub fn widen_scope(String?, String?) -> String?
+
+pub fn with_offline_access(String?, Server, Grant) -> String?
 
 pub fn with_query(String, Array[(String, String)]) -> String
 
@@ -193,6 +197,7 @@ pub fn Tokens::equal(Self, Self) -> Bool
 pub fn Tokens::good_until(Self, Int64) -> Int64?
 pub fn Tokens::not_equal(Self, Self) -> Bool
 pub fn Tokens::parse(@json.Json) -> Self raise Refused
+pub fn Tokens::renewed(Self, Self) -> Self
 pub fn Tokens::to_repr(Self) -> @debug.Repr
 
 // Type aliases

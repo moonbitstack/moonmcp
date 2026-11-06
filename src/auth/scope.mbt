@@ -27,6 +27,53 @@ pub fn scope_for(
 }
 
 ///|
+/// Whether every scope `asked` names is one `granted` already carries. A
+/// challenge that names no scope asks nothing new; one that names a scope this
+/// client was never granted is a step up, and a refresh cannot answer it
+/// (RFC 6749 §6 keeps a refresh inside the scope it was given).
+pub fn scope_within(asked : String?, granted : String?) -> Bool {
+  guard asked is Some(asked) else { return true }
+  guard granted is Some(granted) else { return false }
+  let held : Array[String] = []
+  for piece in granted.split(" ") {
+    let scope = piece.to_owned()
+    if !scope.is_empty() && !held.contains(scope) {
+      held.push(scope)
+    }
+  }
+  for piece in asked.split(" ") {
+    let scope = piece.to_owned()
+    if !scope.is_empty() && !held.contains(scope) {
+      return false
+    }
+  }
+  true
+}
+
+///|
+/// The scope to ask for when this client wants a refresh token. The
+/// authorization server's own `offline_access` is what makes it hand one out,
+/// and a server that does not list it must not be asked (SEP-2207). The
+/// client-credentials grant gets no refresh token at all (RFC 6749 §4.4.3), so
+/// nothing is added for it.
+pub fn with_offline_access(
+  scope : String?,
+  server : Server,
+  grant : Grant,
+) -> String? {
+  guard grant is AuthorizationCode else { return scope }
+  match server.scopes_supported {
+    Some(supported) =>
+      if supported.contains("offline_access") {
+        widen_scope(scope, Some("offline_access"))
+      } else {
+        scope
+      }
+    None => scope
+  }
+}
+
+///|
 /// The union of two scope strings, the current one first, without repeats.
 pub fn widen_scope(current : String?, asked : String?) -> String? {
   guard asked is Some(asked) else { return current }

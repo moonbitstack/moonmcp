@@ -1,0 +1,14 @@
+// The OAuth client flow against an authorization server in this process: what
+// a refresh token turns into on the wire. It needs a server to be reached,
+// which is why it lives here and not beside the flow itself.
+supported_targets = "+native"
+
+import {
+  "moonbitstack/moonasgi/http" @asgi,
+  "moonbitstack/mooncat",
+  "moonbitstack/moonmcp/auth",
+  "moonbitstack/moonmcp/auth/oauth",
+  "moonbitlang/async",
+  "moonbitlang/async/http" @net,
+  "moonbitlang/core/encoding/utf8",
+} for "test"

@@ -46,6 +46,28 @@ pub fn Tokens::good_until(self : Tokens, issued : Int64) -> Int64? {
 }
 
 ///|
+/// The token a refresh left this client with. A server may rotate the refresh
+/// token, so a response that carries one replaces the old; one that carries
+/// none leaves the old in place rather than throwing the only key away. The
+/// same holds for the scope: what a response does not name is what was asked
+/// for, which is what this client already had.
+pub fn Tokens::renewed(self : Tokens, fresh : Tokens) -> Tokens {
+  {
+    access_token: fresh.access_token,
+    token_type: fresh.token_type,
+    expires_in: fresh.expires_in,
+    refresh_token: match fresh.refresh_token {
+      Some(token) => Some(token)
+      None => self.refresh_token
+    },
+    scope: match fresh.scope {
+      Some(scope) => Some(scope)
+      None => self.scope
+    },
+  }
+}
+
+///|
 /// The body of an authorization-code exchange (RFC 6749 §4.1.3) with the PKCE
 /// verifier and the RFC 8707 resource indicator.
 pub fn authorization_code_form(

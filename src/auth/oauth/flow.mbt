@@ -30,6 +30,10 @@ pub struct Oauth {
   priv mut server : @auth.Server?
   priv mut registration : @auth.Registration?
   priv mut tokens : @auth.Tokens?
+  // What the token in hand was granted, which is the ceiling a refresh may not
+  // go over: the response's own `scope`, or what the authorization asked for
+  // when the response names none.
+  priv mut granted_scope : String?
   priv mut good_until : Int64?
   priv mut rounds : Int32
 }
@@ -82,6 +86,7 @@ pub fn Oauth::new(
     server: None,
     registration: None,
     tokens: None,
+    granted_scope: None,
     good_until: None,
     rounds: 0,
   }
@@ -135,10 +140,90 @@ pub async fn Oauth::renew(self : Oauth, challenge? : @auth.Challenge) -> Bool {
   if self.rounds >= 3 {
     return false
   }
+  // A token that can be refreshed is refreshed: one request, no browser, no
+  // person. Anything a refresh cannot do — there is no refresh token, the
+  // server refused it, or the challenge asks for a scope this token never had
+  // — falls through to the full flow.
+  if self.refresh(challenge?) {
+    return true
+  }
   self.authorize(challenge?) catch {
     _ => return false
   }
   true
+}
+
+///|
+/// Get a new access token from the refresh token, without a person in front of
+/// the client. False when there is nothing to refresh with or the server
+/// refused, which is the caller's cue to authorize again.
+///
+/// A refresh keeps the scope it was granted (RFC 6749 §6), so a challenge that
+/// asks for a larger one is not answered here: the caller is sent through
+/// authorization instead, where a scope can be widened.
+pub async fn Oauth::refresh(self : Oauth, challenge? : @auth.Challenge) -> Bool {
+  let fresh : @auth.Tokens? = try self.refresh_once(challenge) catch {
+    _ => None
+  } noraise {
+    tokens => Some(tokens)
+  }
+  guard fresh is Some(fresh) else { return false }
+  let renewed = match self.tokens {
+    Some(held) => held.renewed(fresh)
+    None => fresh
+  }
+  self.tokens = Some(renewed)
+  self.granted_scope = match renewed.scope {
+    Some(scope) => Some(scope)
+    None => self.granted_scope
+  }
+  self.good_until = renewed.good_until((self.clock)())
+  true
+}
+
+///|
+/// The refresh request itself, or a refusal: no token held, no refresh token in
+/// it, no authorization server discovered yet, or a scope the challenge asks for
+/// that this token cannot give.
+async fn Oauth::refresh_once(
+  self : Oauth,
+  challenge : @auth.Challenge?,
+) -> @auth.Tokens raise @auth.Refused {
+  let held = match self.tokens {
+    Some(tokens) => tokens
+    None => raise @auth.Refused(message="no token to refresh")
+  }
+  let refresh_token = match held.refresh_token {
+    Some(token) => token
+    None => raise @auth.Refused(message="the token carries no refresh token")
+  }
+  if !@auth.scope_within(
+      @auth.scope_for(challenge, self.resource, self.scope),
+      self.granted_scope,
+    ) {
+    raise @auth.Refused(
+      message="the challenge asks for a scope this token was not granted",
+    )
+  }
+  let server = match self.server {
+    Some(server) => server
+    None =>
+      raise @auth.Refused(message="no authorization server discovered yet")
+  }
+  let registration = match self.registration {
+    Some(registration) => registration
+    None => raise @auth.Refused(message="no registration to refresh with")
+  }
+  tokens_of(
+    server,
+    registration,
+    @auth.refresh_form(
+      refresh_token~,
+      resource?=self.resource_indicator(self.resource),
+    ),
+    self.assertion,
+    (self.clock)(),
+  )
 }
 
 ///|
@@ -166,7 +251,11 @@ pub async fn Oauth::authorize(
       }
     None => ()
   }
-  let scope = @auth.scope_for(challenge, resource, self.scope)
+  let scope = @auth.with_offline_access(
+    @auth.scope_for(challenge, resource, self.scope),
+    server,
+    self.grant,
+  )
   let registration = self.establish(server)
   let tokens = match self.grant {
     ClientCredentials =>
@@ -222,6 +311,10 @@ pub async fn Oauth::authorize(
     }
   }
   self.tokens = Some(tokens)
+  self.granted_scope = match tokens.scope {
+    Some(scope) => Some(scope)
+    None => scope
+  }
   self.good_until = tokens.good_until((self.clock)())
 }
 
