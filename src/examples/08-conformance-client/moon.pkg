@@ -1,0 +1,18 @@
+// The client the official MCP conformance suite drives, one scenario per run.
+supported_targets = "+native"
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/http" @net,
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitstack/moonbase/base64",
+  "moonbitstack/moonmcp/auth",
+  "moonbitstack/moonmcp/auth/oauth",
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/client/http",
+  "moonbitstack/moonmcp/types",
+}
+
+pkgtype(kind: "executable")
