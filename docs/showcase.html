@@ -311,8 +311,8 @@
 
     <section class="section" id="how">
       <h2>Run it yourself</h2>
-      <p class="pdesc">The captures above are the demo server over Streamable HTTP. Build it for native and the documentation page is served at <code>/docs</code> next to the endpoint:</p>
-      <div class="runline"><span class="prompt">$</span><code>moon run src/examples/02-http --target native</code><button class="copy" type="button">copy</button></div>
+      <p class="pdesc">The captures above are the demo server over Streamable HTTP. Build it for native and the documentation page is served at <code>/docs</code> next to the endpoint. The server that runs it lives in the <code>integration</code> module, so that the library itself carries no HTTP server:</p>
+      <div class="runline"><span class="prompt">$</span><code>cd integration &amp;&amp; moon run src/02-http --target native</code><button class="copy" type="button">copy</button></div>
       <p style="color:var(--sheet-muted);font-size:.9rem;margin-top:.9rem">Then open <code>http://127.0.0.1:12000/docs</code>. <code>to_asgi(docs=None)</code> leaves it off.</p>
     </section>
 
