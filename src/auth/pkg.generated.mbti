@@ -8,8 +8,44 @@ import {
 }
 
 // Values
+pub fn authorization_code_form(code~ : String, redirect_uri~ : String, verifier~ : String, resource? : String, scope? : String) -> Array[(String, String)]
+
+pub fn authorize_url(Server, Registration, String, String, Pkce, scope? : String, resource? : String) -> String raise Refused
+
+pub fn client_credentials_form(resource? : String, scope? : String) -> Array[(String, String)]
+
+pub fn form_encode(Array[(String, String)]) -> String
+
+pub fn new_state() -> String raise Refused
+
+pub fn origin_of(String) -> String
+
+pub fn path_of(String) -> String
+
+pub fn percent_encode(StringView) -> String
+
+pub fn query_of(String) -> String
+
+pub fn query_value(String, String) -> String?
+
+pub fn refresh_form(refresh_token~ : String, resource? : String, scope? : String) -> Array[(String, String)]
+
+pub fn same_origin(String, String) -> Bool
+
+pub fn scope_for(Challenge?, Resource?, String?) -> String?
+
+pub fn target_of(String) -> String
+
+pub fn trimmed_path_of(String) -> String
+
+pub fn widen_scope(String?, String?) -> String?
+
+pub fn with_query(String, Array[(String, String)]) -> String
 
 // Errors
+pub(all) suberror Refused {
+  Refused(message~ : String)
+}
 
 // Types and methods
 pub struct Bearer {
@@ -20,6 +56,66 @@ pub fn Bearer::hmac(secret~ : String, alg? : @jwt.Alg, issuer? : String, audienc
 pub fn Bearer::own(check~ : (String) -> Result[Principal, String]) -> Self
 
 #derive(Eq, @debug.Debug)
+pub(all) struct Challenge {
+  resource_metadata : String?
+  scope : String?
+  error : String?
+  error_description : String?
+}
+pub fn Challenge::equal(Self, Self) -> Bool
+pub fn Challenge::not_equal(Self, Self) -> Bool
+pub fn Challenge::parse(String) -> Self?
+pub fn Challenge::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Credentials {
+  Basic
+  Post
+  Public
+}
+pub fn Credentials::authorization(Self, Registration) -> String?
+pub fn Credentials::equal(Self, Self) -> Bool
+pub fn Credentials::form(Self, Registration) -> Array[(String, String)]
+pub fn Credentials::not_equal(Self, Self) -> Bool
+pub fn Credentials::select(Registration, Array[String]) -> Self
+pub fn Credentials::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Grant {
+  AuthorizationCode
+  ClientCredentials
+}
+pub fn Grant::equal(Self, Self) -> Bool
+pub fn Grant::not_equal(Self, Self) -> Bool
+pub fn Grant::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Metadata {
+  client_name : String
+  redirect_uris : Array[String]
+  grant_types : Array[String]
+  response_types : Array[String]
+  token_endpoint_auth_method : String
+  scope : String?
+}
+pub fn Metadata::body(Self) -> Map[String, @json.Json]
+pub fn Metadata::equal(Self, Self) -> Bool
+pub fn Metadata::new(client_name~ : String, redirect_uris~ : Array[String], scope? : String, grant_types? : Array[String], response_types? : Array[String], token_endpoint_auth_method? : String) -> Self
+pub fn Metadata::not_equal(Self, Self) -> Bool
+pub fn Metadata::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Pkce {
+  verifier : String
+  challenge : String
+}
+pub fn Pkce::equal(Self, Self) -> Bool
+pub fn Pkce::new() -> Self raise Refused
+pub fn Pkce::not_equal(Self, Self) -> Bool
+pub fn Pkce::of(String) -> Self
+pub fn Pkce::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) struct Principal {
   subject : String?
   claims : Map[String, @json.Json]
@@ -28,6 +124,76 @@ pub fn Principal::equal(Self, Self) -> Bool
 pub fn Principal::has_scope(Self, String) -> Bool
 pub fn Principal::not_equal(Self, Self) -> Bool
 pub fn Principal::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Redirect {
+  code : String
+  state : String?
+}
+pub fn Redirect::equal(Self, Self) -> Bool
+pub fn Redirect::not_equal(Self, Self) -> Bool
+pub fn Redirect::parse(String) -> Self raise Refused
+pub fn Redirect::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Registration {
+  client_id : String
+  client_secret : String?
+  token_endpoint_auth_method : String?
+}
+pub fn Registration::equal(Self, Self) -> Bool
+pub fn Registration::not_equal(Self, Self) -> Bool
+pub fn Registration::parse(@json.Json) -> Self raise Refused
+pub fn Registration::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Resource {
+  resource : String
+  authorization_servers : Array[String]
+  scopes_supported : Array[String]?
+}
+pub fn Resource::equal(Self, Self) -> Bool
+pub fn Resource::not_equal(Self, Self) -> Bool
+pub fn Resource::parse(@json.Json) -> Self raise Refused
+pub fn Resource::probes(String, hinted? : String) -> Array[String]
+pub fn Resource::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Server {
+  issuer : String
+  authorization_endpoint : String?
+  token_endpoint : String
+  registration_endpoint : String?
+  scopes_supported : Array[String]?
+  response_types_supported : Array[String]
+  grant_types_supported : Array[String]
+  token_endpoint_auth_methods_supported : Array[String]
+  token_endpoint_auth_signing_alg_values_supported : Array[String]
+  code_challenge_methods_supported : Array[String]?
+  client_id_metadata_document_supported : Bool
+}
+pub fn Server::at_root(String) -> Self
+pub fn Server::equal(Self, Self) -> Bool
+pub fn Server::not_equal(Self, Self) -> Bool
+pub fn Server::offers(Self, String) -> Bool
+pub fn Server::parse(@json.Json) -> Self raise Refused
+pub fn Server::probes(String) -> Array[String]
+pub fn Server::serves_authorization_code(Self) -> Bool
+pub fn Server::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Tokens {
+  access_token : String
+  token_type : String
+  expires_in : Int64?
+  refresh_token : String?
+  scope : String?
+}
+pub fn Tokens::equal(Self, Self) -> Bool
+pub fn Tokens::good_until(Self, Int64) -> Int64?
+pub fn Tokens::not_equal(Self, Self) -> Bool
+pub fn Tokens::parse(@json.Json) -> Self raise Refused
+pub fn Tokens::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

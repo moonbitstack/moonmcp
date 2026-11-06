@@ -4,6 +4,9 @@ import {
   "moonbitstack/mooncred/jwt",
   "moonbitstack/mooncrypt/hash/sha2",
   "moonbitstack/mooncrypt/mac/hmac",
+  "moonbitstack/moonbase/base64",
+  "moonbitstack/moonrand/auto",
+  "moonbitstack/moonurl",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/async",
 }

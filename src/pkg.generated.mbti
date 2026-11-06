@@ -39,11 +39,15 @@ pub using @layers {type Call}
 
 pub using @server {type Cancellations}
 
+pub using @auth {type Challenge}
+
 pub using @server {type Channel}
 
 pub using @client {type Client}
 
 pub using @context {type Context}
+
+pub using @types {type ElicitResult}
 
 pub using @context {type Facts}
 

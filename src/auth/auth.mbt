@@ -153,7 +153,8 @@ fn refusal_text(e : @jwt.Refused) -> String {
 }
 
 ///|
-/// Seconds since the epoch, from the runtime's clock.
+/// Seconds since the epoch. The runtime's clock counts milliseconds, which is
+/// also what `exp`, `iat` and `nbf` are measured in once they are seconds.
 fn wall_clock() -> Int64 {
-  @async.now() / 1_000_000_000L
+  @async.now() / 1_000L
 }

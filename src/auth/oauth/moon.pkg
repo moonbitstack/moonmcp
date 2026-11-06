@@ -1,0 +1,15 @@
+// The OAuth client flow, over HTTP: discovery, registration, authorization,
+// the token exchange and the JWT assertion a client can make about itself.
+supported_targets = "+native"
+
+import {
+  "moonbitstack/moonmcp/auth",
+  "moonbitstack/moonbase/base64",
+  "moonbitstack/mooncrypt/asn1",
+  "moonbitstack/mooncrypt/curve",
+  "moonbitstack/mooncrypt/sign/ecdsa",
+  "moonbitlang/async",
+  "moonbitlang/async/http" @net,
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
+}
