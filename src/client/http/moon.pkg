@@ -4,19 +4,9 @@ supported_targets = "+native"
 
 import {
   "moonbitstack/moonmcp/client",
-  "moonbitstack/moonmcp/types",
   "moonbitstack/moonmcp/server",
+  "moonbitlang/async",
   "moonbitlang/async/http" @net,
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/json",
 }
-
-import {
-  "moonbitstack/moonmcp/client",
-  "moonbitstack/moonmcp/server",
-  "moonbitstack/moonmcp/tools",
-  "moonbitstack/moonmcp/types",
-  "moonbitstack/mooncat",
-  "moonbitlang/async",
-  "moonbitlang/async/http" @net,
-} for "test"
