@@ -7,13 +7,6 @@
 pub let refused_code : Int32 = -32000
 
 ///|
-/// One caller's bucket.
-struct Bucket {
-  mut tokens : Double
-  mut filled_at : Double
-}
-
-///|
 /// A token bucket per caller (← FastMCP's `RateLimitingMiddleware`).
 ///
 /// Each caller starts with a full bucket of `burst` tokens, spends one per
@@ -32,7 +25,7 @@ pub struct RateLimiting {
   priv operations : Array[Operation]
   priv key : (Call) -> String
   priv clock : () -> Double
-  priv buckets : Map[String, Bucket]
+  priv buckets : Map[String, @moonward.Bucket]
   priv mut refused : Int32
 }
 
@@ -70,28 +63,24 @@ pub fn RateLimiting::layer(self : RateLimiting) -> Layer {
       return next.then(call)
     }
     let key = (self.key)(call)
-    let now = (self.clock)()
+    // moonward counts in nanoseconds and takes the reading from its caller, so
+    // the whole policy stays testable with a clock a test moves by hand.
+    let now = ((self.clock)() * 1_000_000_000.0).to_int64()
     let bucket = match self.buckets.get(key) {
       Some(bucket) => bucket
       None => {
-        let bucket = { tokens: self.burst.to_double(), filled_at: now, }
+        let bucket = @moonward.Bucket::new(
+          self.rate.to_double(),
+          burst=self.burst.to_double(),
+          now~,
+        )
         self.buckets[key] = bucket
         bucket
       }
     }
-    let waited = if now > bucket.filled_at {
-      now - bucket.filled_at
-    } else {
-      0.0
-    }
-    let filled = bucket.tokens + waited * self.rate.to_double()
-    let tokens = if filled > self.burst.to_double() {
-      self.burst.to_double()
-    } else {
-      filled
-    }
-    if tokens < 1.0 {
+    if !bucket.take(now) {
       self.refused = self.refused + 1
+      let tokens = bucket.tokens(now)
       let wait_ms = ((1.0 - tokens) / self.rate.to_double() * 1000.0).to_int()
       raise @exceptions.Mcp({
         code: refused_code,
@@ -99,8 +88,6 @@ pub fn RateLimiting::layer(self : RateLimiting) -> Layer {
         data: Some(Json({ "retryAfterMs": Json(wait_ms) })),
       })
     }
-    bucket.tokens = tokens - 1.0
-    bucket.filled_at = now
     next.then(call)
   })
 }

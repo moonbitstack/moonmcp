@@ -16,8 +16,6 @@ pub let refused_code : Int32
 // Errors
 
 // Types and methods
-type Bucket
-
 pub struct Caching {
   // private fields
 }

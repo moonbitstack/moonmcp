@@ -3,6 +3,7 @@
 import {
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonward",
   "moonbitlang/core/bench",
 }
 
