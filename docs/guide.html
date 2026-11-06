@@ -48,6 +48,8 @@
       <a href="#debug">The documentation page</a>
       <a href="#client">Connect a client</a>
       <a href="#reach">Reach a server from MoonBit</a>
+      <a href="#grant">A server that asks for a token</a>
+      <a href="#grant">A server that asks for a token</a>
     </nav>
     <div class="side-foot" style="margin-top:1.4rem">
       <a class="ghost" href="index.html">Home</a>
@@ -723,7 +725,46 @@ let tools = client.list_tools()
 let reply = client.call_tool("add", arguments={ "a": 2 })
 let sum = reply.structured_content.unwrap().get("sum").unwrap()
 println("\{tools.length()} tools, sum \{sum.stringify()}")</code></pre><button class="copy" type="button">copy</button></div>
-      <p>A transport is four methods &mdash; <code>ask</code>, <code>tell</code>, <code>listen</code> and <code>close</code> &mdash; so a connection of your own plugs in without touching the client. The client fills in <code>_meta</code>, keeps the request ids, and runs the handshake when the revision it was given needs one.</p>
+      <p>A transport is five methods &mdash; <code>ask</code>, <code>tell</code>, <code>listen</code>, <code>close</code> and <code>answer_with</code> &mdash; so a connection of your own plugs in without touching the client. The client fills in <code>_meta</code>, runs the handshake when the revision it was given needs one, and answers the requests the server makes of it through whichever transport it is on.</p>
+      <p>The server may ask for a completion, a form, or the roots this client may read. Say what to do about each when connecting; anything left out is refused, not ignored:</p>
+      <div class="code"><pre><code class="language-moonbit">let handlers = @client.Handlers::new(
+  elicitation=request =&gt; {
+    println(request.message)
+    @types.ElicitResult::accept({ "answer": Json::string("yes") })
+  },
+)
+// Client::connect(transport, handlers~) makes them this client's answers.</code></pre><button class="copy" type="button">copy</button></div>
+      <p>An accepted elicitation leaves out every field the person did not touch; the default the requested schema names is filled in before the answer goes back, so the server sees a complete form.</p>
+    </section>
+
+    <section class="section" id="grant">
+      <h2>A server that asks for a token</h2>
+      <p class="pdesc">A server behind OAuth answers <code>401</code> with a challenge that names its metadata. <code>Oauth</code> reads the metadata, registers, sends the user to authorize, and exchanges the code &mdash; and the HTTP transport calls it whenever the server asks for a token the client does not have.</p>
+      <div class="code"><pre><code class="language-moonbit">async fn main {
+  let oauth = @oauth.Oauth::new(
+    resource_url="https://example.com/mcp",
+    client_name="my-agent",
+    redirect_uri="http://127.0.0.1:53682/callback",
+    present=url =&gt; {
+      // Open a browser on the URL and listen on the redirect port; give back
+      // where the browser was sent, or "" when the person gave up.
+      println("authorize: \{url}")
+      ""
+    },
+  )
+  let transport = @http.Http::new(
+    "https://example.com/mcp",
+    token=fn() { oauth.bearer() },
+    renew=async fn(_status, challenge) {
+      oauth.renew(challenge?=@auth.Challenge::parse(challenge))
+    },
+  )
+  let client = @client.Client::connect(transport)
+  println("\{client.list_tools().length()} tools")
+  client.close()
+}</code></pre><button class="copy" type="button">copy</button></div>
+      <p>The flow is the protocol's, in its order: protected resource metadata at the location the challenge named or under the endpoint's own path, authorization server metadata by RFC 8414 then OpenID Connect Discovery, registration by RFC 7591 or a URL client identifier, then <code>response_type=code</code> with PKCE S256, the scope the challenge named, and the resource indicator of RFC 8707. A <code>403</code> with a scope the token does not carry starts a second round, three at most. A resource whose metadata names another origin is refused before anything is sent.</p>
+      <p>Server-side, <code>Bearer</code> is the other half: the token the endpoint checks before it serves anything.</p>
     </section>
 
     <footer class="site">

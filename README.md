@@ -1,8 +1,9 @@
 <p align="center">
   <strong>moonmcp</strong><br>
-  Model Context Protocol servers for MoonBit.<br>
-  Register tools, resources, resource templates and prompts; serve them over<br>
-  Streamable HTTP or stdio, in both protocol eras.
+  Model Context Protocol servers and clients for MoonBit.<br>
+  Register tools, resources, resource templates and prompts, serve them over<br>
+  Streamable HTTP or stdio in both protocol eras, and reach other people's<br>
+  servers from the other end — with their authorization flow.
 </p>
 
 <p align="center">
@@ -438,10 +439,32 @@ async fn main {
 
 ## Conformance
 
-`scripts/interop/check_conformance.sh` runs the official
-[MCP conformance suite](https://github.com/modelcontextprotocol/conformance) on
-`src/examples/07-conformance`, in CI, with its pending scenarios included. Every
-server scenario passes.
+The official [MCP conformance suite](https://github.com/modelcontextprotocol/conformance),
+pinned at 0.1.16, runs in CI in both directions.
+
+`scripts/interop/check_conformance.sh` drives the server in
+`integration/src/07-conformance`: 42 server scenarios, the pending ones
+included, every check passing.
+
+`scripts/interop/check_client_conformance.sh` drives
+`src/examples/08-conformance-client` through the 27 client scenarios: the
+foundation ones, the fifteen of the authorization suite, the two older-revision
+ones, the three drafts and the three extensions. 287 checks, every one passing.
+
+| Client scenario | Checks |
+|:--|--:|
+| initialize, tools_call | 2 |
+| elicitation-sep1034-client-defaults | 5 |
+| sse-retry | 3 |
+| auth/metadata-default, -var1, -var2, -var3 | 52 |
+| auth/basic-cimd | 13 |
+| auth/scope-from-www-authenticate, -scopes-supported, -omitted-when-undefined | 42 |
+| auth/scope-step-up, auth/scope-retry-limit | 30 |
+| auth/token-endpoint-auth-basic, -post, -none | 54 |
+| auth/pre-registration | 13 |
+| auth/2025-03-26-oauth-metadata-backcompat, -endpoint-fallback | 19 |
+| auth/resource-mismatch, -offline-access-scope, -offline-access-not-supported | 29 |
+| auth/client-credentials-jwt, -basic, auth/cross-app-access-complete-flow | 25 |
 
 ## Client
 
@@ -490,9 +513,82 @@ server started as a child process speaks.
 | `request`, `exchange`, `notify` | Any method, with `_meta` filled in for you. |
 | `close()` | Lets the connection go. |
 
-A transport is anything implementing `Transport`: `ask`, `tell`, `listen` and
-`close`. `Memory`, `Lines` and `Http` ship here; a fourth is a hundred lines,
+A transport is anything implementing `Transport`: `ask`, `tell`, `listen`,
+`close`, and `answer_with`, which is where the requests the server makes of the
+client go. `Memory`, `Lines` and `Http` ship here; a fourth is a hundred lines,
 and the client above it does not change.
+
+The server may ask the client for something while a call is in flight: a
+completion (sampling), a form for the person in front of it (elicitation), the
+roots it may read. `Client::connect(handlers=)` says what this client does about
+each, and a request it does not serve is refused with the error JSON-RPC names.
+
+```moonbit
+async fn main {
+  let mcp = @moonmcp.Server::new("demo")
+  let client = @moonmcp.Client::connect(
+    @moonmcp.Memory::new(mcp),
+    handlers=@client.Handlers::new(
+      elicitation=request => {
+        // A real client shows `request.requested_schema` and returns what was filled in.
+        println(request.message)
+        @moonmcp.ElicitResult::accept(Map([]))
+      },
+    ),
+  )
+  client.close()
+}
+```
+
+### Authorization
+
+A server that answers `401` names where its metadata is; the client reads it,
+registers, sends the user to authorize and exchanges the code for a token.
+`Oauth` does that whole flow, and the HTTP transport calls it whenever the
+server asks for a token it does not have.
+
+```moonbit
+async fn main {
+  let oauth = @oauth.Oauth::new(
+    resource_url="https://example.com/mcp",
+    client_name="my-agent",
+    redirect_uri="http://127.0.0.1:53682/callback",
+    // Open a browser on this URL and listen on the redirect port for the
+    // callback; give back the URL the browser was sent to, or "" if the person
+    // gave up.
+    present=url => {
+      println("authorize: \{url}")
+      ""
+    },
+  )
+  let transport = @http.Http::new(
+    "https://example.com/mcp",
+    token=fn() { oauth.bearer() },
+    renew=async fn(_status, challenge) {
+      oauth.renew(challenge?=@moonmcp.Challenge::parse(challenge))
+    },
+  )
+  let client = @moonmcp.Client::connect(transport)
+  let tools = client.list_tools()
+  println("\{tools.length()} tools")
+  client.close()
+}
+```
+
+What the flow does, in the order the specifications put it:
+
+| Step | What is read or sent |
+|:--|:--|
+| Discovery | the protected resource metadata of RFC 9728, at the location the challenge named or under the endpoint's own path, then the authorization server metadata of RFC 8414, then OpenID Connect Discovery, then the endpoints of a server that publishes neither |
+| Registration | dynamic registration (RFC 7591), a URL client identifier when the server advertises client metadata documents, or the credentials a deployment was given |
+| Authorization | `response_type=code`, PKCE with S256, the scope the challenge named or the resource's own, and the resource indicator of RFC 8707 |
+| Token | the code and its verifier, with the client authenticating by HTTP Basic, in the body, or not at all |
+| Renewal | a second round when the server answers `403` with a scope this token does not carry, at most three times |
+
+A resource whose metadata names another origin is refused before anything is
+sent: the token would be minted for a server that is not this one. `Oauth`
+also holds the client-credentials grant, and a signed JWT assertion for servers
+that take `private_key_jwt`.
 
 ## Authorization
 
@@ -625,12 +721,16 @@ writes the configuration above.
 |:--|:--|
 | [`demo`](src/examples/demo/) | One server with three tools, a resource, a resource template and a prompt; one tool reports progress |
 | [`01-annotations`](src/examples/01-annotations/) | Tools, resources, a template and a prompt written as `#mcp.*` annotations, served over stdio |
-| [`02-http`](src/examples/02-http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `moon run src/examples/02-http --target native` |
+| [`02-http`](integration/src/02-http/) | That server over Streamable HTTP, with the documentation page at `/docs`: `cd integration && moon run src/02-http --target native` |
 | [`03-stdio`](src/examples/03-stdio/) | That server over stdio: `moon run src/examples/03-stdio --target native` |
 | [`04-client`](src/examples/04-client/) | A client and a server in one program: list the tools, call one, print the progress it reports: `moon run src/examples/04-client --target native` |
 | [`05-extensions`](src/examples/05-extensions/) | A provider, a namespace, a cache and a rate limiter on one server: `moon run src/examples/05-extensions --target native` |
 | [`06-interop`](src/examples/06-interop/) | The client against a server written with the official TypeScript SDK, over Streamable HTTP and over a child's stdio: `moon run src/examples/06-interop --target native -- http <url>` |
 | [`guide/ann`](src/examples/guide/ann/), [`guide/fns`](src/examples/guide/fns/), [`guide/cls`](src/examples/guide/cls/) | The same server written three ways; `guide/check` sends each request to all three and fails if one of them answers differently |
+| [`08-conformance-client`](src/examples/08-conformance-client/) | The client the official conformance suite drives, one scenario per run |
+| [`integration/`](integration/) | The examples that need a server to run them, and the server the conformance suite tests; a module of its own, so the library carries neither |
+| [`08-conformance-client`](src/examples/08-conformance-client/) | The client the official conformance suite drives, one scenario per run |
+| [`integration/`](integration/) | The examples that need a server to run them, and the server the conformance suite tests; a module of its own, so the library carries neither |
 
 ## Packages
 
@@ -645,7 +745,8 @@ writes the configuration above.
 | `context` | `Context` and `Facts`: what a handler is told about the request it serves |
 | `client` | `Client` and the `Transport` contract, with the in-memory and line transports |
 | `client/http` | The HTTP transport |
-| `auth` | `Bearer` and `Principal`: the token an HTTP endpoint checks, verified through `mooncred` |
+| `auth` | `Bearer` and `Principal`: the token an HTTP endpoint checks, verified through `mooncred`; and the metadata, PKCE, registration and scope rules a client follows to get one |
+| `auth/oauth` | `Oauth`: the authorization-code flow over HTTP, the client-credentials grant and the JWT assertion; native only |
 | `providers` | `Provider`: where capabilities come from when they are not registered one at a time, and `Listing` |
 | `transforms` | `Transform`: what the client is shown, with `Namespace`, `Hidden` and `Tagged` |
 | `layers` | `Layer`: the code every request passes through, with `Caching`, `RateLimiting` and `Telemetry` |
