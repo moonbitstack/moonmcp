@@ -1,6 +1,8 @@
 // The client: the same protocol seen from the other end, over an in-memory
 // server, a pair of line streams, or HTTP.
 import {
+  "moonbitstack/moonjrpc",
+  "moonbitstack/moonjrpc/peer",
   "moonbitstack/moonmcp/types",
   "moonbitstack/moonmcp/server",
   "moonbitlang/core/json",

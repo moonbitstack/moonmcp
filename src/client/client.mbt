@@ -37,6 +37,7 @@ pub async fn Client::connect(
   version~ : String = "0.1.0",
   protocol_version~ : String = @types.latest_protocol_version,
   capabilities~ : @types.ClientCapabilities = @types.ClientCapabilities::new(),
+  handlers~ : Handlers = Handlers::none(),
 ) -> Client {
   let client : Client = {
     transport,
@@ -48,6 +49,9 @@ pub async fn Client::connect(
     capabilities,
     modern: modern_revision(protocol_version),
   }
+  // The server may ask this client for a completion, a form or the roots it
+  // may read; the transport carries the answer back.
+  transport.answer_with(message => handlers.answer(message))
   if !client.modern {
     client.handshake()
   }

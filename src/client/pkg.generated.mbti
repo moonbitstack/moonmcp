@@ -4,11 +4,13 @@ package "moonbitstack/moonmcp/client"
 import {
   "moonbitlang/async",
   "moonbitlang/core/json",
+  "moonbitlang/core/ref",
   "moonbitstack/moonmcp/server",
   "moonbitstack/moonmcp/types",
 }
 
 // Values
+pub fn fill_defaults(Map[String, @json.Json]?, Map[String, @json.Json]) -> Map[String, @json.Json]
 
 // Errors
 pub suberror Refused {
@@ -23,7 +25,7 @@ pub struct Client {
 }
 pub async fn Client::call_tool(Self, String, arguments? : Map[String, @json.Json], on_notification? : async (@json.Json) -> Unit, progress_token? : @json.Json) -> @types.CallToolResult
 pub async fn Client::close(Self) -> Unit
-pub async fn Client::connect(&Transport, name? : String, version? : String, protocol_version? : String, capabilities? : @types.ClientCapabilities) -> Self
+pub async fn Client::connect(&Transport, name? : String, version? : String, protocol_version? : String, capabilities? : @types.ClientCapabilities, handlers? : Handlers) -> Self
 pub async fn Client::discover(Self) -> Map[String, @json.Json]
 pub async fn Client::exchange(Self, String, params? : Map[String, @json.Json], on_notification? : async (@json.Json) -> Unit, progress_token? : @json.Json) -> Map[String, @json.Json]
 pub async fn Client::get_prompt(Self, String, arguments? : Map[String, @json.Json]) -> @types.GetPromptResult
@@ -39,11 +41,22 @@ pub async fn Client::request(Self, String, params? : Map[String, @json.Json]) ->
 pub fn Client::server_capabilities(Self) -> @types.ServerCapabilities?
 pub fn Client::server_info(Self) -> @types.Implementation?
 
-pub struct Lines {
-  read : async () -> String?
-  write : async (String) -> Unit
-  lock : @async.Mutex
+pub(all) struct Handlers {
+  sampling : (async (@types.CreateMessageRequestParams) -> @types.CreateMessageResult)?
+  elicitation : (async (@types.ElicitRequestParams) -> @types.ElicitResult)?
+  roots : (async () -> @types.ListRootsResult)?
+  apply_defaults : Bool
 }
+pub async fn Handlers::answer(Self, @json.Json) -> @json.Json?
+pub fn Handlers::new(sampling? : async (@types.CreateMessageRequestParams) -> @types.CreateMessageResult, elicitation? : async (@types.ElicitRequestParams) -> @types.ElicitResult, roots? : async () -> @types.ListRootsResult, apply_defaults? : Bool) -> Self
+pub fn Handlers::none() -> Self
+
+pub struct Lines {
+  lock : @async.Mutex
+  answer : @ref.Ref[(async (@json.Json) -> @json.Json?)?]
+  // private fields
+}
+pub fn Lines::answer_with(Self, async (@json.Json) -> @json.Json?) -> Unit
 pub async fn Lines::ask(Self, @json.Json, async (@json.Json) -> Unit) -> @json.Json
 pub async fn Lines::close(Self) -> Unit
 pub async fn Lines::listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
@@ -53,7 +66,9 @@ pub impl Transport for Lines
 
 pub struct Memory {
   server : @server.Server
+  answer : @ref.Ref[(async (@json.Json) -> @json.Json?)?]
 }
+pub fn Memory::answer_with(Self, async (@json.Json) -> @json.Json?) -> Unit
 pub async fn Memory::ask(Self, @json.Json, async (@json.Json) -> Unit) -> @json.Json
 pub async fn Memory::close(Self) -> Unit
 pub async fn Memory::listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
@@ -69,4 +84,5 @@ pub(open) trait Transport {
   async fn tell(Self, @json.Json) -> Unit
   async fn listen(Self, @json.Json, async (@json.Json) -> Unit) -> Unit
   async fn close(Self) -> Unit
+  fn answer_with(Self, async (@json.Json) -> @json.Json?) -> Unit
 }
