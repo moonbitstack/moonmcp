@@ -1,17 +1,18 @@
 #!/bin/sh
-# The official MCP conformance suite against `src/examples/07-conformance`, every server scenario
-# including the ones still pending upstream. Pinned, so a new scenario upstream turns nothing red
-# until someone looks at it. Needs Node.
+# The official MCP conformance suite against the server in `integration/src/07-conformance`, every
+# server scenario including the ones still pending upstream. Pinned, so a new scenario upstream turns
+# nothing red until someone looks at it. Needs Node.
 #
 #     sh scripts/interop/check_conformance.sh
 set -eu
 
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 root=$(dirname "$(dirname "$here")")
-cd "$root"
+cd "$root/integration"
 
-moon build src/examples/07-conformance --target native
-server=$(find _build/native/debug/build -type f \( -name 07-conformance -o -name 07-conformance.exe \) | head -1)
+moon build src/07-conformance --target native
+server=$(find _build/native/debug/build -type f \
+  \( -name 07-conformance -o -name 07-conformance.exe \) | head -1)
 
 "$server" > /dev/null 2>&1 &
 pid=$!

@@ -8,6 +8,14 @@ skipped: an HTML comment `<!-- nocheck -->` just before the block (it does not
 show on the rendered page), ```moonbit nocheck in Markdown, or a nocheck class
 on the <code>.
 
+The examples serve over HTTP, which takes a server: the temporary packages are
+built inside `integration/`, the module that carries one, so a block naming
+`@mooncat` is checked like any other. The library itself does not depend on it.
+
+The examples serve over HTTP, which takes a server: the temporary packages are
+built inside `integration/`, the module that carries one, so a block naming
+`@mooncat` is checked like any other. The library itself does not depend on it.
+
 A block with `fn main` becomes a program, one with top-level definitions a
 library, and anything else the body of a function. Each `@alias.` it uses is
 resolved to a package of this module, of a dependency, or of core.
@@ -41,15 +49,21 @@ def packages(module, base, into):
         into.setdefault(path.rsplit("/", 1)[-1], path)
 
 
+# The blocks are built in the module that carries a server, because the
+# documentation serves what it builds and the library itself carries none.
+ECOSYSTEM = ROOT / "integration"
+
+
 def aliases():
-    name, source, deps = manifest(ROOT / "moon.mod")
     found = {}
-    packages(name, ROOT / source, found)
-    for dep in deps:
-        home = ROOT / ".mooncakes" / dep
-        if (home / "moon.mod").exists():
-            _, dep_source, _ = manifest(home / "moon.mod")
-            packages(dep, home / dep_source, found)
+    for module in (ROOT, ECOSYSTEM):
+        name, source, deps = manifest(module / "moon.mod")
+        packages(name, module / source, found)
+        for dep in deps:
+            home = module / ".mooncakes" / dep
+            if (home / "moon.mod").exists():
+                _, dep_source, _ = manifest(home / "moon.mod")
+                packages(dep, home / dep_source, found)
     core = pathlib.Path.home() / ".moon" / "lib" / "core"
     if core.exists():
         packages("moonbitlang/core", core, found)
@@ -97,7 +111,9 @@ def package_for(code, known):
     lines = ["import {"] + [f'  "{name}",' for name in imports] + ["}", ""]
     if re.search(r"\bfn main\b", code):
         lines += ['pkgtype(kind: "executable")', ""]
-    lines += ['warnings = "-1-2-29-67"', ""]
+    # Every package here is checked on native; saying so keeps the packages that
+    # import a native-only one from warning about it.
+    lines += ['supported_targets = "+native"', 'warnings = "-1-2-29-67"', ""]
     return "\n".join(lines)
 
 
@@ -108,34 +124,60 @@ def source_for(code):
     return "///|\nasync fn snippet() -> Unit {\n  let _ = {\n" + body + "\n  }\n}\n"
 
 
+def home_of(code):
+    """The module a block is built in: the one whose manifest declares what it
+    imports. A block that serves needs the server, and the server is not a
+    dependency of the library."""
+    return ECOSYSTEM if "@mooncat." in code else ROOT
+
+
+def home_of(code):
+    """The module a block is built in: the one whose manifest declares what it
+    imports. A block that serves needs the server, and the server is not a
+    dependency of the library."""
+    return ECOSYSTEM if "@mooncat." in code else ROOT
+
+
 def main():
     found = blocks()
     if not found:
         print("no MoonBit blocks in the documentation")
         return
     known = aliases()
-    _, source, _ = manifest(ROOT / "moon.mod")
-    # A package left behind by an interrupted run would make the next one fail
-    # on the same name.
-    for stale in (ROOT / source).glob("_doc*"):
-        shutil.rmtree(stale, ignore_errors=True)
+    homes = {}
+    for origin, code in found:
+        homes.setdefault(home_of(code), []).append((origin, code))
+
     made = []
+    failures = []
     try:
-        for i, (origin, code) in enumerate(found):
-            pkg = ROOT / source / f"_doc{i}"
-            pkg.mkdir()
-            made.append(pkg)
-            (pkg / "moon.pkg").write_text(package_for(code, known), encoding="utf-8")
-            (pkg / "main.mbt").write_text(
-                f"// {origin.relative_to(ROOT).as_posix()}\n" + source_for(code),
-                encoding="utf-8",
+        for home, group in homes.items():
+            _, source, _ = manifest(home / "moon.mod")
+            # A package left behind by an interrupted run would make the next
+            # one fail on the same name.
+            for stale in (home / source).glob("_doc*"):
+                shutil.rmtree(stale, ignore_errors=True)
+            for i, (origin, code) in enumerate(group):
+                pkg = home / source / f"_doc{i}"
+                pkg.mkdir()
+                made.append(pkg)
+                (pkg / "moon.pkg").write_text(
+                    package_for(code, known), encoding="utf-8"
+                )
+                (pkg / "main.mbt").write_text(
+                    f"// {origin.relative_to(ROOT).as_posix()}\n" + source_for(code),
+                    encoding="utf-8",
+                )
+            result = subprocess.run(
+                ["moon", "check", "--target", "native"], cwd=home
             )
-        result = subprocess.run(["moon", "check", "--target", "native"], cwd=ROOT)
+            if result.returncode != 0:
+                failures.append(home)
     finally:
         for pkg in made:
             shutil.rmtree(pkg, ignore_errors=True)
     print(f"{len(found)} documentation block(s) checked")
-    sys.exit(result.returncode)
+    sys.exit(1 if failures else 0)
 
 
 main()

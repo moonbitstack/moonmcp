@@ -80,7 +80,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          moon run src/examples/02-http --target native & server=$!
+          (cd integration && moon run src/02-http --target native) & server=$!
           curl -sS --retry 60 --retry-connrefused --retry-delay 1 \
             -o "$RUNNER_TEMP/debug-page.html" http://127.0.0.1:12000/docs
           grep -q 'moonmcp' "$RUNNER_TEMP/debug-page.html"
@@ -96,6 +96,12 @@ jobs:
       - name: documentation blocks compile
         if: runner.os == 'Linux'
         run: python3 scripts/check_docs.py
+
+      - name: the ecosystem module checks and tests
+        run: |
+          cd integration
+          moon check --target native --deny-warn
+          moon test --target native
 
       - name: lint (fmt is clean)
         run: |
@@ -127,18 +133,22 @@ jobs:
       - name: install the interoperability packages
         run: npm install --prefix scripts/interop --no-audit --no-fund
 
-      - name: build the two servers and the client
+      - name: build the two servers and the clients
         run: |
           moon build src/examples/03-stdio --target native
-          moon build src/examples/02-http --target native
           moon build src/examples/06-interop --target native
+          moon build src/examples/08-conformance-client --target native
+          cd integration && moon build src/02-http --target native
 
-      - name: the official conformance suite
+      - name: the official conformance suite, server side
         run: sh scripts/interop/check_conformance.sh
+
+      - name: the official conformance suite, client side
+        run: sh scripts/interop/check_client_conformance.sh
 
       - name: the typescript sdk and the inspector, both ways
         run: |
           node scripts/interop/run.mjs \
             --stdio _build/native/debug/build/examples/03-stdio/03-stdio \
-            --http _build/native/debug/build/examples/02-http/02-http \
+            --http integration/_build/native/debug/build/moonbitstack/moonmcp-ecosystem/02-http/02-http \
             --client _build/native/debug/build/examples/06-interop/06-interop

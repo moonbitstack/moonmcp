@@ -1,0 +1,24 @@
+// The HTTP transport of the client, against a server on a socket: it needs a
+// server to be reached, which the library itself does not carry.
+supported_targets = "+native"
+
+import {
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/client/http",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/mooncat",
+  "moonbitlang/async",
+}
+
+import {
+  "moonbitstack/moonmcp/client",
+  "moonbitstack/moonmcp/client/http",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moonmcp/tools",
+  "moonbitstack/moonmcp/types",
+  "moonbitstack/mooncat",
+  "moonbitlang/async",
+  "moonbitlang/async/http" @net,
+} for "test"
