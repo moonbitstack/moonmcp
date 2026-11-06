@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/json",
+  "moonbitstack/moonjrpc",
   "moonbitstack/moonmcp/tasks",
 }
 

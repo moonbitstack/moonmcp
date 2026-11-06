@@ -42,29 +42,61 @@ pub(all) enum JSONRPCMessage {
 }
 
 ///|
-pub impl ToJson for JSONRPCMessage with fn to_json(self : JSONRPCMessage) -> Json {
-  let obj : Map[String, Json] = Map([])
-  put_str(obj, "jsonrpc", "2.0")
+/// This message as the JSON-RPC frame moonjrpc speaks: the same four shapes,
+/// with the identifier and the error object that library's types carry.
+fn JSONRPCMessage::to_wire(self : JSONRPCMessage) -> @moonjrpc.Message {
   match self {
-    Request(id~, verb~, params~) => {
-      put_opt_json(obj, "id", Some(RequestId::to_json(id)))
-      put_str(obj, "method", verb)
-      put_opt_json(obj, "params", params)
-    }
-    Notification(verb~, params~) => {
-      put_str(obj, "method", verb)
-      put_opt_json(obj, "params", params)
-    }
-    Response(id~, result~) => {
-      put_opt_json(obj, "id", Some(RequestId::to_json(id)))
-      put_opt_json(obj, "result", Some(result))
-    }
-    Error(id~, error~) => {
-      put_opt_json(obj, "id", Some(RequestId::to_json(id)))
-      put_opt_json(obj, "error", Some(ErrorData::to_json(error)))
-    }
+    Request(id~, verb~, params~) =>
+      @moonjrpc.Message::Call(id=id_to_wire(id), name=verb, params~)
+    Notification(verb~, params~) =>
+      @moonjrpc.Message::Notice(name=verb, params~)
+    Response(id~, result~) =>
+      @moonjrpc.Message::Reply(id=id_to_wire(id), result~)
+    Error(id~, error~) =>
+      @moonjrpc.Message::Refusal(id=id_to_wire(id), failure={
+        code: error.code,
+        message: error.message,
+        data: error.data,
+      })
   }
-  Json(obj)
+}
+
+///|
+/// Read one of moonjrpc's messages as this library's.
+fn JSONRPCMessage::of_wire(message : @moonjrpc.Message) -> JSONRPCMessage {
+  match message {
+    Call(id~, name~, params~) => Request(id=id_of_wire(id), verb=name, params~)
+    Notice(name~, params~) => Notification(verb=name, params~)
+    Reply(id~, result~) => Response(id=id_of_wire(id), result~)
+    Refusal(id~, failure~) =>
+      Error(id=id_of_wire(id), error={
+        code: failure.code,
+        message: failure.message,
+        data: failure.data,
+      })
+  }
+}
+
+///|
+fn id_to_wire(id : RequestId) -> @moonjrpc.Id {
+  match id {
+    Number(id~) => @moonjrpc.Id::Num(id.to_double(), repr=None)
+    Text(id~) => @moonjrpc.Id::Text(id)
+  }
+}
+
+///|
+fn id_of_wire(id : @moonjrpc.Id) -> RequestId {
+  match id {
+    Num(number, ..) => Number(id=number.to_int())
+    Text(text) => Text(id=text)
+    Null => Number(id=0)
+  }
+}
+
+///|
+pub impl ToJson for JSONRPCMessage with fn to_json(self : JSONRPCMessage) -> Json {
+  self.to_wire().to_json()
 }
 
 ///|
@@ -72,24 +104,12 @@ pub impl FromJson for JSONRPCMessage with fn from_json(
   json : Json,
   path : @json.JsonPath,
 ) -> JSONRPCMessage raise @json.JsonDecodeError {
-  let obj = expect_obj(json, path, "JSONRPCMessage")
-  let id = match obj.get("id") {
-    Some(value) => Some(@json.from_json(value))
-    None => None
+  let message : @moonjrpc.Message = try @json.from_json(json) catch {
+    _ => raise decode_error(path, "JSONRPCMessage: not a JSON-RPC message")
+  } noraise {
+    message => message
   }
-  if obj.get("method") is Some(String(verb)) {
-    let params = obj.get("params")
-    match id {
-      Some(id) => Request(id~, verb~, params~)
-      None => Notification(verb~, params~)
-    }
-  } else if obj.get("result") is Some(result) {
-    Response(id=id.unwrap_or(Number(id=0)), result~)
-  } else if obj.get("error") is Some(error) {
-    Error(id=id.unwrap_or(Number(id=0)), error=@json.from_json(error))
-  } else {
-    raise decode_error(path, "JSONRPCMessage: missing method, result or error")
-  }
+  JSONRPCMessage::of_wire(message)
 }
 
 ///|
@@ -293,7 +313,6 @@ pub(all) enum ServerRequest {
 /// Wrap a client request into a wire frame.
 pub fn client_request_frame(id : RequestId, request : ClientRequest) -> Json {
   let obj : Map[String, Json] = Map([])
-  put_str(obj, "jsonrpc", "2.0")
   put_opt_json(obj, "id", Some(RequestId::to_json(id)))
   match request {
     Initialize(params) => {
@@ -351,14 +370,17 @@ pub fn client_request_frame(id : RequestId, request : ClientRequest) -> Json {
       put_opt_json(obj, "params", Some(params.to_json()))
     }
   }
-  Json(obj)
+  let params = match obj.get("params") {
+    Some(params) => Some(params)
+    None => None
+  }
+  @moonjrpc.Message::Call(id=id_to_wire(id), name=request.verb(), params~).to_json()
 }
 
 ///|
 /// Wrap a server request into a wire frame.
 pub fn server_request_frame(id : RequestId, request : ServerRequest) -> Json {
   let obj : Map[String, Json] = Map([])
-  put_str(obj, "jsonrpc", "2.0")
   put_opt_json(obj, "id", Some(RequestId::to_json(id)))
   match request {
     Ping(meta~) => {
@@ -382,7 +404,15 @@ pub fn server_request_frame(id : RequestId, request : ServerRequest) -> Json {
       }
     }
   }
-  Json(obj)
+  let params = match obj.get("params") {
+    Some(params) => Some(params)
+    None => None
+  }
+  @moonjrpc.Message::Call(
+    id=id_to_wire(id),
+    name=server_request_verb(request),
+    params~,
+  ).to_json()
 }
 
 ///|
@@ -492,6 +522,17 @@ pub fn ClientRequest::verb(self : ClientRequest) -> String {
     Complete(_) => method_completion_complete
     SetLevel(_) => method_logging_set_level
     InputResponse(_) => method_input_response
+  }
+}
+
+///|
+/// The method name a typed server request goes out under.
+pub fn server_request_verb(request : ServerRequest) -> String {
+  match request {
+    Ping(_) => method_ping
+    CreateMessage(_) => method_sampling_create_message
+    Elicit(_) => method_elicitation_create
+    ListRoots(_) => method_roots_list
   }
 }
 

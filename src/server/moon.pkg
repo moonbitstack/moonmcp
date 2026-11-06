@@ -16,6 +16,7 @@ import {
   "moonbitstack/moonschema",
   "moonbitstack/moonasgi",
   "moonbitstack/moonbase/base64",
+  "moonbitstack/moonjrpc",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbitlang/core/encoding/utf8",

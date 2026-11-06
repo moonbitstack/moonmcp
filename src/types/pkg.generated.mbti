@@ -108,6 +108,8 @@ pub let server_info_meta_key : String
 
 pub fn server_request_frame(RequestId, ServerRequest) -> @json.Json
 
+pub fn server_request_verb(ServerRequest) -> String
+
 pub let subscription_id_meta_key : String
 
 pub fn text_block(String) -> ContentBlock

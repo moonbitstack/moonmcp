@@ -100,14 +100,13 @@ pub fn Cancellations::has(self : Cancellations, id : Json) -> Bool {
 }
 
 ///|
-/// A request id as a map key: a string as itself, a number by its digits, and
-/// anything else by its JSON text, so the two sides of a cancellation agree
-/// without knowing which kind the client chose.
+/// A request id as a map key: moonjrpc's own rule for the two kinds JSON-RPC
+/// allows, so the two sides of a cancellation agree without knowing which kind
+/// the client chose. Anything else is keyed by its text.
 fn id_key(id : Json) -> String {
   match id {
-    String(text) => "s:" + text
-    Number(_, repr=Some(text)) => "n:" + text
-    Number(value, ..) => "n:" + Json::number(value).stringify()
+    String(text) => @moonjrpc.Id::Text(text).key()
+    Number(value, repr~) => @moonjrpc.Id::Num(value, repr~).key()
     _ => "j:" + id.stringify()
   }
 }
