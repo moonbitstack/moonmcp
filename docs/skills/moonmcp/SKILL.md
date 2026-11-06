@@ -111,6 +111,11 @@ async fn main {
 user to authorize, and exchanges the code. The HTTP transport calls it whenever
 the server asks for a token the client does not have.
 
+`renew` is what the transport calls, and it spends a refresh token before it
+opens a browser: the authorization server has to list `offline_access` for one
+to be issued at all, and a challenge that asks for a scope this token was never
+granted still goes through the person, because a refresh may not widen one.
+
 ```moonbit
 async fn main {
   let oauth = @oauth.Oauth::new(

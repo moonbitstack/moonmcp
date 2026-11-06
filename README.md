@@ -449,7 +449,7 @@ included, every check passing.
 `scripts/interop/check_client_conformance.sh` drives
 `src/examples/08-conformance-client` through the 27 client scenarios: the
 foundation ones, the fifteen of the authorization suite, the two older-revision
-ones, the three drafts and the three extensions. 287 checks, every one passing.
+ones, the three drafts and the three extensions. 288 checks, every one passing.
 
 | Client scenario | Checks |
 |:--|--:|
@@ -583,12 +583,23 @@ What the flow does, in the order the specifications put it:
 | Registration | dynamic registration (RFC 7591), a URL client identifier when the server advertises client metadata documents, or the credentials a deployment was given |
 | Authorization | `response_type=code`, PKCE with S256, the scope the challenge named or the resource's own, and the resource indicator of RFC 8707 |
 | Token | the code and its verifier, with the client authenticating by HTTP Basic, in the body, or not at all |
-| Renewal | a second round when the server answers `403` with a scope this token does not carry, at most three times |
+| Renewal | the refresh token, when the server gave one: a request to the token endpoint, and no browser. A challenge that asks for a wider scope cannot be answered that way, so it starts a second authorization round instead, three at most |
 
 A resource whose metadata names another origin is refused before anything is
-sent: the token would be minted for a server that is not this one. `Oauth`
-also holds the client-credentials grant, and a signed JWT assertion for servers
-that take `private_key_jwt`.
+sent: the token would be minted for a server that is not this one.
+
+A refresh is what `Oauth::renew` tries first, which is why a transport that is
+handed a `401` in the middle of a session does not open a browser: `renew` uses
+the refresh token, and only falls back to the full flow when there is none, when
+the server refused it, or when the challenge names a scope this token was never
+granted — RFC 6749 §6 forbids widening a scope at the token endpoint, so a step
+up has to go through the person. A refresh the server does not rotate keeps the
+refresh token it used, since the response naming none means "the same one".
+
+`Oauth` also asks for `offline_access` when the authorization server lists it,
+which is what makes a server hand out a refresh token at all (SEP-2207), and
+never when it does not. It holds the client-credentials grant too, and a signed
+JWT assertion for servers that take `private_key_jwt`.
 
 ## Authorization
 
@@ -746,7 +757,7 @@ writes the configuration above.
 | `client` | `Client` and the `Transport` contract, with the in-memory and line transports |
 | `client/http` | The HTTP transport |
 | `auth` | `Bearer` and `Principal`: the token an HTTP endpoint checks, verified through `mooncred`; and the metadata, PKCE, registration and scope rules a client follows to get one |
-| `auth/oauth` | `Oauth`: the authorization-code flow over HTTP, the client-credentials grant and the JWT assertion; native only |
+| `auth/oauth` | `Oauth`: the authorization-code flow over HTTP, its refresh, the client-credentials grant and the JWT assertion; native only |
 | `providers` | `Provider`: where capabilities come from when they are not registered one at a time, and `Listing` |
 | `transforms` | `Transform`: what the client is shown, with `Namespace`, `Hidden` and `Tagged` |
 | `layers` | `Layer`: the code every request passes through, with `Caching`, `RateLimiting` and `Telemetry` |

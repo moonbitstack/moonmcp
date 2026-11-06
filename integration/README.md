@@ -10,4 +10,5 @@ for the sake of an example.
 cd integration && moon run src/02-http --target native
 cd integration && moon run src/07-conformance --target native
 cd integration && moon test src/client-http --target native
+cd integration && moon test src/oauth-refresh --target native
 ```
