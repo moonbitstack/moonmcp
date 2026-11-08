@@ -1,24 +1,20 @@
-"""Compile every MoonBit block of the documentation against this module, so the
-README and the docs cannot drift from the code. Read: README.md, every .md
-under docs/, and every <code class="language-moonbit"> block of the .html
-pages under docs/. Blocks in any other language are not read.
+"""Compile every MoonBit block of the pages under docs/, so the site cannot drift from the code.
 
-A fragment, pseudo-code, or anything not meant to compile is marked and
-skipped: an HTML comment `<!-- nocheck -->` just before the block (it does not
-show on the rendered page), ```moonbit nocheck in Markdown, or a nocheck class
+README.md and docs/skills are checked by scripts/check_snippets.py; this script reads the rendered
+pages: every <code class="language-moonbit"> block of the .html under docs/. Blocks in any other
+language are not read.
+
+A fragment, pseudo-code, or anything not meant to compile is marked and skipped: an HTML comment
+`<!-- nocheck -->` just before the block (it does not show on the rendered page), or a nocheck class
 on the <code>.
 
-The examples serve over HTTP, which takes a server: the temporary packages are
-built inside `integration/`, the module that carries one, so a block naming
-`@mooncat` is checked like any other. The library itself does not depend on it.
+The pages serve over HTTP, which takes a server: the temporary packages are built inside
+`integration/`, the module that carries one, so a block naming `@mooncat` is checked like any other.
+The library itself does not depend on it.
 
-The examples serve over HTTP, which takes a server: the temporary packages are
-built inside `integration/`, the module that carries one, so a block naming
-`@mooncat` is checked like any other. The library itself does not depend on it.
-
-A block with `fn main` becomes a program, one with top-level definitions a
-library, and anything else the body of a function. Each `@alias.` it uses is
-resolved to a package of this module, of a dependency, or of core.
+A block with `fn main` becomes a program, one with top-level definitions a library, and anything else
+the body of a function. Each `@alias.` it uses is resolved to a package of this module, of a
+dependency, or of core.
 
 Usage, from the repository root: python scripts/check_docs.py"""
 import html
@@ -71,7 +67,6 @@ def aliases():
 
 
 SKIP = r"(<!--\s*nocheck\s*-->\s*)?"
-FENCE = re.compile(SKIP + r"```(?:moonbit|mbt)([^\n]*)\n(.*?)```", re.S)
 CODE = re.compile(
     SKIP + r'(?:<pre[^>]*>\s*)?<code([^>]*class="[^"]*language-(?:moonbit|mbt)[^"]*"[^>]*)>(.*?)</code>',
     re.S,
@@ -87,12 +82,6 @@ TOP = re.compile(
 
 def blocks():
     found = []
-    for md in [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]:
-        if md.exists():
-            text = md.read_text(encoding="utf-8")
-            for marked, info, code in FENCE.findall(text):
-                if not marked and "nocheck" not in info:
-                    found.append((md, code))
     for page in sorted((ROOT / "docs").rglob("*.html")):
         text = page.read_text(encoding="utf-8")
         for marked, attrs, code in CODE.findall(text):
@@ -122,13 +111,6 @@ def source_for(code):
         return "///|\n" + code
     body = "\n".join("    " + line for line in code.splitlines())
     return "///|\nasync fn snippet() -> Unit {\n  let _ = {\n" + body + "\n  }\n}\n"
-
-
-def home_of(code):
-    """The module a block is built in: the one whose manifest declares what it
-    imports. A block that serves needs the server, and the server is not a
-    dependency of the library."""
-    return ECOSYSTEM if "@mooncat." in code else ROOT
 
 
 def home_of(code):
