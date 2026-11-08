@@ -45,10 +45,10 @@
       <a href="#mrtr">Ask the client</a>
       <a href="#auth">Authorization</a>
       <a href="#logging">Logging</a>
+      <a href="#tracing">Observability</a>
       <a href="#debug">The documentation page</a>
       <a href="#client">Connect a client</a>
       <a href="#reach">Reach a server from MoonBit</a>
-      <a href="#grant">A server that asks for a token</a>
       <a href="#grant">A server that asks for a token</a>
     </nav>
     <div class="side-foot" style="margin-top:1.4rem">
@@ -681,6 +681,49 @@ ignore(hub.add(slot) catch {
 let mcp = @server.Server::new("demo", version="1.0.0")
 mcp.log_to(logger=hub.logger("moonmcp"))</code></pre><button class="copy" type="button">copy</button></div>
       <p><code>Context::log</code> writes to that logger <em>and</em> sends <code>notifications/message</code>, so a client that went away does not take the record with it; <code>Context::logger</code> hands a handler the same logger scoped to its request, for lines of its own.</p>
+    </section>
+
+    <section class="section" id="tracing">
+      <h2>Observability</h2>
+      <p class="pdesc">A layer gives every request a span of its own, named and tagged the way the OpenTelemetry conventions for MCP ask. A request that arrives with a <code>traceparent</code> header is recorded as part of the caller's trace rather than starting a second one.</p>
+      <div class="code"><pre><code class="language-moonbit">///|
+/// The clock a span is timed by, in nanoseconds.
+fn nanos() -&gt; Int64 {
+  @async.now() * 1_000_000L
+}
+
+///|
+/// The ids a span is given, from the platform's entropy source.
+fn entropy(width : Int32) -&gt; Bytes {
+  let rng = @auto.rng() catch { _ =&gt; abort("no entropy source") }
+  let bytes = FixedArray::make(width, (0).to_byte())
+  rng.fill(bytes)
+  Bytes::from_fixedarray(bytes)
+}
+
+async fn main {
+  let traces = @export.traces(
+    service="demo",
+    now=fn() { @async.now() },
+    rand=entropy,
+  )
+  let tracer = @trace.Tracer::new(
+    rand=entropy,
+    sink=traces,
+    sampler=@trace.parent_based(root=@trace.always),
+  )
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool("add", _args =&gt; { "sum": Json(2) })
+  mcp.use_layer(@otel.Tracing::new(tracer~, now=nanos).layer())
+  // Serve `mcp.to_asgi()` with an ASGI server, as the sections above do.
+  ignore(traces.flush())
+}</code></pre><button class="copy" type="button">copy</button></div>
+      <p>The spans come from <code>otel</code> and the exporter from <code>otel/export</code>; the root package imports neither, so a program that does not trace never compiles a tracing library. <code>traces</code> posts to a collector at <code>http://localhost:4318</code>, batches, retries, and tags the spans with the service name and the instrumentation scope; <code>flush</code> sends what is still waiting when the program ends. Any other sink works the same way: the tracer is handed one.</p>
+      <div class="exchange glass" style="padding:1rem 1.1rem">
+        <div class="msg agent"><div class="who">span name</div><div class="body"><code>tools/call add</code> &middot; <code>prompts/get review</code> &middot; <code>tools/list</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">attributes</div><div class="body"><code>mcp.method.name</code> &middot; <code>gen_ai.tool.name</code> &middot; <code>gen_ai.operation.name</code> &middot; <code>mcp.resource.uri</code> &middot; <code>mcp.protocol.version</code> &middot; <code>jsonrpc.request.id</code></div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">on a refusal</div><div class="body"><code>error.type</code> &middot; <code>rpc.response.status_code</code>, and the failure kept as an exception event</div></div>
+      </div>
     </section>
 
     <section class="section" id="debug">

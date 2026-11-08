@@ -32,6 +32,8 @@ PACKAGES = [
     ("providers", "providers", "Providers", "Where the capabilities come from when they are not registered one at a time: a contract, and a fixed listing."),
     ("transforms", "transforms", "Transforms", "What the client is shown: the contract that rewrites a set of capabilities, and the renames and filters that ship with it."),
     ("layers", "layers", "Layers", "The code every request passes through: the chain, a result cache, a rate limiter and a span recorder."),
+    ("otel", "otel", "Observability", "A span for every request a server serves, named and tagged the way the OpenTelemetry conventions for MCP ask."),
+    ("otel/export", "otel/export", "OTLP export", "The trace exporter, wired for a collector: OTLP over HTTP, batched and retried as the protocol asks."),
     ("types", "types", "Wire types", "The JSON-RPC and MCP data shapes, method constants and protocol-version helpers shared with the wire."),
     ("exceptions", "exceptions", "Errors", "The error type the handlers raise, and how it maps onto JSON-RPC error codes."),
     ("component", "component", "Component", "The shared metadata every capability carries: name, title, description, tags and icons."),

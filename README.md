@@ -107,7 +107,7 @@ registration per capability, and a type that holds a capability of its own.
 Annotations generate exactly these calls, and a capability decided at run time
 is written the same way:
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo", version="1.0.0")
   mcp.tool(
@@ -155,7 +155,7 @@ work in its methods, and one `impl Provider` saying which of them the server
 offers. The server is handed the object and asks it again whenever the tools
 are listed, so what it offers may change between two listings.
 
-```moonbit
+```moonbit native
 ///|
 struct Arithmetic {
   priv mut calls : Int
@@ -216,7 +216,7 @@ type of your own. A **transform** rewrites what the client is shown. A **layer**
 sees every request before it is served, and may answer it, refuse it, or let it
 go on.
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo", version="1.0.0")
   mcp.tool("add", args => Json("added"), description="Add two numbers")
@@ -244,6 +244,67 @@ arguments, with object keys sorted, so the same call with its arguments in
 another order hits the same entry. Errors and asks for client input are never
 cached, and one caller's answer is not handed to another unless the cache was
 built with `shared=true`.
+
+## Observability
+
+A layer can give every request a span of its own, named and tagged the way the
+OpenTelemetry conventions for MCP ask. A request that arrives with a
+`traceparent` header is recorded as part of the caller's trace rather than
+starting a second one.
+
+The spans come from `moonbitstack/moonmcp/otel` and the exporter from
+`moonbitstack/moonmcp/otel/export`; the root package imports neither, so a
+program that does not trace never compiles a tracing library.
+
+```moonbit native
+///|
+/// The clock a span is timed by, in nanoseconds.
+fn nanos() -> Int64 {
+  @async.now() * 1_000_000L
+}
+
+///|
+/// The ids a span is given, from the platform's entropy source.
+fn entropy(width : Int32) -> Bytes {
+  let rng = @auto.rng() catch { _ => abort("no entropy source") }
+  let bytes = FixedArray::make(width, (0).to_byte())
+  rng.fill(bytes)
+  Bytes::from_fixedarray(bytes)
+}
+
+async fn main {
+  let traces = @export.traces(
+    service="demo",
+    now=fn() { @async.now() },
+    rand=entropy,
+  )
+  let tracer = @trace.Tracer::new(
+    rand=entropy,
+    sink=traces,
+    sampler=@trace.parent_based(root=@trace.always),
+  )
+  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
+  mcp.tool("add", _args => { "sum": Json(2) })
+  mcp.use_layer(@otel.Tracing::new(tracer~, now=nanos).layer())
+  // Serve `mcp.to_asgi()` with an ASGI server, as the sections above do.
+  ignore(traces.flush())
+}
+```
+
+`traces` posts to a collector at `http://localhost:4318` by default, batches,
+retries, and tags the spans with `service` and the instrumentation scope
+`moonbitstack/moonmcp`; `flush` sends what is still waiting when the program
+ends. Any other sink works the same way: the tracer is handed one.
+
+| On the span | Value |
+|:--|:--|
+| name | the method, and the component when the request names one: `tools/call add`, `prompts/get review`, `tools/list`. A resource URI stays an attribute, so a server that reads a thousand URIs keeps one span name. |
+| `mcp.method.name` | the JSON-RPC method, `tools/call` and the rest. |
+| `gen_ai.tool.name`, `gen_ai.operation.name` | the tool being run, and `execute_tool`. |
+| `gen_ai.prompt.name` | the prompt being rendered. |
+| `mcp.resource.uri` | the resource being read. |
+| `mcp.protocol.version`, `jsonrpc.request.id` | the revision the request came in under, and its id. |
+| `error.type`, `rpc.response.status_code` | on a request that was refused: the class of failure, and the code the client was answered with. The failure is also kept as an exception event. |
 
 ## Request context
 
@@ -306,7 +367,7 @@ A 2026-07-28 request that offers a progress token, or that opens a
 subscription, is answered with `text/event-stream` when the client accepts one:
 what the handler reports arrives on that stream, and the reply ends it.
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo")
   mcp.tool_context("count", async fn(_args : Map[String, Json], context : @context.Context) {
@@ -510,7 +571,7 @@ registers, sends the user to authorize and exchanges the code for a token.
 `Oauth` does that whole flow, and the HTTP transport calls it whenever the
 server asks for a token it does not have.
 
-```moonbit
+```moonbit native
 async fn main {
   let oauth = @oauth.Oauth::new(
     resource_url="https://example.com/mcp",
@@ -570,7 +631,7 @@ An endpoint that should not be open takes a bearer token: the header is checked
 before the body is read, and a request without a good one is answered `401` with
 the `WWW-Authenticate` challenge the specification asks for.
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo")
   let bearer = @moonmcp.Bearer::hmac(secret="s3cret")
@@ -722,6 +783,8 @@ writes the configuration above.
 | `providers` | `Provider`: where capabilities come from when they are not registered one at a time, and `Listing` |
 | `transforms` | `Transform`: what the client is shown, with `Namespace`, `Hidden` and `Tagged` |
 | `layers` | `Layer`: the code every request passes through, with `Caching`, `RateLimiting` and `Telemetry` |
+| `otel` | `Tracing`: a server span per request, named and tagged as the OpenTelemetry conventions for MCP ask |
+| `otel/export` | `traces`: the OTLP/HTTP exporter, wired for a collector; native and wasm |
 | `component`, `tasks`, `settings`, `config`, `utilities` | Component metadata, task configuration, settings, the `mcp.json` client configuration, media helpers |
 
 ## Install

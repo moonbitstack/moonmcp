@@ -30,7 +30,7 @@ moon add moonbitstack/mooncat
 Register each capability on the server. A handler that returns a `Json` has its
 result sent as `structuredContent`; one that returns a string sends it as text.
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo", version="1.0.0")
   mcp.tool("add", args => {
@@ -55,7 +55,7 @@ child process.
 Over HTTP, hand the same object to a server. The documentation page is served
 at `/docs` unless told otherwise:
 
-```moonbit
+```moonbit native
 async fn main {
   let mcp = @moonmcp.Server::new("demo", version="1.0.0")
   mcp.tool("ping", _ => { "pong": Json::string("pong") })
@@ -116,7 +116,7 @@ opens a browser: the authorization server has to list `offline_access` for one
 to be issued at all, and a challenge that asks for a scope this token was never
 granted still goes through the person, because a refresh may not widen one.
 
-```moonbit
+```moonbit native
 async fn main {
   let oauth = @oauth.Oauth::new(
     resource_url="https://example.com/mcp",
@@ -138,6 +138,15 @@ async fn main {
   client.close()
 }
 ```
+
+## Tracing
+
+`@otel.Tracing::new(tracer~, now~).layer()` opens one server span per request,
+named `tools/call add` and tagged as the OpenTelemetry conventions for MCP ask;
+a `traceparent` header on the request is used as the parent. It is a package of
+its own, imported by nothing in the root package, so a program that does not
+trace carries no tracing library. `@otel/export` posts the spans over OTLP/HTTP
+and is native and wasm only; the tracer takes any sink instead.
 
 ## Rules that catch people out
 
