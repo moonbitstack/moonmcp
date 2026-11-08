@@ -1,0 +1,20 @@
+// The spans leaving the process: OTLP over HTTP, wired once, with the resource
+// and the instrumentation scope a moonmcp server should be found under.
+//
+// A package of its own because it takes an HTTP stack, which a program that
+// only turns spans on for a test does not need.
+supported_targets = "+native+wasm"
+
+import {
+  "moonbitstack/moontel/otlp",
+  "moonbitstack/moontel/otlp/http" @collector,
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitstack/moonmcp/otel",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moontel/otlp",
+  "moonbitstack/moontel/trace",
+} for "test"

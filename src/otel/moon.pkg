@@ -1,0 +1,21 @@
+// OpenTelemetry spans for the requests a server serves: one span per call, as
+// the MCP semantic conventions name and describe it, exported through whatever
+// sink the tracer was built with. The library's own layers keep their
+// bookkeeping; a program that wants a trace imports this package, and one that
+// does not never compiles it.
+import {
+  "moonbitstack/moonmcp/exceptions",
+  "moonbitstack/moonmcp/layers",
+  "moonbitstack/moontel/propagate",
+  "moonbitstack/moontel/trace",
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/json",
+  "moonbitstack/moonbase/base16",
+  "moonbitstack/moonmcp/server",
+  "moonbitstack/moontel/otlp",
+  "moonbitstack/moontel/propagate",
+  "moonbitstack/moontel/trace",
+} for "test"

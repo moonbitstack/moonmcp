@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonmcp/otel"
+
+import {
+  "moonbitstack/moonmcp/layers",
+  "moonbitstack/moontel/trace",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct Tracing {
+  // private fields
+}
+pub fn Tracing::layer(Self) -> @layers.Layer
+pub fn Tracing::new(tracer~ : @trace.Tracer, now~ : () -> Int64) -> Self
+
+// Type aliases
+
+// Traits
