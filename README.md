@@ -83,7 +83,7 @@ as JSON unless it is a `String`.
 Wire the generator into the build once. In `moon.mod`:
 
 ```
-rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.10 -C \"$mod_dir\" \"$input\" -o \"$output\"")
+rule(name: "mcp", command: "moonx moonbitstack/moonmcp/cmd/mcp@0.1.11 -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package holding the functions:
@@ -207,43 +207,6 @@ async fn main {
   }
 }
 ```
-
-## Extending the server
-
-Three things can sit between the program and the client. A **provider** supplies
-capabilities from somewhere other than the registry — a file, another server, a
-type of your own. A **transform** rewrites what the client is shown. A **layer**
-sees every request before it is served, and may answer it, refuse it, or let it
-go on.
-
-```moonbit
-async fn main {
-  let mcp = @moonmcp.Server::new("demo", version="1.0.0")
-  mcp.tool("add", args => Json("added"), description="Add two numbers")
-  mcp.add_transform(@moonmcp.Namespace::new("bench"))
-  mcp.use_layer(@moonmcp.RateLimiting::new(rate=10, burst=20).layer())
-  mcp.use_layer(@moonmcp.Caching::new(ttl_ms=5_000).layer())
-  @mooncat.serve(mcp.to_asgi(), port=12000) catch {
-    e => println("stopped: \{e}")
-  }
-}
-```
-
-The tool is now listed as `bench_add`, ten calls a second are allowed per caller
-with twenty in a burst, and a repeated call is answered from memory for five
-seconds.
-
-| Call | Does |
-|:--|:--|
-| `add_provider(provider)` | Takes capabilities from an object implementing `Provider`, asked again on every listing. A name the server already answers is not taken over. |
-| `add_transform(transform)` | Rewrites the offered set: `Namespace(prefix)`, `Hidden(names)`, `Tagged(any_of)`, or a type implementing `Transform`. They run in the order they were added. |
-| `use_layer(layer)` | Puts a `Layer` in front of every request: `Caching`, `RateLimiting`, `Telemetry`, or `Layer::new(run=)`. The first one added is outermost. |
-
-A cached answer is keyed on the operation, the name, the caller and the
-arguments, with object keys sorted, so the same call with its arguments in
-another order hits the same entry. Errors and asks for client input are never
-cached, and one caller's answer is not handed to another unless the cache was
-built with `shared=true`.
 
 ## Extending the server
 
@@ -738,8 +701,6 @@ writes the configuration above.
 | [`05-extensions`](src/examples/05-extensions/) | A provider, a namespace, a cache and a rate limiter on one server: `moon run src/examples/05-extensions --target native` |
 | [`06-interop`](src/examples/06-interop/) | The client against a server written with the official TypeScript SDK, over Streamable HTTP and over a child's stdio: `moon run src/examples/06-interop --target native -- http <url>` |
 | [`guide/ann`](src/examples/guide/ann/), [`guide/fns`](src/examples/guide/fns/), [`guide/cls`](src/examples/guide/cls/) | The same server written three ways; `guide/check` sends each request to all three and fails if one of them answers differently |
-| [`08-conformance-client`](src/examples/08-conformance-client/) | The client the official conformance suite drives, one scenario per run |
-| [`integration/`](integration/) | The examples that need a server to run them, and the server the conformance suite tests; a module of its own, so the library carries neither |
 | [`08-conformance-client`](src/examples/08-conformance-client/) | The client the official conformance suite drives, one scenario per run |
 | [`integration/`](integration/) | The examples that need a server to run them, and the server the conformance suite tests; a module of its own, so the library carries neither |
 
