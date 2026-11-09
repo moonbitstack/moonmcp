@@ -73,5 +73,5 @@ import {
   "moonbitstack/moonward@0.2.1",
   "moonbitstack/moonrand@0.1.2",
   "moonbitstack/moonurl@0.2.5",
-  "moonbitstack/moontel@0.1.1",
+  "moonbitstack/moontel@0.1.2",
 }

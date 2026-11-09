@@ -8,7 +8,7 @@ import {
 // Values
 pub let default_endpoint : String
 
-pub fn traces(endpoint? : String, service? : String, headers? : Array[(String, String)], format? : @otlp.BodyFormat, transport? : &@otlp.Transport, now~ : () -> Int64, rand~ : (Int32) -> Bytes) -> @otlp.TraceExporter
+pub fn traces(endpoint? : String, service? : String, headers? : Array[(String, String)], encoding? : &@otlp.Encoding, transport? : &@otlp.Transport, now~ : () -> Int64, rand~ : (Int32) -> Bytes) -> @otlp.TraceExporter
 
 // Errors
 
