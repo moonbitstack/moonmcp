@@ -5,7 +5,8 @@
 ///|
 /// What one request says about itself: the revision it was sent under, the
 /// client's identity and capabilities, the progress token it offered, the
-/// headers that carried it, and the answers it brings back to an earlier leg.
+/// headers that carried it, the `_meta` object it came with, and the answers it
+/// brings back to an earlier leg.
 #derive(Debug, Eq)
 pub(all) struct Facts {
   protocol_version : String
@@ -15,6 +16,8 @@ pub(all) struct Facts {
   client_capabilities : @types.ClientCapabilities?
   progress_token : Json?
   headers : Map[String, String]
+  /// `params._meta` as the client sent it; empty when the request had none.
+  meta : Map[String, Json]
   input_responses : Map[String, Json]
   request_state : String?
   /// The subject the transport's token vouched for, when it checked one.
@@ -34,6 +37,7 @@ pub fn Facts::new(
   client_capabilities? : @types.ClientCapabilities,
   progress_token? : Json,
   headers~ : Map[String, String] = Map([]),
+  meta~ : Map[String, Json] = Map([]),
   input_responses~ : Map[String, Json] = Map([]),
   request_state? : String,
   subject? : String,
@@ -47,6 +51,7 @@ pub fn Facts::new(
     client_capabilities,
     progress_token,
     headers,
+    meta,
     input_responses,
     request_state,
     subject,
@@ -150,6 +155,16 @@ pub fn Context::header(self : Context, name : String) -> String? {
 /// Every header the request carried, keyed in lower case.
 pub fn Context::headers(self : Context) -> Map[String, String] {
   self.facts.headers
+}
+
+///|
+/// The request's `params._meta` object as the client sent it. Over stdio this
+/// is the only place a caller can put a trace context or its own metadata;
+/// a handler reads it here, and the tracing layer reads `traceparent` and
+/// `tracestate` from it before falling back to the headers. Empty when the
+/// request had no `_meta` or made one that was not an object.
+pub fn Context::meta(self : Context) -> Map[String, Json] {
+  self.facts.meta
 }
 
 ///|

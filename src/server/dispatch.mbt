@@ -244,6 +244,7 @@ fn Server::context_of(
       client_capabilities?,
       progress_token?=meta.get("progressToken"),
       headers=channel.headers,
+      meta~,
       input_responses~,
       request_state?,
       subject?=channel.subject,

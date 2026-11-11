@@ -5,11 +5,11 @@
 /// A tracer bound to a clock, ready to hang a span on every request a server
 /// serves.
 ///
-/// The trace a request arrived with is read from its headers, so a server
-/// behind an instrumented caller joins the caller's trace instead of starting a
-/// second one. A request that carries no context, or one that carries a broken
-/// one, starts a trace of its own: refusing a request over a header would lose
-/// more than it protects.
+/// The trace a request arrived with is read from `params._meta` first and from
+/// its headers when `_meta` has none, so a server behind an instrumented caller
+/// joins the caller's trace over stdio as well as over HTTP. A request that
+/// carries no context, or one that carries a broken one, starts a trace of its
+/// own: refusing a request over a bad context would lose more than it protects.
 ///
 /// This library never reads a clock of its own; `now` is the caller's, in
 /// nanoseconds from any fixed origin, so a replay can drive a request through a
@@ -120,11 +120,30 @@ fn name_of(call : @layers.Call) -> String {
 }
 
 ///|
-/// The trace the request carried, as a parent for its span.
+/// The trace the request carried, as a parent for its span. `_meta` wins over
+/// the headers, which a caller that still sends its context there needs. Both
+/// values come from the same source: a `tracestate` belonging to another trace
+/// than its `traceparent` describes nothing.
 fn parent_of(call : @layers.Call) -> @trace.TraceContext? {
-  let headers = call.context.headers()
-  guard headers.get("traceparent") is Some(traceparent) else { return None }
-  let tracestate = headers.get("tracestate").map(state => state[:])
+  let meta = call.context.meta()
+  let carried : (String, StringView?)? = match meta.get("traceparent") {
+    Some(String(value)) => {
+      let state = match meta.get("tracestate") {
+        Some(String(text)) => Some(text[:])
+        _ => None
+      }
+      Some((value, state))
+    }
+    _ => {
+      let headers = call.context.headers()
+      match headers.get("traceparent") {
+        Some(value) =>
+          Some((value, headers.get("tracestate").map(state => state[:])))
+        None => None
+      }
+    }
+  }
+  guard carried is Some((traceparent, tracestate)) else { return None }
   let parsed : Result[@trace.TraceContext, @trace.Refused] = Ok(
     @propagate.parse(traceparent, tracestate?),
   ) catch {
