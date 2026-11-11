@@ -142,11 +142,14 @@ async fn main {
 ## Tracing
 
 `@otel.Tracing::new(tracer~, now~).layer()` opens one server span per request,
-named `tools/call add` and tagged as the OpenTelemetry conventions for MCP ask;
-a `traceparent` header on the request is used as the parent. It is a package of
-its own, imported by nothing in the root package, so a program that does not
-trace carries no tracing library. `@otel/export` posts the spans over OTLP/HTTP
-and is native and wasm only; the tracer takes any sink instead.
+named `tools/call add` and tagged as the OpenTelemetry conventions for MCP ask.
+The parent comes from `params._meta` — `traceparent` and `tracestate` — before
+the request headers are read, so a call over stdio joins its caller's trace too;
+a broken context starts a new trace instead of refusing the request. A handler
+reads the whole object with `Context::meta()`. It is a package of its own,
+imported by nothing in the root package, so a program that does not trace
+carries no tracing library. `@otel/export` posts the spans over OTLP/HTTP and
+is native and wasm only; the tracer takes any sink instead.
 
 ## Rules that catch people out
 
@@ -158,6 +161,9 @@ and is native and wasm only; the tracer takes any sink instead.
   raise `@exceptions.Mcp` with the code you want.
 - Tool arguments are validated against the schema before the handler runs; a
   mismatch comes back as `isError` with the path of the field.
+- A `traceparent` in `params._meta` wins over the `traceparent` header. The two
+  sources are never mixed: when `_meta` supplies the parent, a `tracestate` in
+  the headers is ignored. Over stdio there are no headers at all.
 - `for { }` is not an infinite loop in MoonBit; write `while true`.
 - `method`, `local` and `move` are reserved words, so a parameter of your own
   cannot be called `method`.

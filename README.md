@@ -248,9 +248,13 @@ built with `shared=true`.
 ## Observability
 
 A layer can give every request a span of its own, named and tagged the way the
-OpenTelemetry conventions for MCP ask. A request that arrives with a
-`traceparent` header is recorded as part of the caller's trace rather than
-starting a second one.
+OpenTelemetry conventions for MCP ask. The caller's trace context is read from
+`params._meta` first — `traceparent` and, when there is one, `tracestate` — and
+from the request headers only when `_meta` has no `traceparent`. A request over
+stdio carries no headers, so it joins its caller's trace through `_meta`; a
+caller over HTTP that still sends the headers is served the same way. A broken
+context starts a new trace rather than refusing the request. A handler reads the
+whole `_meta` object with `Context::meta()`.
 
 The spans come from `moonbitstack/moonmcp/otel` and the exporter from
 `moonbitstack/moonmcp/otel/export`; the root package imports neither, so a
@@ -269,7 +273,7 @@ fn entropy(width : Int32) -> Bytes {
   let rng = @auto.rng() catch { _ => abort("no entropy source") }
   let bytes = FixedArray::make(width, (0).to_byte())
   rng.fill(bytes)
-  Bytes::from_fixedarray(bytes)
+  Bytes::from_array(Array::makei(width, index => bytes[index]))
 }
 
 async fn main {
@@ -306,12 +310,40 @@ ends. Any other sink works the same way: the tracer is handed one.
 | `mcp.protocol.version`, `jsonrpc.request.id` | the revision the request came in under, and its id. |
 | `error.type`, `rpc.response.status_code` | on a request that was refused: the class of failure, and the code the client was answered with. The failure is also kept as an exception event. |
 
+A client that wants its trace to continue on either transport puts the W3C keys
+in `params._meta`:
+
+<!-- nocheck -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "add",
+    "arguments": { "a": 1, "b": 2 },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+      "tracestate": "vendor=collector"
+    }
+  }
+}
+```
+
+Both keys come from one source: when `_meta` supplies the `traceparent`, a
+`tracestate` in the headers is not mixed into it. `Context::meta()` answers the
+whole object, including the protocol keys and anything else the client put
+there.
+
 ## Request context
 
 A handler that needs to know who is calling, or to report while it works, is
 registered with the context-taking call. The `Context` carries the request's
-headers, the client's identity and capabilities, its progress token, the
-answers it sent back on a retry, and whether it has withdrawn the request.
+headers and its whole `params._meta` object, the client's identity and
+capabilities, its progress token, the answers it sent back on a retry, and
+whether it has withdrawn the request. `meta()` answers the `_meta` object as the
+client wrote it; `header(name)` reads one header.
 
 ```moonbit
 async fn main {

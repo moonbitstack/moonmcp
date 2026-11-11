@@ -685,7 +685,7 @@ mcp.log_to(logger=hub.logger("moonmcp"))</code></pre><button class="copy" type="
 
     <section class="section" id="tracing">
       <h2>Observability</h2>
-      <p class="pdesc">A layer gives every request a span of its own, named and tagged the way the OpenTelemetry conventions for MCP ask. A request that arrives with a <code>traceparent</code> header is recorded as part of the caller's trace rather than starting a second one.</p>
+      <p class="pdesc">A layer gives every request a span of its own, named and tagged the way the OpenTelemetry conventions for MCP ask. The caller's trace context is read from <code>params._meta</code> first, and from the headers only when <code>_meta</code> has none, so a request over stdio joins its caller's trace too. A handler reads the whole object with <code>Context::meta()</code>.</p>
       <div class="code"><pre><code class="language-moonbit">///|
 /// The clock a span is timed by, in nanoseconds.
 fn nanos() -&gt; Int64 {
@@ -698,7 +698,7 @@ fn entropy(width : Int32) -&gt; Bytes {
   let rng = @auto.rng() catch { _ =&gt; abort("no entropy source") }
   let bytes = FixedArray::make(width, (0).to_byte())
   rng.fill(bytes)
-  Bytes::from_fixedarray(bytes)
+  Bytes::from_array(Array::makei(width, index =&gt; bytes[index]))
 }
 
 async fn main {
@@ -719,10 +719,12 @@ async fn main {
   ignore(traces.flush())
 }</code></pre><button class="copy" type="button">copy</button></div>
       <p>The spans come from <code>otel</code> and the exporter from <code>otel/export</code>; the root package imports neither, so a program that does not trace never compiles a tracing library. <code>traces</code> posts to a collector at <code>http://localhost:4318</code>, batches, retries, and tags the spans with the service name and the instrumentation scope; <code>flush</code> sends what is still waiting when the program ends. Any other sink works the same way: the tracer is handed one.</p>
+      <p>The trace context is read from <code>params._meta</code>: <code>traceparent</code> and <code>tracestate</code>, falling back to the headers of the same names only when <code>_meta</code> has no <code>traceparent</code>. A stdio request has no headers, so <code>_meta</code> is how its caller's trace continues; a broken context starts a new trace instead of refusing the call. Both keys come from one source, so a <code>tracestate</code> in the headers is never mixed with a <code>traceparent</code> from <code>_meta</code>.</p>
       <div class="exchange glass" style="padding:1rem 1.1rem">
         <div class="msg agent"><div class="who">span name</div><div class="body"><code>tools/call add</code> &middot; <code>prompts/get review</code> &middot; <code>tools/list</code></div></div>
         <div class="msg" style="margin-top:-.2rem"><div class="who">attributes</div><div class="body"><code>mcp.method.name</code> &middot; <code>gen_ai.tool.name</code> &middot; <code>gen_ai.operation.name</code> &middot; <code>mcp.resource.uri</code> &middot; <code>mcp.protocol.version</code> &middot; <code>jsonrpc.request.id</code></div></div>
         <div class="msg" style="margin-top:-.2rem"><div class="who">on a refusal</div><div class="body"><code>error.type</code> &middot; <code>rpc.response.status_code</code>, and the failure kept as an exception event</div></div>
+        <div class="msg" style="margin-top:-.2rem"><div class="who">trace context</div><div class="body"><code>_meta.traceparent</code> &middot; <code>_meta.tracestate</code>, then the headers</div></div>
       </div>
     </section>
 
