@@ -166,3 +166,58 @@ jobs:
             --stdio _build/native/debug/build/examples/03-stdio/03-stdio \
             --http integration/_build/native/debug/build/moonbitstack/moonmcp-ecosystem/02-http/02-http \
             --client _build/native/debug/build/examples/06-interop/06-interop
+
+  # A real collector receives the spans of a traced MCP call. A request it
+  # accepted and a span it decoded with the right parent are different things:
+  # the file exporter's own OTLP/JSON is what the script reads, one field at a
+  # time, including the child's parentSpanId against the caller's spanId.
+  collector:
+    permissions:
+      contents: read
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: start the collector
+        run: |
+          mkdir -p "$RUNNER_TEMP/otel-out"
+          chmod 777 "$RUNNER_TEMP/otel-out"
+          docker run -d --name collector -p 4318:4318 \
+            -v "$PWD/.github/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro" \
+            -v "$RUNNER_TEMP/otel-out:/out" \
+            otel/opentelemetry-collector-contrib:0.164.0
+          for i in $(seq 60); do
+            if docker logs collector 2>&1 | grep -q "Everything is ready"; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs collector
+          exit 1
+
+      - name: one traced MCP call, with its trace context in _meta
+        run: moon run src/examples/09-otel-collector --target native -- http://127.0.0.1:4318
+
+      - name: the collector received the span, field by field
+        run: |
+          for i in $(seq 30); do
+            if [ -s "$RUNNER_TEMP/otel-out/traces.json" ]; then break; fi
+            sleep 1
+          done
+          python3 scripts/check_collector_spans.py "$RUNNER_TEMP/otel-out/traces.json"
+
+      - name: the collector's log
+        if: always()
+        run: docker logs collector 2>&1 | tail -40 || true

@@ -1,0 +1,22 @@
+// The program the tracing job runs against a real collector: a caller span, a
+// request whose `_meta` carries its trace context, and the server span that
+// joins it. It needs a collector at the address it is given, and fails if one
+// span did not arrive.
+//
+//     moon run src/examples/09-otel-collector --target native -- http://127.0.0.1:4318
+//
+// A process that posts HTTP and then exits has no counterpart on the targets
+// without a runtime that starts a main, so this package is native only.
+pkgtype(kind: "executable")
+
+supported_targets = "+native"
+
+import {
+  "moonbitstack/moonmcp",
+  "moonbitstack/moonmcp/otel",
+  "moonbitstack/moonmcp/otel/export",
+  "moonbitstack/moonrand/auto",
+  "moonbitstack/moontel/trace",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+}

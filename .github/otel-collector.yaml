@@ -1,0 +1,22 @@
+# The collector the tracing job starts: OTLP/HTTP on the port the protocol
+# uses. The debug exporter prints what it accepted; the file exporter writes the
+# same payload as OTLP/JSON, which is what the job reads to check every field of
+# a span rather than only that a request was answered.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  file:
+    path: /out/traces.json
+    format: json
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug, file]
