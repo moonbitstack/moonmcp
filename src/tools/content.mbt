@@ -17,7 +17,7 @@ fn parse_block(value : Json) -> @types.ContentBlock raise @json.JsonDecodeError 
 
 ///|
 fn serialize_json(value : Json) -> String {
-  value.stringify()
+  @moonjson.dumps(value)
 }
 
 ///|

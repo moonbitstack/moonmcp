@@ -1,5 +1,5 @@
 import {
-  "moonbitlang/core/encoding/base64",
+  "moonbitstack/moonbase/base64",
   "moonbitlang/core/encoding/utf8",
   "moonbitstack/moonmcp/exceptions",
   "moonbitstack/moonmcp/types",

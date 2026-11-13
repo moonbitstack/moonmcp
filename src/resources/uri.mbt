@@ -486,7 +486,7 @@ pub fn match_uri_template(
 fn json_param_to_string(value : Json) -> String {
   match value {
     String(text) => text
-    _ => value.stringify()
+    _ => @moonjson.dumps(value)
   }
 }
 

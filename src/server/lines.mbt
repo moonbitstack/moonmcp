@@ -50,14 +50,14 @@ pub async fn Server::serve_lines(
       if line.is_empty() {
         continue
       }
-      let message : Json? = try @json.parse(line) catch {
+      let message : Json? = Some(@moonjson.loads(line, @moonjson.strict)) catch {
         _ => None
-      } noraise {
-        json => Some(json)
       }
       match message {
         None => {
-          let text = refusal(Json::null(), fail(parse_error, "Parse error")).1.stringify()
+          let text = @moonjson.dumps(
+            refusal(Json::null(), fail(parse_error, "Parse error")).1,
+          )
           outbox.put((seq, text)) catch {
             _ => ()
           }
@@ -75,7 +75,7 @@ pub async fn Server::serve_lines(
                 async fn() {
                   defer self.unwatch(stdio_stream)
                   while queue.get() is (Object(_) as out) {
-                    send(out.stringify())
+                    send(@moonjson.dumps(out))
                   }
                 },
                 allow_failure=true,
@@ -186,7 +186,7 @@ async fn serve_one(
 ) -> String? {
   let id = request_id_of(message)
   let channel = Channel::new(
-    emit=async fn(out : Json) { send(out.stringify()) },
+    emit=async fn(out : Json) { send(@moonjson.dumps(out)) },
     headers~,
     asks=true,
     gone=fn() {
@@ -198,7 +198,7 @@ async fn serve_one(
   )
   let reply = server.answer(message, channel~) catch { _ => None }
   match reply {
-    Some((_, reply)) => Some(reply.stringify())
+    Some((_, reply)) => Some(@moonjson.dumps(reply))
     None => None
   }
 }
@@ -219,7 +219,7 @@ async fn serve_one_listen(
   }
   let params = params_of(message)
   let channel = Channel::new(
-    emit=async fn(out : Json) { send(out.stringify()) },
+    emit=async fn(out : Json) { send(@moonjson.dumps(out)) },
     headers=Map([]),
     gone=fn() { withdrawn.has(id) },
   )
@@ -241,7 +241,7 @@ async fn serve_one_listen(
     "id": id,
     "result": subscription_closed_result(id),
   }
-  send(reply.stringify()) catch {
+  send(@moonjson.dumps(reply)) catch {
     _ => ()
   }
 }

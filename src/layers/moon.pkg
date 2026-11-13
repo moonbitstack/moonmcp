@@ -5,6 +5,7 @@ import {
   "moonbitstack/moonmcp/exceptions",
   "moonbitstack/moonward",
   "moonbitlang/core/bench",
+  "moonbitstack/moonjson",
 }
 
 import {

@@ -1,8 +1,9 @@
 import {
-  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/percent",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/set",
+  "moonbitstack/moonbase/base64",
+  "moonbitstack/moonjson",
   "moonbitstack/moonmcp/component",
   "moonbitstack/moonmcp/context",
   "moonbitstack/moonmcp/exceptions",

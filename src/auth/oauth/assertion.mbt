@@ -61,7 +61,11 @@ pub fn Assertion::form(
 ///|
 /// One JWT segment: the JSON in base64url without padding.
 fn segment(json : Json) -> String {
-  @base64.encode(@utf8.encode(json.stringify())[:], kind=Url, padding=false)
+  @base64.encode(
+    @utf8.encode(@moonjson.dumps(json))[:],
+    kind=Url,
+    padding=false,
+  )
 }
 
 ///|

@@ -74,11 +74,13 @@ pub fn Call::subject(self : Call) -> String {
 /// mean the same thing also spell the same thing. A cache keys on it, and a
 /// rate limiter that counts by argument does too.
 pub fn Call::fingerprint(self : Call) -> String {
-  Json([
-    Json::string(self.operation.code()),
-    Json::string(self.name),
-    Json::string(canonical(Json(self.arguments))),
-  ]).stringify()
+  @moonjson.dumps(
+    Json([
+      Json::string(self.operation.code()),
+      Json::string(self.name),
+      Json::string(canonical(Json(self.arguments))),
+    ]),
+  )
 }
 
 ///|
@@ -89,12 +91,12 @@ fn canonical(value : Json) -> String {
       let keys : Array[String] = fields.keys().collect()
       keys.sort_by(String::lexical_compare)
       let written = keys.map(key => {
-        Json::string(key).stringify() + ":" + canonical(fields[key])
+        @moonjson.dumps(Json::string(key)) + ":" + canonical(fields[key])
       })
       "{" + written.join(",") + "}"
     }
     Array(items) => "[" + items.map(canonical).join(",") + "]"
-    _ => value.stringify()
+    _ => @moonjson.dumps(value)
   }
 }
 

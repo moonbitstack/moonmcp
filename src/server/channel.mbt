@@ -107,7 +107,7 @@ fn id_key(id : Json) -> String {
   match id {
     String(text) => @moonjrpc.Id::Text(text).key()
     Number(value, repr~) => @moonjrpc.Id::Num(value, repr~).key()
-    _ => "j:" + id.stringify()
+    _ => "j:" + @moonjson.dumps(id)
   }
 }
 

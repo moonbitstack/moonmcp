@@ -481,7 +481,7 @@ async fn Oauth::register(
       message="the authorization server offers no registration endpoint, and no credentials were configured",
     )
   }
-  let body = Json(self.metadata.body()).stringify()
+  let body = @moonjson.dumps(Json(self.metadata.body()))
   let reply = post(endpoint, body, kind="application/json")
   if !reply.ok() {
     raise @auth.Refused(

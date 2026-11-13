@@ -42,7 +42,7 @@ pub fn page(endpoint~ : String = "/mcp", theme~ : Theme = theme) -> String {
   before_mark +
   mark +
   after_mark +
-  Json(endpoint).stringify() +
+  @moonjson.dumps(Json(endpoint)) +
   script_end
 }
 

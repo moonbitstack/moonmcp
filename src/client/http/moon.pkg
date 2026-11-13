@@ -8,5 +8,5 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/http" @net,
   "moonbitlang/core/encoding/utf8",
-  "moonbitlang/core/json",
+  "moonbitstack/moonjson",
 }

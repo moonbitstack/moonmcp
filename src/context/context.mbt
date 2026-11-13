@@ -256,7 +256,7 @@ pub async fn Context::log(
       fields.push(("logger", @moonlog.Value::of_str(name)))
     }
     if data is Some(value) {
-      fields.push(("data", @moonlog.Value::of_str(value.stringify())))
+      fields.push(("data", @moonlog.Value::of_str(@moonjson.dumps(value))))
     }
     log.log(severity(level), message, fields~)
   }

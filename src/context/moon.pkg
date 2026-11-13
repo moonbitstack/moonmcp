@@ -3,6 +3,7 @@
 import {
   "moonbitstack/moonmcp/types",
   "moonbitstack/moonlog",
+  "moonbitstack/moonjson",
 }
 
 import {

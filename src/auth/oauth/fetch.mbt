@@ -94,9 +94,7 @@ async fn read_body(client : @net.Client) -> String raise @auth.Refused {
 ///|
 /// `reply` read as JSON.
 pub fn json_of(reply : Reply) -> Json raise @auth.Refused {
-  try @json.parse(reply.body) catch {
+  @moonjson.loads(reply.body, @moonjson.strict) catch {
     _ => raise @auth.Refused(message="the reply is not JSON: \{reply.body}")
-  } noraise {
-    json => json
   }
 }

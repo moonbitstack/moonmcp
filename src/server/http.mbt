@@ -195,7 +195,7 @@ async fn Server::over_http(
   if listening {
     return self.listen_http(send, receive)
   }
-  let message = @json.parse(@utf8.decode_lossy(body[:])) catch {
+  let message = @moonjson.loads(@utf8.decode_lossy(body[:]), @moonjson.strict) catch {
     _ =>
       return json_reply(
         send,
@@ -415,7 +415,7 @@ async fn challenge(send : @moonasgi.Send, reason : String) -> Unit {
 /// messages only, so the event name is fixed and no id is set: streams are not
 /// resumed.
 fn sse_frame(message : Json) -> String {
-  "event: message\ndata: " + message.stringify() + "\n\n"
+  "event: message\ndata: " + @moonjson.dumps(message) + "\n\n"
 }
 
 ///|
@@ -451,7 +451,7 @@ async fn json_reply(
     send,
     status,
     [("content-type", "application/json")],
-    @utf8.encode(reply.stringify()),
+    @utf8.encode(@moonjson.dumps(reply)),
   )
 }
 

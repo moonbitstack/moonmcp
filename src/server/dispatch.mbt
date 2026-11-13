@@ -272,7 +272,7 @@ fn Server::request_logger(
         log
         .under("request")
         .bound("method", @moonlog.Value::of_str(op))
-        .bound("id", @moonlog.Value::of_str(id.stringify())),
+        .bound("id", @moonlog.Value::of_str(@moonjson.dumps(id))),
       )
     None => None
   }

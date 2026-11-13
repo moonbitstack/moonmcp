@@ -12,7 +12,9 @@ pub fn[T : @json.FromJson] decode(
     e =>
       match value {
         String(text) => {
-          let parsed = @json.parse(text) catch { _ => raise e }
+          let parsed = @moonjson.loads(text, @moonjson.strict) catch {
+            _ => raise e
+          }
           @json.from_json(parsed)
         }
         _ => raise e

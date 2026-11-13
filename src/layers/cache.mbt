@@ -124,7 +124,9 @@ fn Caching::key(self : Caching, call : Call) -> String {
   if self.shared {
     call.fingerprint()
   } else {
-    Json([Json::string(call.subject()), Json::string(call.fingerprint())]).stringify()
+    @moonjson.dumps(
+      Json([Json::string(call.subject()), Json::string(call.fingerprint())]),
+    )
   }
 }
 

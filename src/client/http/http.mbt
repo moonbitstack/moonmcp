@@ -81,7 +81,7 @@ pub impl @client.Transport for Http with fn tell(self : Http, message : Json) ->
   defer client.close()
   let response = client.post(
     path_of(self.url),
-    @utf8.encode(message.stringify()),
+    @utf8.encode(@moonjson.dumps(message)),
     extra_headers=self.headers_for(message),
   ) catch {
     _ => return
@@ -104,7 +104,7 @@ pub impl @client.Transport for Http with fn listen(
   headers["accept"] = "text/event-stream"
   let response = client.post(
     path_of(self.url),
-    @utf8.encode(message.stringify()),
+    @utf8.encode(@moonjson.dumps(message)),
     extra_headers=headers,
   ) catch {
     _ => return
@@ -117,10 +117,8 @@ pub impl @client.Transport for Http with fn listen(
     let frame = read_frame(client) catch { _ => None }
     guard frame is Some(frame) else { return }
     guard frame.data is Some(text) else { continue }
-    let parsed : Json? = try @json.parse(text) catch {
+    let parsed : Json? = Some(@moonjson.loads(text, @moonjson.strict)) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     guard parsed is Some(message) else { continue }
     if is_reply(message) {
@@ -179,7 +177,7 @@ async fn Http::exchange(
   let headers = self.headers_for(message)
   let response = client.post(
     path_of(self.url),
-    @utf8.encode(message.stringify()),
+    @utf8.encode(@moonjson.dumps(message)),
     extra_headers=headers,
   ) catch {
     e => return bad_reply(-32603, "\{e}")
@@ -191,10 +189,10 @@ async fn Http::exchange(
     // A refused request still carries a JSON-RPC error body when the server
     // had one to give, and a bare status when it did not.
     let body = read_body(client) catch { _ => b"" }
-    let parsed : Json? = try @json.parse(@utf8.decode_lossy(body[:])) catch {
+    let parsed : Json? = Some(
+      @moonjson.loads(@utf8.decode_lossy(body[:]), @moonjson.strict),
+    ) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     let reply = match parsed {
       Some(reply) if is_reply(reply) => reply
@@ -216,10 +214,10 @@ async fn Http::exchange(
   }
   if !streamed {
     let body = read_body(client) catch { _ => b"" }
-    let parsed : Json? = try @json.parse(@utf8.decode_lossy(body[:])) catch {
+    let parsed : Json? = Some(
+      @moonjson.loads(@utf8.decode_lossy(body[:]), @moonjson.strict),
+    ) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     let reply = match parsed {
       Some(reply) => reply
@@ -340,10 +338,8 @@ async fn Http::read_beside(
     guard frame is Some(frame) else { break }
     self.remember_frame(frame)
     guard frame.data is Some(text) else { continue }
-    let parsed : Json? = try @json.parse(text) catch {
+    let parsed : Json? = Some(@moonjson.loads(text, @moonjson.strict)) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     guard parsed is Some(message) else { continue }
     if is_reply(message) {
@@ -379,10 +375,8 @@ async fn Http::follow(
     guard frame is Some(frame) else { return None }
     self.remember_frame(frame)
     guard frame.data is Some(text) else { continue }
-    let parsed : Json? = try @json.parse(text) catch {
+    let parsed : Json? = Some(@moonjson.loads(text, @moonjson.strict)) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     guard parsed is Some(message) else { continue }
     if is_reply(message) {
@@ -431,10 +425,8 @@ async fn Http::reopen(
     guard frame is Some(frame) else { break }
     self.remember_frame(frame)
     guard frame.data is Some(text) else { continue }
-    let parsed : Json? = try @json.parse(text) catch {
+    let parsed : Json? = Some(@moonjson.loads(text, @moonjson.strict)) catch {
       _ => None
-    } noraise {
-      json => Some(json)
     }
     guard parsed is Some(message) else { continue }
     if is_reply(message) {
@@ -504,7 +496,7 @@ async fn Http::reply_with(self : Http, reply : Json) -> Unit {
   }
   let response = client.post(
     path_of(self.url),
-    @utf8.encode(reply.stringify()),
+    @utf8.encode(@moonjson.dumps(reply)),
     extra_headers=headers,
   ) catch {
     _ => return
@@ -675,10 +667,8 @@ async fn read_frame(client : @net.Client) -> Frame? {
 ///|
 /// The number `text` is, when it is one.
 fn digits_of(text : String) -> Int32? {
-  let parsed : Json? = try @json.parse(text) catch {
+  let parsed : Json? = Some(@moonjson.loads(text, @moonjson.strict)) catch {
     _ => None
-  } noraise {
-    json => Some(json)
   }
   match parsed {
     Some(Number(value, ..)) => Some(value.to_int())
