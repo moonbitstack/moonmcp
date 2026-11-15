@@ -4,37 +4,6 @@ fn generate(source : String) -> String raise {
 }
 
 ///|
-test "types become schemas" {
-  assert_eq(schema_of("String"), "{ \"type\": \"string\" }")
-  assert_eq(schema_of("Int64"), "{ \"type\": \"integer\" }")
-  assert_eq(schema_of("Double"), "{ \"type\": \"number\" }")
-  assert_eq(schema_of("Bool"), "{ \"type\": \"boolean\" }")
-  assert_eq(
-    schema_of("Array[Int]"),
-    "{ \"type\": \"array\", \"items\": { \"type\": \"integer\" } }",
-  )
-  assert_eq(
-    schema_of("Map[String, Array[Bool]]"),
-    "{ \"type\": \"object\", \"additionalProperties\": { \"type\": \"array\", \"items\": { \"type\": \"boolean\" } } }",
-  )
-  assert_eq(
-    schema_of("String?"),
-    "{ \"anyOf\": [{ \"type\": \"string\" }, { \"type\": \"null\" }] }",
-  )
-  assert_eq(schema_of("Option[Int]"), schema_of("Int?"))
-  assert_eq(schema_of("@mine.Profile"), "{}")
-}
-
-///|
-test "generic splits arguments at the top level only" {
-  assert_eq(
-    generic("Map[String, Map[String, Int]]"),
-    Some(("Map", ["String", "Map[String, Int]"])),
-  )
-  assert_eq(generic("Int"), None)
-}
-
-///|
 test "a tool reads each parameter as its pass mode asks" {
   let code = generate(
     (

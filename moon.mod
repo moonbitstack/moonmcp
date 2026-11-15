@@ -64,7 +64,7 @@ import {
   "moonbitstack/moonschema@0.2.5",
   "moonbitstack/moonasgi@0.11.2",
   "moonbitstack/moonbase@0.5.0",
-  "moonbitstack/moonast@0.3.0",
+  "moonbitstack/moonast@0.3.1",
   "moonbitstack/moonlog@0.2.0",
   "moonbitstack/mooncred@0.7.0",
   "moonbitstack/mooncrypt@0.5.0",

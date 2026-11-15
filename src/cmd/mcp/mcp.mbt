@@ -32,76 +32,6 @@ fn quoted(text : String) -> String {
 }
 
 ///|
-/// The JSON Schema a parameter type describes, as MoonBit source. A type this
-/// does not know (a struct of the program's own) accepts any value and is left
-/// to its `FromJson`.
-fn schema_of(ty : String) -> String {
-  let ty = ty.trim(chars=" ").to_owned()
-  if ty.has_suffix("?") {
-    let inner = ty.exact_view(end=ty.length() - 1).to_owned()
-    return "{ \"anyOf\": [\{schema_of(inner)}, { \"type\": \"null\" }] }"
-  }
-  match generic(ty) {
-    Some(("Option", [inner])) =>
-      "{ \"anyOf\": [\{schema_of(inner)}, { \"type\": \"null\" }] }"
-    Some(("Array" | "FixedArray" | "ReadOnlyArray", [inner])) =>
-      "{ \"type\": \"array\", \"items\": \{schema_of(inner)} }"
-    Some(("Map", [_, inner])) =>
-      "{ \"type\": \"object\", \"additionalProperties\": \{schema_of(inner)} }"
-    _ =>
-      match ty {
-        "String" => "{ \"type\": \"string\" }"
-        "Int"
-        | "Int16"
-        | "Int32"
-        | "Int64"
-        | "UInt"
-        | "UInt16"
-        | "UInt32"
-        | "UInt64"
-        | "Byte"
-        | "BigInt" => "{ \"type\": \"integer\" }"
-        "Double" | "Float" => "{ \"type\": \"number\" }"
-        "Bool" => "{ \"type\": \"boolean\" }"
-        "Unit" => "{ \"type\": \"null\" }"
-        _ => "{}"
-      }
-  }
-}
-
-///|
-/// `Name[A, B]` as its name and arguments; commas inside nested brackets stay
-/// with their argument.
-fn generic(ty : String) -> (String, Array[String])? {
-  guard ty.find("[") is Some(open) && ty.has_suffix("]") else { return None }
-  let name = ty.exact_view(end=open).to_owned()
-  let inside = ty.exact_view(start=open + 1, end=ty.length() - 1)
-  let args = []
-  let mut depth = 0
-  let mut from = 0
-  for i, c in inside {
-    match c {
-      '[' => depth += 1
-      ']' => depth -= 1
-      ',' if depth == 0 => {
-        args.push(
-          inside.exact_view(start=from, end=i).trim(chars=" ").to_owned(),
-        )
-        from = i + 1
-      }
-      _ => ()
-    }
-  }
-  args.push(inside.exact_view(start=from).trim(chars=" ").to_owned())
-  Some((name, args))
-}
-
-///|
-fn optional_type(ty : String) -> Bool {
-  ty.has_suffix("?") || ty.has_prefix("Option[")
-}
-
-///|
 /// The parameters as the call that reads each from `args`, the schema of the
 /// whole argument object, and the prompt arguments they make.
 fn params_of(
@@ -110,43 +40,32 @@ fn params_of(
   source : String,
 ) -> (String, String, String) raise {
   let call = []
-  let props = []
-  let required = []
   let arguments = []
   for param in params {
     guard param.name is Some(name) && param.ty is Some(ty) else {
       fail("\{where_}: every parameter needs a name and a type")
     }
     let maybe = "@moonmcp.decode_option(\{source}, \{quoted(name)})"
-    let read = if optional_type(ty) {
+    let read = if @gen.is_optional(ty) {
       maybe
     } else {
       "@moonmcp.decode(\{source}, \{quoted(name)})"
     }
-    let needed = match param.pass {
-      Positional => {
-        call.push(read)
-        !optional_type(ty)
-      }
-      Labelled => {
-        call.push("\{name}=\{read}")
-        !optional_type(ty)
-      }
-      Optional | Defaulted => {
-        call.push("\{name}?=\{maybe}")
-        false
-      }
+    match param.pass {
+      Positional => call.push(read)
+      Labelled => call.push("\{name}=\{read}")
+      Optional | Defaulted => call.push("\{name}?=\{maybe}")
     }
-    props.push("\{quoted(name)}: \{schema_of(ty)}")
-    if needed {
-      required.push(quoted(name))
-    }
+    let needed = param.required()
     arguments.push(
       "{ name: \{quoted(name)}, title: None, description: None, required: Some(\{needed}) }",
     )
   }
-  let schema = "{ \"type\": \"object\", \"properties\": { \{props.join(", ")} }, \"required\": [\{required.join(", ")}] }"
-  (call.join(", "), schema, "[\{arguments.join(", ")}]")
+  (
+    call.join(", "),
+    @gen.object_schema(params, where_),
+    "[\{arguments.join(", ")}]",
+  )
 }
 
 ///|
