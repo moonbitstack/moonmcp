@@ -39,34 +39,35 @@ fn answer(mock : Mock, request : @asgi.Request) -> @asgi.Response {
   match (request.http_method, request.path) {
     ("GET", "/.well-known/oauth-protected-resource/mcp") =>
       @asgi.Response::json(
-        ({
-          "resource": "\{base}/mcp",
-          "authorization_servers": [base],
-          "scopes_supported": ["mcp:basic"],
-        } : Json),
+        (
+          {
+            "resource": "\{base}/mcp",
+            "authorization_servers": [base],
+            "scopes_supported": ["mcp:basic"],
+          } : Json),
       )
     ("GET", "/.well-known/oauth-authorization-server") =>
       @asgi.Response::json(
-        ({
-          "issuer": base,
-          "authorization_endpoint": "\{base}/authorize",
-          "token_endpoint": "\{base}/token",
-          "registration_endpoint": "\{base}/register",
-          "response_types_supported": ["code"],
-          "code_challenge_methods_supported": ["S256"],
-          "token_endpoint_auth_methods_supported": ["none"],
-          // What a client that wants a refresh token is told: the scope that
-          // buys one is on offer here (SEP-2207).
-          "scopes_supported": ["mcp:basic", "offline_access"],
-        } : Json),
+        (
+          {
+            "issuer": base,
+            "authorization_endpoint": "\{base}/authorize",
+            "token_endpoint": "\{base}/token",
+            "registration_endpoint": "\{base}/register",
+            "response_types_supported": ["code"],
+            "code_challenge_methods_supported": ["S256"],
+            "token_endpoint_auth_methods_supported": ["none"],
+            // What a client that wants a refresh token is told: the scope that
+            // buys one is on offer here (SEP-2207).
+            "scopes_supported": ["mcp:basic", "offline_access"],
+          } : Json),
       )
     ("POST", "/register") =>
       @asgi.Response::json(
         status=201,
-        ({
-          "client_id": "client-1",
-          "token_endpoint_auth_method": "none",
-        } : Json),
+        (
+          { "client_id": "client-1", "token_endpoint_auth_method": "none" } :
+          Json),
       )
     ("POST", "/token") => {
       let form = @utf8.decode_lossy(request.body[:])
@@ -76,22 +77,24 @@ fn answer(mock : Mock, request : @asgi.Request) -> @asgi.Response {
         "authorization_code" =>
           if mock.seen.gives_refresh {
             @asgi.Response::json(
-              ({
-                "access_token": first_token,
-                "token_type": "Bearer",
-                "expires_in": Json::number(3600.0),
-                "refresh_token": "refresh-1",
-                "scope": "mcp:basic",
-              } : Json),
+              (
+                {
+                  "access_token": first_token,
+                  "token_type": "Bearer",
+                  "expires_in": Json::number(3600.0),
+                  "refresh_token": "refresh-1",
+                  "scope": "mcp:basic",
+                } : Json),
             )
           } else {
             @asgi.Response::json(
-              ({
-                "access_token": first_token,
-                "token_type": "Bearer",
-                "expires_in": Json::number(3600.0),
-                "scope": "mcp:basic",
-              } : Json),
+              (
+                {
+                  "access_token": first_token,
+                  "token_type": "Bearer",
+                  "expires_in": Json::number(3600.0),
+                  "scope": "mcp:basic",
+                } : Json),
             )
           }
         "refresh_token" => {
@@ -100,22 +103,24 @@ fn answer(mock : Mock, request : @asgi.Request) -> @asgi.Response {
           )
           if mock.seen.rotates {
             @asgi.Response::json(
-              ({
-                "access_token": refreshed_token,
-                "token_type": "Bearer",
-                "expires_in": Json::number(3600.0),
-                "refresh_token": "refresh-2",
-              } : Json),
+              (
+                {
+                  "access_token": refreshed_token,
+                  "token_type": "Bearer",
+                  "expires_in": Json::number(3600.0),
+                  "refresh_token": "refresh-2",
+                } : Json),
             )
           } else {
             // A server that hands out the same refresh token again, or names
             // none: the client must not lose the one it has.
             @asgi.Response::json(
-              ({
-                "access_token": refreshed_token,
-                "token_type": "Bearer",
-                "expires_in": Json::number(3600.0),
-              } : Json),
+              (
+                {
+                  "access_token": refreshed_token,
+                  "token_type": "Bearer",
+                  "expires_in": Json::number(3600.0),
+                } : Json),
             )
           }
         }
@@ -141,7 +146,7 @@ async fn with_mock(
 ) -> Unit {
   let mock : Mock = {
     port,
-    seen: { grants: [], refreshes: [], gives_refresh, rotates },
+    seen: { grants: [], refreshes: [], gives_refresh, rotates, },
   }
   let app = @asgi.to_asgi(request => answer(mock, request))
   @async.with_task_group(async fn(group : @async.TaskGroup[Unit]) {
@@ -177,7 +182,7 @@ fn callback_for(url : String) -> String {
 
 ///|
 /// A client of the mock, counting how often it went to the browser.
-fn client_for(mock : Mock, visits : Ref[Int]) -> @oauth.Oauth {
+fn client_for(mock : Mock, visits : Ref[Int32]) -> @oauth.Oauth {
   @oauth.Oauth::new(
     resource_url=mock.base() + "/mcp",
     client_name="test",
@@ -192,7 +197,7 @@ fn client_for(mock : Mock, visits : Ref[Int]) -> @oauth.Oauth {
 ///|
 async test "a refresh token buys an access token without a browser" {
   with_mock(12081, true, true, async fn(mock) {
-    let visits : Ref[Int] = Ref(0)
+    let visits : Ref[Int32] = Ref(0)
     let oauth = client_for(mock, visits)
     oauth.authorize() catch {
       @auth.Refused(message~) => abort(message)
@@ -212,14 +217,16 @@ async test "a refresh token buys an access token without a browser" {
     assert_eq(mock.seen.refreshes, ["refresh-1"])
     assert_eq(oauth.refresh(), true)
     assert_eq(mock.seen.refreshes, ["refresh-1", "refresh-2"])
-    assert_eq(mock.seen.grants, ["authorization_code", "refresh_token", "refresh_token"])
+    assert_eq(mock.seen.grants, [
+      "authorization_code", "refresh_token", "refresh_token",
+    ])
   })
 }
 
 ///|
 async test "a refresh the server does not rotate keeps the token it had" {
   with_mock(12082, true, false, async fn(mock) {
-    let visits : Ref[Int] = Ref(0)
+    let visits : Ref[Int32] = Ref(0)
     let oauth = client_for(mock, visits)
     oauth.authorize() catch {
       @auth.Refused(message~) => abort(message)
@@ -235,7 +242,7 @@ async test "a refresh the server does not rotate keeps the token it had" {
 ///|
 async test "a token with no refresh token sends the client to authorize" {
   with_mock(12083, false, false, async fn(mock) {
-    let visits : Ref[Int] = Ref(0)
+    let visits : Ref[Int32] = Ref(0)
     let oauth = client_for(mock, visits)
     oauth.authorize() catch {
       @auth.Refused(message~) => abort(message)
@@ -253,7 +260,7 @@ async test "a token with no refresh token sends the client to authorize" {
 ///|
 async test "a challenge that asks for a wider scope authorizes, not refreshes" {
   with_mock(12084, true, true, async fn(mock) {
-    let visits : Ref[Int] = Ref(0)
+    let visits : Ref[Int32] = Ref(0)
     let oauth = client_for(mock, visits)
     oauth.authorize() catch {
       @auth.Refused(message~) => abort(message)

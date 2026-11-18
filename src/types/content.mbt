@@ -96,14 +96,14 @@ pub(all) enum ContentBlock {
     data~ : String,
     mime_type~ : String,
     annotations~ : Annotations?,
-    meta~ : Map[String, Json]?
+    meta~ : Map[String, Json]?,
   )
   /// Base64-encoded audio content.
   Audio(
     data~ : String,
     mime_type~ : String,
     annotations~ : Annotations?,
-    meta~ : Map[String, Json]?
+    meta~ : Map[String, Json]?,
   )
   /// A link to a resource the client should read separately.
   ResourceLink(
@@ -114,13 +114,13 @@ pub(all) enum ContentBlock {
     mime_type~ : String?,
     size~ : Int32?,
     annotations~ : Annotations?,
-    meta~ : Map[String, Json]?
+    meta~ : Map[String, Json]?,
   )
   /// A resource embedded directly in the content.
   EmbeddedResource(
     resource~ : ResourceContents,
     annotations~ : Annotations?,
-    meta~ : Map[String, Json]?
+    meta~ : Map[String, Json]?,
   )
 }
 
@@ -174,7 +174,7 @@ pub impl ToJson for ContentBlock with fn to_json(self : ContentBlock) -> Json {
       mime_type~,
       size~,
       annotations~,
-      meta~
+      meta~,
     ) => {
       put_str(obj, "type", "resource_link")
       put_str(obj, "uri", uri)

@@ -21,7 +21,7 @@ pub(all) struct MCPConfig {
 }
 pub fn MCPConfig::add_server(Self, String, MCPServerEntry) -> Unit
 pub fn MCPConfig::equal(Self, Self) -> Bool
-pub fn MCPConfig::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn MCPConfig::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn MCPConfig::new() -> Self
 pub fn MCPConfig::not_equal(Self, Self) -> Bool
 pub fn MCPConfig::to_json(Self) -> @json.Json
@@ -38,7 +38,7 @@ pub(all) struct MCPServerEntry {
   transform : ServerTransform?
 }
 pub fn MCPServerEntry::equal(Self, Self) -> Bool
-pub fn MCPServerEntry::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn MCPServerEntry::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn MCPServerEntry::not_equal(Self, Self) -> Bool
 pub fn MCPServerEntry::to_json(Self) -> @json.Json
 pub fn MCPServerEntry::to_repr(Self) -> @debug.Repr

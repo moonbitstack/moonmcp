@@ -161,7 +161,7 @@ pub(all) enum MCPServerKind {
     args~ : Array[String],
     env~ : Map[String, Json],
     cwd~ : String?,
-    keep_alive~ : Bool?
+    keep_alive~ : Bool?,
   )
   Remote(
     url~ : String,
@@ -169,7 +169,7 @@ pub(all) enum MCPServerKind {
     headers~ : Map[String, String],
     /// Bearer token, or the literal "oauth".
     auth~ : String?,
-    sse_read_timeout_ms~ : Int32?
+    sse_read_timeout_ms~ : Int32?,
   )
 }
 

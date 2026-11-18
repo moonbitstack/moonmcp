@@ -68,7 +68,7 @@ import {
   "moonbitstack/moonlog@0.2.0",
   "moonbitstack/mooncred@0.7.1",
   "moonbitstack/mooncrypt@0.5.0",
-  "moonbitlang/parser@0.4.6",
+  "moonbitlang/parser@0.4.9",
   "moonbitstack/moonjrpc@0.2.0",
   "moonbitstack/moonward@0.3.0",
   "moonbitstack/moonrand@0.2.0",

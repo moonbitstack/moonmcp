@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbitstack/moonmcp/examples/02-http"
+package "moonbitstack/moonmcp-ecosystem/02-http"
 
 // Values
 
