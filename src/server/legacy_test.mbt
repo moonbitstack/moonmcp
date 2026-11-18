@@ -401,6 +401,18 @@ async test "a stateless client gets the ask itself, and answers it on its own" {
 }
 
 ///|
+/// Wait until a written line matches, two seconds at most: what a session writes arrives on its own
+/// task, after however long the runner takes to schedule it.
+async fn wait_for(lines : Array[String], wanted : (String) -> Bool) -> Unit {
+  for _ in 0..<200 {
+    if lines.iter().any(wanted) {
+      return
+    }
+    @async.sleep(10)
+  }
+}
+
+///|
 /// A line stream driven by hand: every line written is kept, and `then` can send the next line once
 /// the server has said something.
 async fn over_lines(
@@ -478,9 +490,12 @@ async test "a client that said initialize hears changes on its own connection" {
       "clientInfo": { "name": "c", "version": "1" },
     },
   }
-  let written = over_lines(mcp, [handshake], async fn(_, _) {
+  // A slow runner may not have answered initialize within a fixed sleep, and only a client that
+  // has initialized is owed the notification, so wait for the answer and then for the notice.
+  let written = over_lines(mcp, [handshake], async fn(lines, _) {
+    wait_for(lines, line => line.contains("\"id\":1"))
     mcp.notify_tools_changed()
-    @async.sleep(10)
+    wait_for(lines, line => line.contains("notifications/tools/list_changed"))
   })
   let methods = written.map(line => {
     let message = @json.parse(line) catch { _ => Json::null() }
