@@ -6,3 +6,6 @@ _build/
 target/
 # The examples that need an HTTP server, kept out of the published package.
 integration/
+
+# Examples are read in the repository and run in CI; they do not ship.
+src/examples/
